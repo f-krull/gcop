@@ -46,7 +46,7 @@ public:
 
   ChrMap();
 
-  const char* chrTypeStr(ChrType c) const {
+  static const char* chrTypeStr(ChrType c) {
     return m_chrTypeStr[c];
   }
 

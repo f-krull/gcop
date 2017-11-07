@@ -44,10 +44,13 @@ bool SnpData::read(const char * filename, uint32_t skip) {
     READ_FLOAT(pos, delim, snp.pval);
     m_d.push_back(snp);
   }
+#if 0
   printf("read %lu snps\n", m_d.size());
-  for (uint32_t i = 0; i < m_d.size() / 944423; i++) {
+  for (uint32_t i = 0; i < std::min(m_d.size(), (size_t)10); i++) {
     printf("%s %lu %f\n", chrmap.chrTypeStr(m_d[i].chr), m_d[i].bp, m_d[i].pval);
   }
+#endif
   fclose(f);
   return true;
 }
+
