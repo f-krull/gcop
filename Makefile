@@ -3,5 +3,6 @@ all:
 	chrdef.cpp \
 	segdata.cpp \
 	snpdata.cpp \
+	tokenreader.cpp \
 	main.cpp \
-	-o ptoo
+	-o ptoo -lz
