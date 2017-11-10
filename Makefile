@@ -5,4 +5,4 @@ all:
 	snpdata.cpp \
 	tokenreader.cpp \
 	main.cpp \
-	-o ptoo -lz
+	-o grp -lz
