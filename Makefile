@@ -5,4 +5,9 @@ all:
 	snpdata.cpp \
 	tokenreader.cpp \
 	main.cpp \
-	-o grp -lz
+	-o gcop -lz
+
+int:
+	$(CXX) -flto -Wall -g2 \
+	interpreter.cpp \
+	-o int -lz
