@@ -9,5 +9,9 @@ all:
 
 int:
 	$(CXX) -flto -Wall -g2 \
+	chrdef.cpp \
+	segdata.cpp \
+	snpdata.cpp \
+	tokenreader.cpp \
 	interpreter.cpp \
 	-o int -lz
