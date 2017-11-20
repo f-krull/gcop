@@ -10,7 +10,7 @@
 class ISegData {
 public:
   virtual ~ISegData() {};
-  virtual bool read(const char* filename) = 0;
+  virtual bool read(const char *filename, const char *format, uint32_t skip) = 0;
   const std::vector<Segment> & data() const {return m_d;}
   std::vector<Segment> data() {return m_d;}
   std::vector<Segment> getChr(ChrMap::ChrType) const;
@@ -23,7 +23,6 @@ protected:
 class SimpleSegData : public ISegData {
 public:
   virtual ~SimpleSegData() {};
-  bool read(const char *filename);
   bool read(const char *filename, const char *format, uint32_t skip);
 private:
 };

@@ -25,8 +25,7 @@ struct Snp {
 
 class SnpData {
 public:
-  bool read(const char *filename, uint32_t skip);
-  bool readdyn(const char *filename, const char *fields, uint32_t skip);
+  bool read(const char *filename, const char *fields, uint32_t skip);
 
   const std::vector<Snp> & data() const { return m_d;}
 private:

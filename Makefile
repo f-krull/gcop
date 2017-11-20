@@ -8,12 +8,16 @@ all:
 	main.cpp \
 	-o gcop -lz
 
-int:
+gcop:
 	$(CXX) -flto -Wall -g2 \
 	chrdef.cpp \
 	segdata.cpp \
 	snpdata.cpp \
 	tokenreader.cpp \
-	interpreter.cpp \
+	int/cmdparam.cpp \
+	int/command.cpp \
+	int/scriptenv.cpp \
+	int/objspace.cpp \
+	int/interpreter.cpp \
 	segannot.cpp \
-	-o int -lz
+	-o gcop -lz
