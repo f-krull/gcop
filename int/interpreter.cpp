@@ -1,18 +1,4 @@
 
-class GcObj {
-public:
-
-
-private:
-};
-
-class GcPoints : public GcObj {
-public:
-
-
-private:
-};
-
 #include <string>
 #include <stdint.h>
 class GcScriptInfo {
@@ -40,6 +26,7 @@ int main(int argc, char **argv) {
   e.run("load_seg dst=b file=data/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=cse skip=0", 1);
   e.run("load_snp dst=a file=data/scz.txt format=1...2...3 skip=1", 1);
   e.run("snp_info src=a", 2);
+  e.run("snp_info src=b", 2);
   return 0;
 }
 

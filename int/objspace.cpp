@@ -1,7 +1,7 @@
 #include "objspace.h"
+#include "objs.h"
 #include "command.h"
 #include <assert.h>
-
 
 
 /*----------------------------------------------------------------------------*/
@@ -24,7 +24,7 @@ void GcObjSpace::addCmd(GcCommand *cmd) {
 
 /*----------------------------------------------------------------------------*/
 
-void GcObjSpace::addObj(const std::string &name, void *obj) {
+void GcObjSpace::addObj(const std::string &name, GcObj *obj) {
   //TODO: assert(getCmd(cmd->name()) == NULL && "command already loaded");
   m_obs[name] = obj;
 }

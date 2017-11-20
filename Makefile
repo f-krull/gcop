@@ -18,6 +18,7 @@ gcop:
 	int/command.cpp \
 	int/scriptenv.cpp \
 	int/objspace.cpp \
+	int/objs.cpp \
 	int/interpreter.cpp \
 	segannot.cpp \
 	-o gcop -lz

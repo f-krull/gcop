@@ -31,11 +31,12 @@ std::string CmdLoadSnp::PARAM_SKIP_INT   = "skip";
 
 #include <stdio.h>
 #include "../snpdata.h"
+#include "objs.h"
 void CmdLoadSnp::executeChild(const char *, GcObjSpace *os) {
-  SnpData *snps = new SnpData();
-  snps->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
-             getParam(PARAM_FORMAT_STR)->valStr().c_str(),
-             getParam(PARAM_SKIP_INT)->valInt());
+  GcObjSnpData *snps = new GcObjSnpData();
+  snps->data()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
+                     getParam(PARAM_FORMAT_STR)->valStr().c_str(),
+                     getParam(PARAM_SKIP_INT)->valInt());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), snps);
 }
 
@@ -70,10 +71,10 @@ std::string CmdLoadSeg::PARAM_SKIP_INT   = "skip";
 #include <stdio.h>
 #include "../segdata.h"
 void CmdLoadSeg::executeChild(const char *, GcObjSpace *os) {
-  SimpleSegData *seg = new SimpleSegData();
-  seg->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
-            getParam(PARAM_FORMAT_STR)->valStr().c_str(),
-            getParam(PARAM_SKIP_INT)->valInt());
+  GcObjSegData *seg = new   GcObjSegData();
+  seg->data()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
+                    getParam(PARAM_FORMAT_STR)->valStr().c_str(),
+                    getParam(PARAM_SKIP_INT)->valInt());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), seg);
 }
 
@@ -98,8 +99,11 @@ std::string CmdSnpInfo::PARAM_SRC_STR = "src";
 
 #include <stdio.h>
 #include "../snpdata.h"
+#include "objs.h"
 void CmdSnpInfo::executeChild(const char *, GcObjSpace *os) {
   const char *src = getParam(PARAM_SRC_STR)->valStr().c_str();
-  SnpData *snps = os->getObj<SnpData>(src);
-  printf("%s: number of snps %lu\n", src, snps->data().size());
+  GcObjSnpData *snps = os->getObj<GcObjSnpData>(src);
+  printf("%s: number of snps %lu\n", src, snps->data()->data().size());
 }
+
+
