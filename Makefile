@@ -4,6 +4,7 @@ all:
 	segdata.cpp \
 	snpdata.cpp \
 	tokenreader.cpp \
+	segannot.cpp \
 	main.cpp \
 	-o gcop -lz
 
@@ -14,4 +15,5 @@ int:
 	snpdata.cpp \
 	tokenreader.cpp \
 	interpreter.cpp \
+	segannot.cpp \
 	-o int -lz

@@ -164,6 +164,9 @@ void GcCommand::parseParams(const char *s) {
     while (str[0] == ' ') {
       str++;
     }
+    if (str[0] == '\0') {
+      break;
+    }
     /* find name (str before '=') */
     char *start = str;
     str = strchr(str, '=');
@@ -173,7 +176,7 @@ void GcCommand::parseParams(const char *s) {
     }
     str[0] = '\0';
     str++;
-    std::map<std::string, GcCmdParam>::iterator it = m_params.find(start);
+    std::map<std::string, GcCmdParam>::iterator it = m_params.find(start); //NOTE: seems to seg fault if cmd not found
     if (it == m_params.end()) {
       fprintf(stderr, "error: param '%s' not found\n", start);
       exit(1);
@@ -276,12 +279,49 @@ std::string CmdLoadSnp::PARAM_SKIP_INT   = "skip";
 #include <stdio.h>
 #include "snpdata.h"
 void CmdLoadSnp::executeChild(const char *, GcObjSpace *os) {
-  printf("hi: %s\n", getParam(PARAM_DST_STR)->valStr().c_str());
   SnpData *snps = new SnpData();
   snps->readdyn(getParam(PARAM_FILE_STR)->valStr().c_str(),
-      getParam(PARAM_FORMAT_STR)->valStr().c_str(),
-      getParam(PARAM_SKIP_INT)->valInt());
+                getParam(PARAM_FORMAT_STR)->valStr().c_str(),
+                getParam(PARAM_SKIP_INT)->valInt());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), snps);
+}
+
+/*----------------------------------------------------------------------------*/
+
+class CmdLoadSeg : public GcCommand {
+public:
+  CmdLoadSeg() {
+    addParam(GcCmdParam(PARAM_DST_STR,    GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FORMAT_STR, GcCmdParam::PARAM_STRING, "cbe"));
+    addParam(GcCmdParam(PARAM_SKIP_INT,   GcCmdParam::PARAM_INT,    "0"));
+  }
+  const char* name() const {
+    return "load_seg";
+  }
+  static std::string PARAM_DST_STR;
+  static std::string PARAM_FILE_STR;
+  static std::string PARAM_FORMAT_STR;
+  static std::string PARAM_SKIP_INT;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLoadSeg::PARAM_DST_STR    = "dst";
+std::string CmdLoadSeg::PARAM_FILE_STR   = "file";
+std::string CmdLoadSeg::PARAM_FORMAT_STR = "format";
+std::string CmdLoadSeg::PARAM_SKIP_INT   = "skip";
+
+
+
+#include <stdio.h>
+#include "segdata.h"
+void CmdLoadSeg::executeChild(const char *, GcObjSpace *os) {
+  SimpleSegData *seg = new SimpleSegData();
+  seg->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
+            getParam(PARAM_FORMAT_STR)->valStr().c_str(),
+            getParam(PARAM_SKIP_INT)->valInt());
+  os->addObj(getParam(PARAM_DST_STR)->valStr(), seg);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -330,6 +370,7 @@ private:
 GcScriptEnv::GcScriptEnv() {
   m_os.addCmd(new CmdLoadSnp);
   m_os.addCmd(new CmdSnpInfo);
+  m_os.addCmd(new CmdLoadSeg);
 }
 
 void GcScriptEnv::run(const char *s, uint32_t line) {
@@ -366,14 +407,16 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
 
 int main(int argc, char **argv) {
   GcScriptEnv e;
+  e.run("load_seg dst=b file=data/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=cse skip=0", 1);
   e.run("load_snp dst=a file=data/scz.txt format=1...2...3 skip=1", 1);
+
   e.run("snp_info src=a", 2);
   return 0;
 }
 
 /*
  * a = load_snp file=fn format=1..2.3 skip=1
- * b = load_regions file=fn format=1..2.3 skip=1
+ * b = load_seg file=fn format=1..2.3 skip=1
  * b = intersect a b
  *
  *

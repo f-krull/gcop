@@ -24,6 +24,7 @@ class SimpleSegData : public ISegData {
 public:
   virtual ~SimpleSegData() {};
   bool read(const char *filename);
+  bool read(const char *filename, const char *format, uint32_t skip);
 private:
 };
 
