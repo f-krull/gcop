@@ -20,16 +20,13 @@ public:
 private:
   std::map<std::string, GcObj*> m_obs;
   std::map<std::string, GcCommand*> m_cmds;
+  static void err(const char  *name, const char* type);
 };
 
 
 /*----------------------------------------------------------------------------*/
 
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <typeinfo>
-
 template <typename T>
 T *GcObjSpace::getObj(const char* name) {
   std::map<std::string, GcObj*>::iterator it = m_obs.find(name);
@@ -38,8 +35,7 @@ T *GcObjSpace::getObj(const char* name) {
   }
   T *o = dynamic_cast<T*>(it->second);
   if (o == NULL) {
-    fprintf(stderr, "error: object '%s' is not of type %s\n", name, typeid(T).name());
-    exit(1);
+    err(name, typeid(T).name());
   }
   return o;
 }

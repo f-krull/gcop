@@ -7,6 +7,8 @@ public:
 private:
 };
 
+/*----------------------------------------------------------------------------*/
+
 GcObj::GcObj(const char *name) {
   m = new GcObjPriv;
   m->name = name;
@@ -19,6 +21,8 @@ GcObj::~GcObj() {
 const char * GcObj::name() const {
   return m->name.c_str();
 }
+
+/*----------------------------------------------------------------------------*/
 
 #include "../snpdata.h"
 
@@ -39,8 +43,7 @@ const SnpData* GcObjSnpData::data() const {
   return m_snp;
 }
 
-
-
+/*----------------------------------------------------------------------------*/
 
 #include "../segdata.h"
 

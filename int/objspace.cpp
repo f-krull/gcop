@@ -2,7 +2,8 @@
 #include "objs.h"
 #include "command.h"
 #include <assert.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -27,5 +28,13 @@ void GcObjSpace::addCmd(GcCommand *cmd) {
 void GcObjSpace::addObj(const std::string &name, GcObj *obj) {
   //TODO: assert(getCmd(cmd->name()) == NULL && "command already loaded");
   m_obs[name] = obj;
+}
+
+/*----------------------------------------------------------------------------*/
+
+
+void GcObjSpace::err(const char* name, const char* type) {
+  fprintf(stderr, "error: object '%s' is not of type %s\n", name, type);
+  exit(1);
 }
 

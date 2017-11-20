@@ -2,14 +2,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-
 #include "cmd_base.cpp"
+
+/*----------------------------------------------------------------------------*/
 
 GcScriptEnv::GcScriptEnv() {
   m_os.addCmd(new CmdLoadSnp);
   m_os.addCmd(new CmdSnpInfo);
   m_os.addCmd(new CmdLoadSeg);
 }
+
+/*----------------------------------------------------------------------------*/
 
 void GcScriptEnv::run(const char *s, uint32_t line) {
   /* skip spaces */
