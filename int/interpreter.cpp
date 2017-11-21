@@ -19,14 +19,32 @@ class GcObjSpace;
 
 /*----------------------------------------------------------------------------*/
 
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "scriptenv.h"
 int main(int argc, char **argv) {
+  const char *fnscript = NULL;
+  if (argc > 1) {
+    fnscript = argv[1];
+  }
+  FILE *f = stdin;
+  if (fnscript != NULL) {
+    f = fopen(fnscript, "r");
+  }
+  if (f == NULL) {
+    fprintf(stderr, "error: cannot open file '%s'\n", fnscript ? fnscript : "stdin");
+    exit(1);
+  }
   GcScriptEnv e;
-  e.run("load_seg dst=b file=data/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=cse skip=0", 1);
-  e.run("load_snp dst=a file=data/scz.txt format=1...2...3 skip=1", 1);
-  e.run("snp_info src=a", 2);
-  e.run("snp_info src=b", 2);
+  char buffer[1024];
+  uint32_t line = 1;
+  while (fgets(buffer, sizeof(buffer)-1, f) != NULL) {
+    e.run(buffer, line);
+    line++;
+  }
+  if (fnscript) {
+    fclose(f);
+  }
   return 0;
 }
 

@@ -2,6 +2,8 @@
 #ifndef INT_OBJS_H_
 #define INT_OBJS_H_
 
+/*----------------------------------------------------------------------------*/
+
 class GcObjPriv;
 
 class GcObj {

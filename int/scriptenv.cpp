@@ -42,7 +42,8 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
   std::string cmd_str;
   cmd_str.assign(s, ce);
   GcCommand *cmd = m_os.getCmd(cmd_str.c_str());
-  printf("executing: %s %s\n", cmd_str.c_str(), ce);
+  printf("executing: %3u %s %s%s", line, cmd_str.c_str(),
+      ce, strlen(ce)>0 && ce[strlen(ce)-1]=='\n' ? "" : "\n");
   cmd->execute(ce, &m_os);
 }
 

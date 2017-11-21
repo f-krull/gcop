@@ -31,9 +31,7 @@ void GcCommand::parseParams(const char *s) {
   buffer[0] = '\0';
   strncat(buffer, s, sizeof(buffer)-1);
   char *str = buffer;
-  printf("line %d %s\n", __LINE__, str);
   while (str[0] != '\0') {
-  printf("line %d %s\n", __LINE__, str);
     /* skip whitespace */
     while (str[0] == ' ') {
       str++;
@@ -63,7 +61,6 @@ void GcCommand::parseParams(const char *s) {
       str[0] = '\0';
       str++;
     }
-    printf("line %d %s\n", __LINE__, start);
     it->second.parse(start);
   }
 }

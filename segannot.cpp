@@ -1,6 +1,7 @@
 #include "segannot.h"
 #include "intervaltree.cpp"
 
+/*----------------------------------------------------------------------------*/
 
 std::vector<char> SegAnnotSimple::intersect(const ISegData &seg, const SnpData &snp) {
   std::vector<char> annot(snp.data().size(), 0);

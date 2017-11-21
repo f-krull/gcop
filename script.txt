@@ -1,0 +1,7 @@
+
+# load dnase
+load_seg dst=b file=data/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=cse skip=0
+# load scz2 snps
+load_snp dst=a file=data/scz_chr6.txt format=1...2...3 skip=1
+snp_info src=a
+intersect srcp=a srcs=b
