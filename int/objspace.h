@@ -12,14 +12,18 @@ class GcObj;
 
 class GcObjSpace {
 public:
+  ~GcObjSpace();
   GcCommand* getCmd(const char *cmd_str);
   void addCmd(GcCommand *cmd);
   void addObj(const std::string &name, GcObj *o);
+  void rmObj(const std::string &name);
   template <typename T>
   T *getObj(const char* name);
 private:
-  std::map<std::string, GcObj*> m_obs;
-  std::map<std::string, GcCommand*> m_cmds;
+  typedef std::map<std::string, GcObj*> GcObjMap;
+  GcObjMap m_obs;
+  typedef std::map<std::string, GcCommand*> GcCmdMap;
+  GcCmdMap m_cmds;
   static void err(const char  *name, const char* type);
 };
 
@@ -29,7 +33,7 @@ private:
 #include <typeinfo>
 template <typename T>
 T *GcObjSpace::getObj(const char* name) {
-  std::map<std::string, GcObj*>::iterator it = m_obs.find(name);
+  GcObjMap::iterator it = m_obs.find(name);
   if (it == m_obs.end()) {
     return NULL;
   }
