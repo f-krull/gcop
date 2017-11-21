@@ -107,3 +107,35 @@ void CmdSnpInfo::executeChild(const char *, GcObjSpace *os) {
 }
 
 
+/*----------------------------------------------------------------------------*/
+
+class CmdIntersectPS : public GcCommand {
+public:
+  CmdIntersectPS() {
+    addParam(GcCmdParam(PARAM_SRCP_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_SRCS_STR, GcCmdParam::PARAM_STRING, ""));
+  }
+  const char* name() const {
+    return "intersect";
+  }
+  static std::string PARAM_SRCP_STR;
+  static std::string PARAM_SRCS_STR;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdIntersectPS::PARAM_SRCP_STR = "srcp";
+std::string CmdIntersectPS::PARAM_SRCS_STR = "srcs";
+
+#include <stdio.h>
+#include "../snpdata.h"
+#include "objs.h"
+#include "../segannot.h"
+void CmdIntersectPS::executeChild(const char *, GcObjSpace *os) {
+  const char *srcPoints   = getParam(PARAM_SRCP_STR)->valStr().c_str();
+  const char *srcSegments = getParam(PARAM_SRCS_STR)->valStr().c_str();
+  GcObjSnpData *snps = os->getObj<GcObjSnpData>(srcPoints);
+  GcObjSegData *segs = os->getObj<GcObjSegData>(srcSegments);
+  SegAnnot sa;
+  sa.intersect(*segs->data(), *snps->data());
+}
