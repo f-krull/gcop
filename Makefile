@@ -1,19 +1,19 @@
 all:
 	$(CXX) -Ofast -flto -Wall -g2 \
-	chrdef.cpp \
+	data/chrdef.cpp \
 	segdata.cpp \
 	snpdata.cpp \
-	tokenreader.cpp \
+	data/tokenreader.cpp \
 	segannot.cpp \
 	main.cpp \
 	-o gcop -lz
 
 gcop:
 	$(CXX) -flto -Wall -g2 \
-	chrdef.cpp \
+	data/chrdef.cpp \
 	segdata.cpp \
 	snpdata.cpp \
-	tokenreader.cpp \
+	data/tokenreader.cpp \
 	int/cmdparam.cpp \
 	int/command.cpp \
 	int/scriptenv.cpp \

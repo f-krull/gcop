@@ -1,5 +1,5 @@
 #include "segdata.h"
-#include "tokenreader.h"
+#include "data/tokenreader.h"
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>

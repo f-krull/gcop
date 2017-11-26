@@ -2,7 +2,7 @@
 #ifndef SEGMENT_H_
 #define SEGMENT_H_
 
-#include "chrdef.h"
+#include "data/chrdef.h"
 #include <stdint.h>
 #include <algorithm>
 #include <vector>

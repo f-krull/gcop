@@ -5,6 +5,8 @@
 #include "chrdef.h"
 #include <stdint.h>
 
+/*----------------------------------------------------------------------------*/
+
 class TokenReader {
 public:
   char* read_chr(char *pos, char delim, ChrMap::ChrType *v) const;

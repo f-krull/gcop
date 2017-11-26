@@ -2,7 +2,7 @@
 #ifndef SNPDATA_H_
 #define SNPDATA_H_
 
-#include "chrdef.h"
+#include "data/chrdef.h"
 #include <stdint.h>
 #include <vector>
 

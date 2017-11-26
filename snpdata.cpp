@@ -1,5 +1,5 @@
 #include "snpdata.h"
-#include "tokenreader.h"
+#include "data/tokenreader.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
