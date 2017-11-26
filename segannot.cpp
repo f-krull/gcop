@@ -91,3 +91,19 @@ void intervalltree_test() {
   printf("ok\n");
 }
 #endif
+
+/*----------------------------------------------------------------------------*/
+
+float Forbes::get(const ISegData &seg, const SnpData &snp) {
+  /*
+   * a = A  and B
+   * b = A  and !B
+   * c = !A and B
+   * d = !B and !A
+   *
+   * forbes = a(a+b+c+d)/((a+b)(a+c))
+   *
+   */
+
+  return 0;
+}

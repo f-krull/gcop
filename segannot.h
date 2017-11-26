@@ -36,4 +36,10 @@ private:
 
 
 
+class Forbes {
+public:
+  float get(const ISegData &seg, const SnpData &snp);
+};
+
+
 #endif /* SEGANNOT_H_ */
