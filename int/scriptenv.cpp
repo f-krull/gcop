@@ -11,6 +11,8 @@ GcScriptEnv::GcScriptEnv() {
   m_os.addCmd(new CmdSnpInfo);
   m_os.addCmd(new CmdLoadSeg);
   m_os.addCmd(new CmdIntersectPS);
+  m_os.addCmd(new CmdLoadLdInfo);
+  m_os.addCmd(new CmdLdGet);
 }
 
 /*----------------------------------------------------------------------------*/

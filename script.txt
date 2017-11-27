@@ -1,3 +1,8 @@
+#load ld
+load_ld dst=l file=testdata/plink.ld.test
+ld_get src=l chr=chr1 bpa=854250 bpb=846808
+ld_get src=l chr=chr1 bpa=846808 bpb=854250
+
 
 # load dnase
 load_seg dst=b file=testdata/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=cse skip=0

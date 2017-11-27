@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 SparseMat::SparseMat(const MatEntryList &mel) : m_n(mel.n()) {
+  assert(mel.n() && "got matrix without any rows");
   m_values  = new uint8_t[mel.l().size()];
   m_colIdx  = new uint32_t[mel.l().size()];
   m_rowPtr  = new uint32_t[mel.n()+1];

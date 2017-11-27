@@ -34,7 +34,6 @@ GcObjSnpData::~GcObjSnpData() {
   delete m_snp;
 }
 
-
 SnpData* GcObjSnpData::data() {
   return m_snp;
 }
@@ -55,11 +54,31 @@ GcObjSegData::~GcObjSegData() {
   delete m_seg;
 }
 
-
 ISegData* GcObjSegData::data() {
   return m_seg;
 }
 
 const ISegData* GcObjSegData::data() const {
   return m_seg;
+}
+
+
+/*----------------------------------------------------------------------------*/
+
+#include "../data/ldinfo.h"
+
+GcObjLdInfo::GcObjLdInfo() : GcObj("LdInnfoData") {
+  m_ldi = new LdInfo();
+}
+
+GcObjLdInfo::~GcObjLdInfo() {
+  delete m_ldi;
+}
+
+LdInfo* GcObjLdInfo::data() {
+  return m_ldi;
+}
+
+const LdInfo* GcObjLdInfo::data() const {
+  return m_ldi;
 }

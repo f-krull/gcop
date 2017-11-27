@@ -139,3 +139,71 @@ void CmdIntersectPS::executeChild(const char *, GcObjSpace *os) {
   SegAnnot sa;
   sa.intersect(*segs->data(), *snps->data());
 }
+
+/*----------------------------------------------------------------------------*/
+
+class CmdLoadLdInfo : public GcCommand {
+public:
+  CmdLoadLdInfo() {
+    addParam(GcCmdParam(PARAM_DST_STR,    GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
+  }
+  const char* name() const {
+    return "load_ld";
+  }
+  static std::string PARAM_DST_STR;
+  static std::string PARAM_FILE_STR;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLoadLdInfo::PARAM_DST_STR    = "dst";
+std::string CmdLoadLdInfo::PARAM_FILE_STR   = "file";
+
+
+#include <stdio.h>
+#include "../data/ldinfo.h"
+void CmdLoadLdInfo::executeChild(const char *, GcObjSpace *os) {
+  GcObjLdInfo *ldi = new GcObjLdInfo();
+  ldi->data()->read(getParam(PARAM_FILE_STR)->valStr().c_str());
+  os->addObj(getParam(PARAM_DST_STR)->valStr(), ldi);
+}
+
+/*----------------------------------------------------------------------------*/
+
+class CmdLdGet : public GcCommand {
+public:
+  CmdLdGet() {
+    addParam(GcCmdParam(PARAM_SRC_STR, GcCmdParam::PARAM_INT, ""));
+    addParam(GcCmdParam(PARAM_CHR_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_BPA_NUM, GcCmdParam::PARAM_INT, ""));
+    addParam(GcCmdParam(PARAM_BPB_NUM, GcCmdParam::PARAM_INT, ""));
+  }
+  const char* name() const {
+    return "ld_get";
+  }
+  static std::string PARAM_SRC_STR;
+  static std::string PARAM_CHR_STR;
+  static std::string PARAM_BPA_NUM;
+  static std::string PARAM_BPB_NUM;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLdGet::PARAM_SRC_STR   = "src";
+std::string CmdLdGet::PARAM_CHR_STR   = "chr";
+std::string CmdLdGet::PARAM_BPA_NUM   = "bpa";
+std::string CmdLdGet::PARAM_BPB_NUM   = "bpb";
+
+
+#include <stdio.h>
+#include "../data/ldinfo.h"
+void CmdLdGet::executeChild(const char *, GcObjSpace *os) {
+  const char *srcLdi   = getParam(PARAM_SRC_STR)->valStr().c_str();
+  GcObjLdInfo *ldi = os->getObj<GcObjLdInfo>(srcLdi);
+  ldi->data()->getLd(
+       getParam(PARAM_CHR_STR)->valStr().c_str()
+      ,getParam(PARAM_BPA_NUM)->valInt()
+      ,getParam(PARAM_BPB_NUM)->valInt()
+  );
+}

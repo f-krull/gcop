@@ -17,6 +17,8 @@ public:
   MatEntryList(uint32_t n);
   static bool readMatPlinkTri(const char* fn, MatEntryList *mel);
   void addValue(uint32_t i, uint32_t j, float value);
+  void push(uint32_t i, uint32_t j, float value);
+  void close();
   void sort();
   void print();
   void printLen();

@@ -44,5 +44,19 @@ private:
 };
 
 
+/*----------------------------------------------------------------------------*/
+
+class LdInfo;
+
+class GcObjLdInfo : public GcObj {
+public:
+  GcObjLdInfo();
+  ~GcObjLdInfo();
+  LdInfo* data();
+  const LdInfo* data() const;
+private:
+  LdInfo *m_ldi;
+};
+
 
 #endif /* INT_OBJS_H_ */

@@ -83,7 +83,7 @@ void MatEntryList::print() {
 /*----------------------------------------------------------------------------*/
 
 void MatEntryList::printLen() {
-  printf("mel len: %lu\n", l().size());
+  printf("mel len: %lu  (n=%u)\n", l().size(), m_n);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -111,6 +111,39 @@ void MatEntryList::addValue(uint32_t i, uint32_t j, float value) {
     mle.v = (0xFF*value);
     m_list.push_back(mle);
   }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void MatEntryList::push(uint32_t i, uint32_t j, float value) {
+  if (i != j) {
+    value = value > 1 ? 1. : value;
+    value = value < 0 ? 0 : value;
+    MatEntry mle;
+    /* specific for triangle matrix: */
+    mle.i = i < j ? i : j;
+    mle.j = i < j ? j : i;
+    mle.v = (0xFF*value);
+    m_list.push_back(mle);
+    m_n = m_list.size();
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+#include <set>
+void MatEntryList::close() {
+  sort();
+  std::set<uint32_t> keyset;
+  for (uint32_t i = 0; i < m_list.size(); i++) {
+    keyset.insert(m_list[i].i);
+    keyset.insert(m_list[i].j);
+  }
+
+  for (std::set<uint32_t>::const_iterator it = keyset.begin(); it != keyset.end(); ++it) {
+    printf("keyset %u\n", *it);
+  }
+
+  m_n = keyset.size();
 }
 
 /*----------------------------------------------------------------------------*/
