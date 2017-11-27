@@ -123,14 +123,14 @@ void LdInfo::read(const char *fn) {
     READ_FIELD_ULL  (bpb,  line, len, 38, 13);
     READ_FIELD_FLOAT(r2,   line, len, 63, 13);
     assert(chra == chrb && "CHR_A != CHR_B");
-    printf("%lu %lu %lu %lu %.6f\n", chra, bpa, chrb, bpb, r2);
+    //printf("%lu %lu %lu %lu %.6f\n", chra, bpa, chrb, bpb, r2);
     addEntry(chra, bpa, bpb, r2, cm);
   }
   /* sort data */
   for (LdlMap::iterator it = m_lddat.begin(); it != m_lddat.end(); ++it) {
     it->second->finalize();
-    printf("chr %d\n", it->first);
-    it->second->print();
+    //printf("chr %d\n", it->first);
+    //it->second->print();
   }
   fclose(f);
 }
