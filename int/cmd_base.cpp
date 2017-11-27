@@ -174,7 +174,7 @@ void CmdLoadLdInfo::executeChild(const char *, GcObjSpace *os) {
 class CmdLdGet : public GcCommand {
 public:
   CmdLdGet() {
-    addParam(GcCmdParam(PARAM_SRC_STR, GcCmdParam::PARAM_INT, ""));
+    addParam(GcCmdParam(PARAM_SRC_STR, GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_CHR_STR, GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_BPA_NUM, GcCmdParam::PARAM_INT, ""));
     addParam(GcCmdParam(PARAM_BPB_NUM, GcCmdParam::PARAM_INT, ""));
@@ -206,4 +206,35 @@ void CmdLdGet::executeChild(const char *, GcObjSpace *os) {
       ,getParam(PARAM_BPA_NUM)->valInt()
       ,getParam(PARAM_BPB_NUM)->valInt()
   );
+}
+
+
+/*----------------------------------------------------------------------------*/
+
+class CmdLdTest : public GcCommand {
+public:
+  CmdLdTest() {
+    addParam(GcCmdParam(PARAM_SRC_STR,    GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_SRCSNP_STR, GcCmdParam::PARAM_STRING, ""));
+  }
+  const char* name() const {
+    return "ld_test";
+  }
+  static std::string PARAM_SRC_STR;
+  static std::string PARAM_SRCSNP_STR;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLdTest::PARAM_SRC_STR     = "src";
+std::string CmdLdTest::PARAM_SRCSNP_STR  = "srcsnp";
+
+#include <stdio.h>
+#include "../data/ldinfo.h"
+void CmdLdTest::executeChild(const char *, GcObjSpace *os) {
+  const char *srcLdi    = getParam(PARAM_SRC_STR)->valStr().c_str();
+  const char *srcsnps   = getParam(PARAM_SRCSNP_STR)->valStr().c_str();
+  GcObjLdInfo  *ldi  = os->getObj<GcObjLdInfo>(srcLdi);
+  GcObjSnpData *snps = os->getObj<GcObjSnpData>(srcsnps);
+  ldi->data()->test(snps->data());
 }

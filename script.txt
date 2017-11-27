@@ -1,7 +1,11 @@
-#load ld
-load_ld dst=l file=testdata/plink.ld.test
-ld_get src=l chr=chr1 bpa=854250 bpb=846808
-ld_get src=l chr=chr1 bpa=846808 bpb=854250
+# load ld
+load_ld dst=myld file=testdata/plink.ld
+ld_get  src=myld chr=chr1 bpa=854250 bpb=846808
+ld_get  src=myld chr=chr1 bpa=846808 bpb=854250
+
+load_snp dst=mysnp file=testdata/scz_chr6.txt format=1...2...3 skip=1
+ld_test src=myld srcsnp=mysnp
+
 
 
 # load dnase

@@ -110,6 +110,7 @@ void LdInfo::read(const char *fn) {
   uint64_t bpb = 0;
   float    r2;
   uint32_t line_no = 0;
+  uint64_t num_read = 0;
   while (fgets(line, sizeof(line)-1, f) != NULL) {
     line_no++;
     if (line_no <= skip) {
@@ -125,6 +126,7 @@ void LdInfo::read(const char *fn) {
     assert(chra == chrb && "CHR_A != CHR_B");
     //printf("%lu %lu %lu %lu %.6f\n", chra, bpa, chrb, bpb, r2);
     addEntry(chra, bpa, bpb, r2, cm);
+    num_read++;
   }
   /* sort data */
   for (LdlMap::iterator it = m_lddat.begin(); it != m_lddat.end(); ++it) {
@@ -132,6 +134,7 @@ void LdInfo::read(const char *fn) {
     //printf("chr %d\n", it->first);
     //it->second->print();
   }
+  printf("LD entries read: %lu\n", num_read);
   fclose(f);
 }
 
@@ -184,3 +187,24 @@ const LdDataList* LdInfo::find(ChrMap::ChrType c) const {
   return it->second;
 }
 
+/*----------------------------------------------------------------------------*/
+#include "../snpdata.h"
+void LdInfo::test(const SnpData *s) const {
+  uint64_t num_skipped = 0;
+  uint64_t num_tested = 0;
+  for (uint32_t i = 1; i < s->data().size(); i++) {
+    ChrMap::ChrType chra = s->data()[i-1].chr;
+    uint64_t        bpa  = s->data()[i-1].bp;
+    ChrMap::ChrType chrb = s->data()[i].chr;
+    uint64_t        bpb  = s->data()[i].bp;
+    if (chra != chrb) {
+      continue;
+    }
+    float ld = getLd(chra, bpa, bpb);
+    /* coutn if ld is -1 */
+    num_skipped += (ld < 0 ? 1 : 0);
+    num_tested++;
+    //printf("r2: chr %d %lu %lu %.5f\n", chra, bpa, bpb, ld);
+  }
+  printf("SNPs\tnum_tested=%lu\tnum_skipped=%lu\n", num_tested, num_skipped);
+}

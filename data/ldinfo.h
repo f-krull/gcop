@@ -5,7 +5,9 @@
 #include "chrdef.h"
 #include <map>
 
+
 class LdDataList;
+class SnpData;
 
 /*----------------------------------------------------------------------------*/
 
@@ -16,6 +18,7 @@ public:
   float getLd(const char* c, uint64_t bpa, uint64_t bpb) const;
   float getLd(ChrMap::ChrType ct, uint64_t bpa, uint64_t bpb) const;
 
+  void test(const SnpData *s) const;
 
 private:
   typedef std::map<ChrMap::ChrType, LdDataList*> LdlMap;
