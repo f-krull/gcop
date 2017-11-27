@@ -58,5 +58,13 @@ private:
   LdInfo *m_ldi;
 };
 
+/*----------------------------------------------------------------------------*/
+
+#define OBJS_DECL_GCCLASS(name) \
+  class Gc##name : public GcObj { \
+  public: \
+      Gc##name() : GcObj("##name") {} \
+  };
+
 
 #endif /* INT_OBJS_H_ */
