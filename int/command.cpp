@@ -48,7 +48,9 @@ void GcCommand::parseParams(const char *s) {
     }
     str[0] = '\0';
     str++;
-    std::map<std::string, GcCmdParam>::iterator it = m_params.find(start); //NOTE: seems to seg fault if cmd not found
+    printf("parse: %s\n", start);
+    std::map<std::string, GcCmdParam>::iterator it = m_params.find(start);
+    printf("parse: %s done\n", start);
     if (it == m_params.end()) {
       fprintf(stderr, "error: param '%s' not found\n", start);
       exit(1);
