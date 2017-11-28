@@ -17,54 +17,27 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-class SnpData;
-
-class GcObjSnpData : public GcObj {
-public:
-  GcObjSnpData();
-  ~GcObjSnpData();
-  SnpData* data();
-  const SnpData* data() const;
-private:
-  SnpData* m_snp;
-};
-
-/*----------------------------------------------------------------------------*/
-
-class ISegData;
-
-class GcObjSegData : public GcObj {
-public:
-  GcObjSegData();
-  ~GcObjSegData();
-  ISegData* data();
-  const ISegData* data() const;
-private:
-  ISegData* m_seg;
-};
-
-
-/*----------------------------------------------------------------------------*/
-
-class LdInfo;
-
-class GcObjLdInfo : public GcObj {
-public:
-  GcObjLdInfo();
-  ~GcObjLdInfo();
-  LdInfo* data();
-  const LdInfo* data() const;
-private:
-  LdInfo *m_ldi;
-};
-
-/*----------------------------------------------------------------------------*/
-
-#define OBJS_DECL_GCCLASS(name) \
-  class Gc##name : public GcObj { \
+#define OBJS_DECL_GCCLASS(name, _class) \
+  class GcObj##name : public GcObj { \
   public: \
-      Gc##name() : GcObj("##name") {} \
+      GcObj##name() : GcObj("##name") { m_c = new _class; } \
+      ~GcObj##name() { delete m_c; } \
+      _class* d() { return m_c; } \
+      const _class* d() const { return m_c; } \
+  private: \
+      _class* m_c; \
   };
+
+#include "../data/ldinfo.h"
+OBJS_DECL_GCCLASS(LdInfo, LdInfo)
+
+#include "../segdata.h"
+OBJS_DECL_GCCLASS(SegData, SimpleSegData)
+
+#include "../snpdata.h"
+OBJS_DECL_GCCLASS(SnpData, SnpData)
+
+#undef OBJS_DECL_GCCLASS
 
 
 #endif /* INT_OBJS_H_ */

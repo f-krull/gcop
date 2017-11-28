@@ -34,7 +34,7 @@ std::string CmdLoadSnp::PARAM_SKIP_INT   = "skip";
 #include "objs.h"
 void CmdLoadSnp::executeChild(const char *, GcObjSpace *os) {
   GcObjSnpData *snps = new GcObjSnpData();
-  snps->data()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
+  snps->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
                      getParam(PARAM_FORMAT_STR)->valStr().c_str(),
                      getParam(PARAM_SKIP_INT)->valInt());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), snps);
@@ -72,7 +72,7 @@ std::string CmdLoadSeg::PARAM_SKIP_INT   = "skip";
 #include "../segdata.h"
 void CmdLoadSeg::executeChild(const char *, GcObjSpace *os) {
   GcObjSegData *seg = new   GcObjSegData();
-  seg->data()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
+  seg->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
                     getParam(PARAM_FORMAT_STR)->valStr().c_str(),
                     getParam(PARAM_SKIP_INT)->valInt());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), seg);
@@ -103,7 +103,7 @@ std::string CmdSnpInfo::PARAM_SRC_STR = "src";
 void CmdSnpInfo::executeChild(const char *, GcObjSpace *os) {
   const char *src = getParam(PARAM_SRC_STR)->valStr().c_str();
   GcObjSnpData *snps = os->getObj<GcObjSnpData>(src);
-  printf("%s: number of snps %lu\n", src, snps->data()->data().size());
+  printf("%s: number of snps %lu\n", src, snps->d()->data().size());
 }
 
 
@@ -137,7 +137,7 @@ void CmdIntersectPS::executeChild(const char *, GcObjSpace *os) {
   GcObjSnpData *snps = os->getObj<GcObjSnpData>(srcPoints);
   GcObjSegData *segs = os->getObj<GcObjSegData>(srcSegments);
   SegAnnot sa;
-  sa.intersect(*segs->data(), *snps->data());
+  sa.intersect(*segs->d(), *snps->d());
 }
 
 /*----------------------------------------------------------------------------*/
@@ -165,7 +165,7 @@ std::string CmdLoadLdInfo::PARAM_FILE_STR   = "file";
 #include "../data/ldinfo.h"
 void CmdLoadLdInfo::executeChild(const char *, GcObjSpace *os) {
   GcObjLdInfo *ldi = new GcObjLdInfo();
-  ldi->data()->read(getParam(PARAM_FILE_STR)->valStr().c_str());
+  ldi->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), ldi);
 }
 
@@ -201,7 +201,7 @@ std::string CmdLdGet::PARAM_BPB_NUM   = "bpb";
 void CmdLdGet::executeChild(const char *, GcObjSpace *os) {
   const char *srcLdi   = getParam(PARAM_SRC_STR)->valStr().c_str();
   GcObjLdInfo *ldi = os->getObj<GcObjLdInfo>(srcLdi);
-  ldi->data()->getLd(
+  ldi->d()->getLd(
        getParam(PARAM_CHR_STR)->valStr().c_str()
       ,getParam(PARAM_BPA_NUM)->valInt()
       ,getParam(PARAM_BPB_NUM)->valInt()
@@ -236,5 +236,5 @@ void CmdLdTest::executeChild(const char *, GcObjSpace *os) {
   const char *srcsnps   = getParam(PARAM_SRCSNP_STR)->valStr().c_str();
   GcObjLdInfo  *ldi  = os->getObj<GcObjLdInfo>(srcLdi);
   GcObjSnpData *snps = os->getObj<GcObjSnpData>(srcsnps);
-  ldi->data()->test(snps->data());
+  ldi->d()->test(snps->d());
 }

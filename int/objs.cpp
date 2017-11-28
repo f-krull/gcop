@@ -24,6 +24,7 @@ const char * GcObj::name() const {
 
 /*----------------------------------------------------------------------------*/
 
+#if 0
 #include "../snpdata.h"
 
 GcObjSnpData::GcObjSnpData() : GcObj("SnpData") {
@@ -64,7 +65,6 @@ const ISegData* GcObjSegData::data() const {
 
 
 /*----------------------------------------------------------------------------*/
-
 #include "../data/ldinfo.h"
 
 GcObjLdInfo::GcObjLdInfo() : GcObj("LdInnfoData") {
@@ -82,3 +82,4 @@ LdInfo* GcObjLdInfo::data() {
 const LdInfo* GcObjLdInfo::data() const {
   return m_ldi;
 }
+#endif
