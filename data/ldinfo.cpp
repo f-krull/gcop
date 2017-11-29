@@ -28,8 +28,6 @@ struct LdDataEntry {
   uint64_t i;
   uint64_t j;
   float v;
-  void print();
-  bool operator < (const LdDataEntry& o) const;
   LdDataEntry(uint64_t bpa, uint64_t bpb, float r2) : i(bpa), j(bpb), v(r2) {}
   static bool cmp(const LdDataEntry& a, const LdDataEntry& b) {
     return a.i < b.i || (a.i == b.i && a.j < b.j);
@@ -72,6 +70,10 @@ public:
         m_list.begin(), m_list.end(), std::make_pair(bpa, bpb),
         LdDataEntry::Cmp());
     if (it == m_list.end()) {
+      return R2_UNDEFINED;
+    }
+    /* lower_bound finds the first element not being smaller */
+    if (it->i != bpa || it->j != bpb) {
       return R2_UNDEFINED;
     }
     return it->v;
