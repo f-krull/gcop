@@ -23,5 +23,6 @@ gcop:
 	int/objs.cpp \
 	int/interpreter.cpp \
 	util/timer.cpp \
+	util/file.cpp \
 	segannot.cpp \
 	-o gcop -lz

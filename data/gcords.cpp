@@ -142,6 +142,8 @@ GCords::~GCords() {
   delete m;
 }
 
+/*----------------------------------------------------------------------------*/
+
 std::vector<GCord> GCords::getChr(ChrMap::ChrType ct) const {
   std::vector<GCord> cseg;
   /* TODO: optimize */
@@ -152,31 +154,6 @@ std::vector<GCord> GCords::getChr(ChrMap::ChrType ct) const {
   }
   return cseg;
 }
-/*----------------------------------------------------------------------------*/
-
-char* read_token(char *pos, char delim, char fieldId, GCord *s, const TokenReader &tr) {
-  switch (fieldId) {
-    case 'c':
-      return tr.read_chr(pos, delim, &s->chr);
-      break;
-    case 's':
-      return tr.read_uint64(pos, delim, &s->s);
-      break;
-    case 'e':
-      return tr.read_uint64(pos, delim, &s->e);
-      break;
-    case '.':
-      return tr.read_forget(pos, delim);
-      break;
-    default:
-      assert(false);
-      break;
-  }
-  return NULL;
-}
-
-
-
 
 /*----------------------------------------------------------------------------*/
 
@@ -271,7 +248,7 @@ char* read_token(char *pos, char delim, const FieldType &ft, GCord *s, Annots *a
 }
 
 /*----------------------------------------------------------------------------*/
-
+#include "../util/file.h"
 bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
   ChrMap chrmap;
   const char delim = '\t';
@@ -281,15 +258,17 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
   std::vector<FieldType> ft = getFields(fmt);
   createFields(&m->annot, ft);
 
-  FILE *f = fopen(filename, "r");
-  if (f == NULL) {
+  //FILE *f = fopen(filename, "r");
+  File f;
+  if (!f.open(filename, "r", File::FILETYPE_AUTO)) {
     fprintf(stderr, "error: cannot open file %s\n", filename);
     exit(1);
   }
   TokenReader tr;
   char buffer[1024];
   uint64_t lineno = 0;
-  while (fgets(buffer, sizeof(buffer)-1, f) != NULL) {
+ // while (fgets(buffer, sizeof(buffer)-1, f) != NULL) {}
+  while (f.gets(buffer, sizeof(buffer)-1) != NULL) {
     lineno++;
     if (lineno <= skip) {
       continue;
@@ -306,7 +285,7 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
     }
     m_d.push_back(r);
   }
-  fclose(f);
+  f.close();
   printf("read %lu genomic coordinates\n", m_d.size());
 #if 0
   for (uint32_t i = 0; i < std::min(m_d.size(), (size_t)10); i++) {
