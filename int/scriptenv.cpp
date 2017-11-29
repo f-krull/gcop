@@ -1,4 +1,5 @@
 #include "scriptenv.h"
+#include "../util/timer.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
@@ -53,5 +54,8 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
     fprintf(stderr, "error: command '%s' not found - line %u:\n", cmd_str.c_str(), line);
     exit(1);
   }
+  Timer t;
   cmd->execute(ce, &m_os);
+  t.stop();
+  printf("took %.3f seconds\n", t.getSec());
 }

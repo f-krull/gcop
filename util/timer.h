@@ -1,5 +1,5 @@
-#ifndef TIMER_H_
-#define TIMER_H_
+#ifndef _UTIL_TIMER_H_
+#define _UTIL_TIMER_H_
 
 /*----------------------------------------------------------------------------*/
 
@@ -18,4 +18,4 @@ private:
 };
 
 
-#endif TIMER_H_
+#endif /* _UTIL_TIMER_H_ */

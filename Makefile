@@ -22,5 +22,6 @@ gcop:
 	int/objspace.cpp \
 	int/objs.cpp \
 	int/interpreter.cpp \
+	util/timer.cpp \
 	segannot.cpp \
 	-o gcop -lz
