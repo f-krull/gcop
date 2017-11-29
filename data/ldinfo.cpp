@@ -194,19 +194,26 @@ const LdDataList* LdInfo::find(ChrMap::ChrType c) const {
 void LdInfo::test(const SnpData *s) const {
   uint64_t num_skipped = 0;
   uint64_t num_tested = 0;
-  for (uint32_t i = 1; i < s->data().size(); i++) {
-    ChrMap::ChrType chra = s->data()[i-1].chr;
-    uint64_t        bpa  = s->data()[i-1].bp;
-    ChrMap::ChrType chrb = s->data()[i].chr;
-    uint64_t        bpb  = s->data()[i].bp;
-    if (chra != chrb) {
-      continue;
+  uint64_t num_found = 0;
+  uint64_t num_snps = 0;
+  const uint32_t num_neigbors = 1;
+  for (uint32_t i = num_neigbors; i < s->data().size(); i++) {
+    num_snps++;
+    for (uint32_t j = 1; j <= num_neigbors; j++) {
+      ChrMap::ChrType chra = s->data()[i-j].chr;
+      uint64_t        bpa  = s->data()[i-j].bp;
+      ChrMap::ChrType chrb = s->data()[i].chr;
+      uint64_t        bpb  = s->data()[i].bp;
+      if (chra != chrb) {
+        continue;
+      }
+      float ld = getLd(chra, bpa, bpb);
+      /* coutn if ld is -1 */
+      num_skipped += (ld < 0 ? 1 : 0);
+      num_found += (ld < 0 ? 0 : 1);
+      num_tested++;
     }
-    float ld = getLd(chra, bpa, bpb);
-    /* coutn if ld is -1 */
-    num_skipped += (ld < 0 ? 1 : 0);
-    num_tested++;
     //printf("r2: chr %d %lu %lu %.5f\n", chra, bpa, bpb, ld);
   }
-  printf("SNPs\tnum_tested=%lu\tnum_skipped=%lu\n", num_tested, num_skipped);
+  printf("SNPs\tnum_snps=%lu\tnum_tested=%lu\tnum_found=%lu\tnum_skipped=%lu\n", num_snps, num_tested, num_found, num_skipped);
 }
