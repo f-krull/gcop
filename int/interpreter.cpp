@@ -45,6 +45,11 @@ int main(int argc, char **argv) {
   if (fnscript) {
     fclose(f);
   }
+
+//  GCords g;
+//  g.get(1).getFloat(1);
+
+
   return 0;
 }
 

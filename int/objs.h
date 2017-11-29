@@ -37,6 +37,9 @@ OBJS_DECL_GCCLASS(SegData, SimpleSegData)
 #include "../snpdata.h"
 OBJS_DECL_GCCLASS(SnpData, SnpData)
 
+#include "../data/gcords.h"
+OBJS_DECL_GCCLASS(GCords, GCords)
+
 #undef OBJS_DECL_GCCLASS
 
 

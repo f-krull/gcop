@@ -2,8 +2,9 @@
 load_ld dst=myld file=testdata/plink.ld
 ld_get  src=myld chr=chr1 bpa=854250 bpb=846808
 ld_get  src=myld chr=chr1 bpa=846808 bpb=854250
+ld_get  src=myld chr=chr1 bpa=846808 bpb=666666
 
-load_snp dst=mysnp file=testdata/scz_chr6.txt format=1...2...3 skip=1
+load_snp dst=mysnp file=testdata/scz.txt format=1...2...3 skip=1
 ld_test src=myld srcsnp=mysnp
 
 
@@ -14,3 +15,8 @@ load_seg dst=b file=testdata/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=
 load_snp dst=a file=testdata/scz_chr6.txt format=1...2...3 skip=1
 snp_info src=a
 intersect srcp=a srcs=b
+
+
+load_gcords dst=mysnp   file=testdata/scz.txt format=c...s...1 skip=1
+load_gcords dst=mydnase file=testdata/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak format=cse skip=0
+intersect_gc srca=mysnp srcb=mydnase

@@ -208,7 +208,6 @@ void CmdLdGet::executeChild(const char *, GcObjSpace *os) {
   );
 }
 
-
 /*----------------------------------------------------------------------------*/
 
 class CmdLdTest : public GcCommand {
@@ -238,3 +237,70 @@ void CmdLdTest::executeChild(const char *, GcObjSpace *os) {
   GcObjSnpData *snps = os->getObj<GcObjSnpData>(srcsnps);
   ldi->d()->test(snps->d());
 }
+
+/*----------------------------------------------------------------------------*/
+
+class CmdLoadGCords : public GcCommand {
+public:
+  CmdLoadGCords() {
+    addParam(GcCmdParam(PARAM_DST_STR,    GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FORMAT_STR, GcCmdParam::PARAM_STRING, "cbe"));
+    addParam(GcCmdParam(PARAM_SKIP_INT,   GcCmdParam::PARAM_INT,    "0"));
+  }
+  const char* name() const {
+    return "load_gcords";
+  }
+  static std::string PARAM_DST_STR;
+  static std::string PARAM_FILE_STR;
+  static std::string PARAM_FORMAT_STR;
+  static std::string PARAM_SKIP_INT;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLoadGCords::PARAM_DST_STR    = "dst";
+std::string CmdLoadGCords::PARAM_FILE_STR   = "file";
+std::string CmdLoadGCords::PARAM_FORMAT_STR = "format";
+std::string CmdLoadGCords::PARAM_SKIP_INT   = "skip";
+
+#include <stdio.h>
+#include "../data/gcords.h"
+void CmdLoadGCords::executeChild(const char *, GcObjSpace *os) {
+  GcObjGCords *gcs = new GcObjGCords();
+  gcs->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
+                    getParam(PARAM_FORMAT_STR)->valStr().c_str(),
+                    getParam(PARAM_SKIP_INT)->valInt());
+  os->addObj(getParam(PARAM_DST_STR)->valStr(), gcs);
+}
+
+/*----------------------------------------------------------------------------*/
+
+class CmdIntersectGc : public GcCommand {
+public:
+  CmdIntersectGc() {
+    addParam(GcCmdParam(PARAM_SRCA_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_SRCB_STR, GcCmdParam::PARAM_STRING, ""));
+  }
+  const char* name() const {
+    return "intersect_gc";
+  }
+  static std::string PARAM_SRCA_STR;
+  static std::string PARAM_SRCB_STR;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdIntersectGc::PARAM_SRCA_STR = "srca";
+std::string CmdIntersectGc::PARAM_SRCB_STR = "srcb";
+
+#include <stdio.h>
+#include "../data/gcords.h"
+void CmdIntersectGc::executeChild(const char *, GcObjSpace *os) {
+  const char *srca = getParam(PARAM_SRCA_STR)->valStr().c_str();
+  const char *srcb = getParam(PARAM_SRCB_STR)->valStr().c_str();
+  GcObjGCords *gca = os->getObj<GcObjGCords>(srca);
+  GcObjGCords *gcb = os->getObj<GcObjGCords>(srcb);
+  GCords::intersect(gca->d(), gcb->d());
+}
+

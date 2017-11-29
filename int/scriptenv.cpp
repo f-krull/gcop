@@ -14,6 +14,8 @@ GcScriptEnv::GcScriptEnv() {
   m_os.addCmd(new CmdLoadLdInfo);
   m_os.addCmd(new CmdLdGet);
   m_os.addCmd(new CmdLdTest);
+  m_os.addCmd(new CmdLoadGCords);
+  m_os.addCmd(new CmdIntersectGc);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -53,4 +55,3 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
   }
   cmd->execute(ce, &m_os);
 }
-

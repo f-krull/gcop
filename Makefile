@@ -15,6 +15,7 @@ gcop:
 	snpdata.cpp \
 	data/tokenreader.cpp \
 	data/ldinfo.cpp \
+	data/gcords.cpp \
 	int/cmdparam.cpp \
 	int/command.cpp \
 	int/scriptenv.cpp \
