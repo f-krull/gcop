@@ -56,3 +56,49 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
   t.stop();
   printf("took %.3f seconds\n", t.getSec());
 }
+
+/*----------------------------------------------------------------------------*/
+
+void GcScriptEnv::addCmd(GcCommand *cmd) {
+  m_os.addCmd(cmd);
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GcScriptEnv::run(FILE *f) {
+  char buffer[1024];
+  uint32_t line = 1;
+  while (fgets(buffer, sizeof(buffer) - 1, f) != NULL) {
+    run(buffer, line);
+    line++;
+  }
+}
+
+#if 0
+
+#include <string>
+#include <stdint.h>
+class GcScriptInfo {
+public:
+  GcScriptInfo(const std::string &fn, uint32_t line) :
+      m_filename(fn), m_line(line) {}
+
+private:
+  std::string m_filename;
+  uint32_t    m_line;
+};
+
+
+class GcObjSpace;
+
+
+
+/*
+ * a = load_snp file=fn format=1..2.3 skip=1
+ * b = load_seg file=fn format=1..2.3 skip=1
+ * b = intersect a b
+ *
+ *
+ * */
+#endif
+

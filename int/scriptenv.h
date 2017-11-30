@@ -3,15 +3,19 @@
 #define INT_SCRIPTENV_H_
 
 #include "objspace.h"
+#include "icmdsink.h"
 #include <stdint.h>
+#include <stdio.h>
 
 /*----------------------------------------------------------------------------*/
 
-class GcScriptEnv {
+class GcScriptEnv : public ICmdSink {
 public:
   GcScriptEnv();
-  void run(const char *s, uint32_t line);
+  void run(FILE* f);
+  void addCmd(GcCommand *cmd);
 private:
+  void run(const char *s, uint32_t line);
   GcObjSpace m_os;
 };
 

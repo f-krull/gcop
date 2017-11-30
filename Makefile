@@ -19,7 +19,7 @@ gcop:
 	int/scriptenv.cpp \
 	int/objspace.cpp \
 	int/objs.cpp \
-	int/interpreter.cpp \
 	util/timer.cpp \
 	util/file.cpp \
+	main.cpp \
 	-o gcop -lz
