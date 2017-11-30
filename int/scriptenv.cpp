@@ -1,19 +1,16 @@
 #include "scriptenv.h"
+#include "cmd_base.h"
+#include "command.h"
 #include "../util/timer.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include "cmd_base.cpp"
+#include <stdlib.h>
 
 /*----------------------------------------------------------------------------*/
 
 GcScriptEnv::GcScriptEnv() {
-  m_os.addCmd(new CmdSnpInfo);
-  m_os.addCmd(new CmdLoadLdInfo);
-  m_os.addCmd(new CmdLdGet);
-  m_os.addCmd(new CmdLdTest);
-  m_os.addCmd(new CmdLoadGCords);
-  m_os.addCmd(new CmdIntersectGc);
+  cmd_base_add(this);
 }
 
 /*----------------------------------------------------------------------------*/

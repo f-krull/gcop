@@ -1,6 +1,8 @@
 #include "cmdparam.h"
 #include "command.h"
 #include "objs.h"
+#include "objspace.h"
+#include "icmdsink.h"
 
 /*----------------------------------------------------------------------------*/
 
@@ -184,8 +186,6 @@ protected:
 
 std::string CmdSnpInfo::PARAM_SRC_STR = "src";
 
-
-
 #include <stdio.h>
 #include "../data/gcords.h"
 #include "objs.h"
@@ -195,3 +195,13 @@ void CmdSnpInfo::executeChild(const char *, GcObjSpace *os) {
   printf("%s: number of snps %lu\n", src, snps->d()->data().size());
 }
 
+/*----------------------------------------------------------------------------*/
+
+void cmd_base_add(ICmdSink *cs) {
+  cs->addCmd(new CmdSnpInfo);
+  cs->addCmd(new CmdLoadLdInfo);
+  cs->addCmd(new CmdLdGet);
+  cs->addCmd(new CmdLdTest);
+  cs->addCmd(new CmdLoadGCords);
+  cs->addCmd(new CmdIntersectGc);
+}

@@ -16,6 +16,7 @@ gcop:
 	data/gcords.cpp \
 	int/cmdparam.cpp \
 	int/command.cpp \
+	int/cmd_base.cpp \
 	int/scriptenv.cpp \
 	int/objspace.cpp \
 	int/objs.cpp \
