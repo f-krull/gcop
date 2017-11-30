@@ -1,5 +1,6 @@
 #include "gcords.h"
 #include "tokenreader.h"
+#include "intervaltree.cpp"
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
@@ -308,7 +309,7 @@ float GCords::annotFloat(uint32_t annotIdx, float rowIdx) const {
 }
 
 /*----------------------------------------------------------------------------*/
-#include "../intervaltree.cpp"
+
 void GCords::intersect(const GCords* gca, const GCords* gcb) {
   std::vector<char> annot(gca->data().size(), 0);
     ChrMap::ChrType chr_curr = ChrMap::CHRTYPE_NUMENTRIES;
@@ -331,3 +332,13 @@ void GCords::intersect(const GCords* gca, const GCords* gcb) {
     printf("\n");
     return;
 }
+
+/*
+ * a = A  and B
+ * b = A  and !B
+ * c = !A and B
+ * d = !B and !A
+ *
+ * forbes = a(a+b+c+d)/((a+b)(a+c))
+ *
+ */

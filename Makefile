@@ -11,8 +11,6 @@ all:
 gcop:
 	$(CXX) -flto -Wall -g2 \
 	data/chrdef.cpp \
-	segdata.cpp \
-	snpdata.cpp \
 	data/tokenreader.cpp \
 	data/ldinfo.cpp \
 	data/gcords.cpp \
@@ -24,5 +22,4 @@ gcop:
 	int/interpreter.cpp \
 	util/timer.cpp \
 	util/file.cpp \
-	segannot.cpp \
 	-o gcop -lz

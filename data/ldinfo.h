@@ -7,7 +7,7 @@
 
 
 class LdDataList;
-class SnpData;
+class GCords;
 
 /*----------------------------------------------------------------------------*/
 
@@ -18,7 +18,7 @@ public:
   float getLd(const char* c, uint64_t bpa, uint64_t bpb) const;
   float getLd(ChrMap::ChrType ct, uint64_t bpa, uint64_t bpb) const;
 
-  void test(const SnpData *s) const;
+  void test(const GCords *s) const;
 
 private:
   typedef std::map<ChrMap::ChrType, LdDataList*> LdlMap;

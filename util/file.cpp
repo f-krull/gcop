@@ -1,6 +1,11 @@
 #include "file.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <zlib.h>
+#include <string.h>
+
+/*----------------------------------------------------------------------------*/
 
 class FilePriv {
 public:
@@ -11,7 +16,8 @@ public:
 private:
 };
 
-#include <stdio.h>
+/*----------------------------------------------------------------------------*/
+
 class FilePrivDef : public FilePriv {
 public:
   FilePrivDef() : m_f(NULL) {}
@@ -32,7 +38,8 @@ private:
   FILE *m_f;
 };
 
-#include <zlib.h>
+/*----------------------------------------------------------------------------*/
+
 class FilePrivGz : public FilePriv {
 public:
   FilePrivGz() : m_f(NULL) {}
@@ -53,15 +60,19 @@ private:
   gzFile m_f;
 };
 
+/*----------------------------------------------------------------------------*/
+
 File::File() : m(NULL) {
 }
+
+/*----------------------------------------------------------------------------*/
 
 File::~File() {
   delete m;
 }
 
+/*----------------------------------------------------------------------------*/
 
-#include <string.h>
 const char* getFileExtention(const char *fn) {
   const char *ext = strrchr(fn, '.');
   if (ext != NULL && ext != fn) {
@@ -69,6 +80,8 @@ const char* getFileExtention(const char *fn) {
   }
   return "";
 }
+
+/*----------------------------------------------------------------------------*/
 
 File::FileType getFileType(const char *fn) {
   const char *ext = getFileExtention(fn);
@@ -78,6 +91,7 @@ File::FileType getFileType(const char *fn) {
   return File::FILETYPE_TXT;
 }
 
+/*----------------------------------------------------------------------------*/
 
 bool File::open(const char *fn, const char *mode, FileType ft) {
   ft = ft == FILETYPE_AUTO ? getFileType(fn) : ft;
@@ -93,10 +107,14 @@ bool File::open(const char *fn, const char *mode, FileType ft) {
   return m->open(fn, mode);
 }
 
+/*----------------------------------------------------------------------------*/
+
 char * File::gets(char *buf, int n) {
   assert(m);
   return m->gets(buf, n);
 }
+
+/*----------------------------------------------------------------------------*/
 
 void File::close() {
   assert(m);

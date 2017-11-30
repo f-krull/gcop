@@ -190,8 +190,8 @@ const LdDataList* LdInfo::find(ChrMap::ChrType c) const {
 }
 
 /*----------------------------------------------------------------------------*/
-#include "../snpdata.h"
-void LdInfo::test(const SnpData *s) const {
+#include "gcords.h"
+void LdInfo::test(const GCords *s) const {
   uint64_t num_skipped = 0;
   uint64_t num_tested = 0;
   uint64_t num_found = 0;
@@ -201,9 +201,9 @@ void LdInfo::test(const SnpData *s) const {
     num_snps++;
     for (uint32_t j = 1; j <= num_neigbors; j++) {
       ChrMap::ChrType chra = s->data()[i-j].chr;
-      uint64_t        bpa  = s->data()[i-j].bp;
+      uint64_t        bpa  = s->data()[i-j].s;
       ChrMap::ChrType chrb = s->data()[i].chr;
-      uint64_t        bpb  = s->data()[i].bp;
+      uint64_t        bpb  = s->data()[i].s;
       if (chra != chrb) {
         continue;
       }

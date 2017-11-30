@@ -2,10 +2,8 @@
 #ifndef SEGMENT_H_
 #define SEGMENT_H_
 
-#include "data/chrdef.h"
-#include "data/interval.h"
-#include <stdint.h>
-#include <algorithm>
+#include "chrdef.h"
+#include "interval.h"
 #include <vector>
 
 /*----------------------------------------------------------------------------*/

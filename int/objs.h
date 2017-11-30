@@ -31,12 +31,6 @@ private:
 #include "../data/ldinfo.h"
 OBJS_DECL_GCCLASS(LdInfo, LdInfo)
 
-#include "../segdata.h"
-OBJS_DECL_GCCLASS(SegData, SimpleSegData)
-
-#include "../snpdata.h"
-OBJS_DECL_GCCLASS(SnpData, SnpData)
-
 #include "../data/gcords.h"
 OBJS_DECL_GCCLASS(GCords, GCords)
 
