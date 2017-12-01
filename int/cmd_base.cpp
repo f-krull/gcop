@@ -147,7 +147,7 @@ public:
     addParam(GcCmdParam(PARAM_SRCB_STR, GcCmdParam::PARAM_STRING, ""));
   }
   const char* name() const {
-    return "intersect_gc";
+    return "intersect";
   }
   static std::string PARAM_SRCA_STR;
   static std::string PARAM_SRCB_STR;
@@ -171,34 +171,34 @@ void CmdIntersectGc::executeChild(const char *, GcObjSpace *os) {
 
 /*----------------------------------------------------------------------------*/
 
-class CmdSnpInfo : public GcCommand {
+class CmdGCordsInfo : public GcCommand {
 public:
-  CmdSnpInfo() {
+  CmdGCordsInfo() {
     addParam(GcCmdParam(PARAM_SRC_STR, GcCmdParam::PARAM_STRING, ""));
   }
   const char* name() const {
-    return "snp_info";
+    return "gcords_info";
   }
   static std::string PARAM_SRC_STR;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
 
-std::string CmdSnpInfo::PARAM_SRC_STR = "src";
+std::string CmdGCordsInfo::PARAM_SRC_STR = "src";
 
 #include <stdio.h>
 #include "../data/gcords.h"
 #include "objs.h"
-void CmdSnpInfo::executeChild(const char *, GcObjSpace *os) {
+void CmdGCordsInfo::executeChild(const char *, GcObjSpace *os) {
   const char *src = getParam(PARAM_SRC_STR)->valStr().c_str();
   GcObjGCords *snps = os->getObj<GcObjGCords>(src);
-  printf("%s: number of snps %lu\n", src, snps->d()->data().size());
+  printf("%s: number of genomic coordinates %lu\n", src, snps->d()->data().size());
 }
 
 /*----------------------------------------------------------------------------*/
 
 void cmd_base_add(ICmdSink *cs) {
-  cs->addCmd(new CmdSnpInfo);
+  cs->addCmd(new CmdGCordsInfo);
   cs->addCmd(new CmdLoadLdInfo);
   cs->addCmd(new CmdLdGet);
   cs->addCmd(new CmdLdTest);
