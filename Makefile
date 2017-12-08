@@ -13,7 +13,7 @@ OBJS := data/chrdef.cpp \
 				main.cpp
 
 gcop:
-	$(CXX) -flto -Wall -g2 $(OBJS) -o gcop -lz
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -std=c++11 -flto -Wall -g2 $(OBJS) -o gcop -lz
 
 clean:
 	$(RM) gcop intervaltree_test
