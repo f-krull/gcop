@@ -16,4 +16,7 @@ gcop:
 	$(CXX) -flto -Wall -g2 $(OBJS) -o gcop -lz
 
 clean:
-	$(RM) gcop
+	$(RM) gcop intervaltree_test
+
+test:
+	$(CXX) -g2 -Wall data/intervaltree_test.cpp -o intervaltree_test

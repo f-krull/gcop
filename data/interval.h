@@ -25,6 +25,10 @@ public:
     return center / count;
   }
 
+  bool operator==(const Interval &o) {
+    return s == o.s && e == o.e;
+  }
+
   bool inside(uint64_t p) const {
     return p >= s && p < e;
   }
