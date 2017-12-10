@@ -25,7 +25,9 @@ private:
     Interval iv;
     uint32_t srcIdx;
     static bool cmpStart(const IndexedInterval &a, const IndexedInterval &b) { return T::cmpStart(a.iv, b.iv);}
-    static bool cmpEnd(const IndexedInterval &a, const IndexedInterval &b) { return !T::cmpEnd(a.iv, b.iv);}
+    static bool cmpEnd(const IndexedInterval &a, const IndexedInterval &b) {
+      // TODO: make use same comparator for both / have ends sorted ascending
+      return !T::cmpEnd(a.iv, b.iv);}
     IndexedInterval(const T& i, uint32_t idx) : iv(i.s, i.e), srcIdx(idx) {
     };
     static std::vector<IndexedInterval> build(const std::vector<T> &);
