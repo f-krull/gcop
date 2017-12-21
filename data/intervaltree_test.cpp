@@ -39,14 +39,18 @@ int main(int argc, char **argv) {
     res.push_back(std::vector<Interval>());
     for (uint32_t i = 0; i < queries.size(); i++) {
       printf("query: (%lu)\n", queries[i]);
-      std::vector<char> ov = it.getOverlaps(queries[i]);
+      std::vector<char> ov;
+      it.overlaps(queries[i], &ov);
+      printf("ov size %lu\n", ov.size());
+      printf("is size %lu\n", is.size());
+      fflush(stdout);
       assert(ov.size() == is.size());
       uint32_t residx = 0;
       for (uint32_t j = 0; j < ov.size(); j++) {
         if (ov[j] == false) {
           continue;
         }
-        printf("%u,%u   result: (%lu/%lu)", i,j, is[j].s, is[j].e);
+        printf("%u,%u   result: (%lu/%lu) ", i,j, is[j].s, is[j].e);
         printf("expected: (%lu/%lu)\n", res.at(i).at(residx).s, res.at(i).at(residx).e);
         fflush(stdout);
         assert(is[j] == res.at(i).at(residx));
@@ -62,9 +66,11 @@ int main(int argc, char **argv) {
     std::vector<Interval> queries;
     queries.push_back(Interval(8, 10));
     queries.push_back(Interval(20,22));
+    queries.push_back(Interval(0,10));
     for (uint32_t i = 0; i < queries.size(); i++) {
       printf("query: (%lu/%lu)\n", queries[i].s, queries[i].e);
-      std::vector<char> ov = it.getOverlaps(queries[i]);
+      std::vector<char> ov;
+      it.overlaps(queries[i], &ov);
       assert(ov.size() == is.size());
       for (uint32_t j = 0; j < ov.size(); j++) {
         if (ov[j] == false) {
