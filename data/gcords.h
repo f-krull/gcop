@@ -25,6 +25,11 @@ public:
   public:
     RowPtr(const GCord &g, GCords *p, uint64_t idx);
     float getFloat(uint32_t i);
+    uint64_t getUint(uint32_t i);
+    ChrMap::ChrType getChr(uint32_t i);
+    const char* str(uint32_t i);
+    uint32_t numAnnot() const;
+
   private:
     GCords *m_p;
     uint64_t m_ridx;
@@ -38,9 +43,14 @@ public:
   std::vector<GCord> getChr(ChrMap::ChrType) const;
 
   RowPtr get(uint64_t i);
-  float annotFloat(uint32_t annotIdx, float rowIdx) const;
+  float           annotFloat(uint32_t annotIdx, uint64_t rowIdx) const;
+  uint64_t        annotUint(uint32_t annotIdx, uint64_t rowIdx) const;
+  ChrMap::ChrType annotChr(uint32_t annotIdx, uint64_t rowIdx) const;
+  const char*     annotStr(uint32_t annotIdx, uint64_t rowIdx) const;
+  uint32_t numAnnot() const;
 
   static void intersect(const GCords* gca, const GCords* gcb);
+  static void join(const GCords* gca, const GCords* gcb);
 
 protected:
   std::vector<GCord> m_d;

@@ -5,6 +5,6 @@
 # ld_get  src=myld chr=chr1 bpa=846808 bpb=666666
 
 # intersect snps with dnase
-load_gcords dst=mysnp   file=testdata/scz2.snp.results.txt.gz format=c...s...1 skip=1
+load_gcords dst=mysnp   file=testdata/scz2.snp.results.txt.gz format=c...s...0f skip=1
 load_gcords dst=mydnase file=testdata/wgEncodeUwDnaseCd20ro01778PkRep1.narrowPeak.gz format=cse skip=0
 intersect srca=mysnp srcb=mydnase

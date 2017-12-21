@@ -41,6 +41,18 @@ char* TokenReader::read_float(char *pos, char delim, float *v) const {
 
 /*----------------------------------------------------------------------------*/
 
+char* TokenReader::read_string(char *pos, char delim, char **str) const {
+  const char *s = pos;
+  assert(pos != NULL);
+  pos = strchr(pos, delim);
+  pos[0] = '\0';
+  (*str) = strdup(s);
+  pos++;
+  return pos;
+}
+
+/*----------------------------------------------------------------------------*/
+
 char* TokenReader::read_forget(char *pos, char delim) const {
   assert(pos != NULL);
   pos = strchr(pos, delim);

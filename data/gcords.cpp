@@ -8,16 +8,39 @@
 
 /*----------------------------------------------------------------------------*/
 
-#define CHAR_CHROM 'c'
-#define CHAR_START 's'
-#define CHAR_END   'e'
-#define CHAR_SKIP  '.'
+#define ENUM_FIELDTYPE(select_fun) \
+    select_fun(FIELD_TYPE_SKIP  , 1, '.', "skip") \
+    select_fun(FIELD_TYPE_GCCHR , 2, 'c', "chromosome") \
+    select_fun(FIELD_TYPE_GCBPS , 3, 's', "BP start") \
+    select_fun(FIELD_TYPE_GCBPE , 4, 'e', "BP end") \
+    select_fun(FIELD_TYPE_FLOAT , 5, 'f', "float") \
+    select_fun(FIELD_TYPE_CHR   , 6, 'c', "chromosome") \
+    select_fun(FIELD_TYPE_UINT  , 7, 'u', "unsigned integer") \
+    select_fun(FIELD_TYPE_STRING, 8, 's', "string")
 
-#define FIELD_TYPE_SKIP  0x0000
-#define FIELD_TYPE_CHR   0x0001
-#define FIELD_TYPE_BPS   0x0002
-#define FIELD_TYPE_BPE   0x0003
-#define FIELD_TYPE_FLOAT 0x0004
+enum FieldType {
+#define ENUM_GET_ENAME(name, num, ch, str) name,
+  ENUM_FIELDTYPE(ENUM_GET_ENAME)
+  FIELD_TYPE_NUMENTRIES
+#undef ENUM_GET_ENAME
+};
+
+
+constexpr char fieldTypeChars[] = {
+#define  ENUM_GET_CHAR(name, num, ch, str) ch,
+        ENUM_FIELDTYPE(ENUM_GET_CHAR)
+        '-'
+#undef ENUM_GET_NAME
+};
+
+
+const char* fieldTypeStr[] = {
+#define  ENUM_GET_STR(name, num, ch, str) str,
+        ENUM_FIELDTYPE(ENUM_GET_STR)
+        "undefined"
+#undef ENUM_GET_NAME
+};
+
 
 /*----------------------------------------------------------------------------*/
 
@@ -33,10 +56,35 @@ float GCords::RowPtr::getFloat(uint32_t i) {
 
 /*----------------------------------------------------------------------------*/
 
+ChrMap::ChrType GCords::RowPtr::getChr(uint32_t i) {
+  return m_p->annotChr(i, m_ridx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t GCords::RowPtr::getUint(uint32_t i) {
+  return m_p->annotUint(i, m_ridx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+const char* GCords::RowPtr::str(uint32_t i) {
+  return m_p->annotStr(i, m_ridx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint32_t GCords::RowPtr::numAnnot() const {
+  return m_p->numAnnot();
+}
+
+/*----------------------------------------------------------------------------*/
+
 class Annot {
 public:
   virtual ~Annot() {};
   static const char* typestr() {return "null";}
+  virtual const char* str(uint32_t idx) const {return "hi";};
 private:
 };
 
@@ -47,8 +95,62 @@ public:
   static const char* typestr() {return "float";}
   const std::vector<float> & d() const {return m_d;}
   std::vector<float> & d() {return m_d;}
+  virtual const char *str(uint32_t idx) const {
+    static char buf[64];
+    snprintf(buf, sizeof(buf)-1, "%f", d()[idx]);
+    return buf;
+  }
 private:
   std::vector<float> m_d;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class AnnotString : public Annot {
+public:
+  ~AnnotString() {
+    for (uint32_t i = 0; i < m_d.size(); i++) {
+      free(m_d[i]);
+    }
+  }
+  static const char* typestr() {return "string";}
+  const std::vector<char*> & d() const {return m_d;}
+  std::vector<char*> & d() {return m_d;}
+  virtual const char *str(uint32_t idx) const {return d()[idx];}
+private:
+  std::vector<char*> m_d;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class AnnotChr : public Annot {
+public:
+  static const char* typestr() {return "chr";}
+  const std::vector<ChrMap::ChrType> & d() const {return m_d;}
+  std::vector<ChrMap::ChrType> & d() {return m_d;}
+  virtual const char *str(uint32_t idx) const {
+      static char buf[64];
+      snprintf(buf, sizeof(buf)-1, "%d", d()[idx]);
+      return buf;
+    }
+private:
+  std::vector<ChrMap::ChrType> m_d;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class AnnotUint : public Annot {
+public:
+  static const char* typestr() {return "uint";}
+  const std::vector<uint64_t> & d() const {return m_d;}
+  std::vector<uint64_t> & d() {return m_d;}
+  virtual const char *str(uint32_t idx) const {
+      static char buf[64];
+      snprintf(buf, sizeof(buf)-1, "%lu", d()[idx]);
+      return buf;
+    }
+private:
+  std::vector<uint64_t> m_d;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -62,20 +164,45 @@ public:
     }
   }
 
+  uint32_t num() const { return m_annots.size(); }
 
   float getFloat(uint32_t aIdx, uint64_t rowIdx) const {
     const AnnotFloat *a = getAnnot<AnnotFloat>(aIdx);
     assert(a != NULL && "check error handling");
     return a->d()[rowIdx];
   }
+  ChrMap::ChrType getChr(uint32_t aIdx, uint64_t rowIdx) const {
+    const AnnotChr *a = getAnnot<AnnotChr>(aIdx);
+    assert(a != NULL && "check error handling");
+    return a->d()[rowIdx];
+  }
+  uint64_t getUint(uint32_t aIdx, uint64_t rowIdx) const {
+    const AnnotUint *a = getAnnot<AnnotUint>(aIdx);
+    assert(a != NULL && "check error handling");
+    return a->d()[rowIdx];
+  }
+  const char *str(uint32_t aIdx, uint64_t rowIdx) const {
+    const Annot *a = getAnnot<Annot>(aIdx);
+    assert(a != NULL && "check error handling");
+    return a->str(rowIdx);
+  }
 
-  void create(uint32_t idx, uint32_t type) {
+  void create(uint32_t idx, FieldType type) {
     switch (type) {
       case FIELD_TYPE_FLOAT:
         m_annots.insert(std::make_pair(idx, new AnnotFloat));
         break;
+      case FIELD_TYPE_CHR:
+        m_annots.insert(std::make_pair(idx, new AnnotChr));
+        break;
+      case FIELD_TYPE_UINT:
+        m_annots.insert(std::make_pair(idx, new AnnotUint));
+        break;
+      case FIELD_TYPE_STRING:
+        m_annots.insert(std::make_pair(idx, new AnnotString));
+        break;
       default:
-        fprintf(stderr, "error: cannot create field of type %x(%u)", type, type);
+        fprintf(stderr, "error: cannot create field of type %c(%s)", fieldTypeChars[type], fieldTypeStr[type]);
         exit(1);
         break;
     }
@@ -83,6 +210,21 @@ public:
 
   void push(uint32_t aIdx, float v) {
     AnnotFloat *a = getAnnot<AnnotFloat>(aIdx);
+    assert(a != NULL);
+    a->d().push_back(v);
+  }
+  void push(uint32_t aIdx, ChrMap::ChrType v) {
+    AnnotChr *a = getAnnot<AnnotChr>(aIdx);
+    assert(a != NULL);
+    a->d().push_back(v);
+  }
+  void push(uint32_t aIdx, uint64_t v) {
+    AnnotUint *a = getAnnot<AnnotUint>(aIdx);
+    assert(a != NULL);
+    a->d().push_back(v);
+  }
+  void push(uint32_t aIdx, char *v) {
+    AnnotString *a = getAnnot<AnnotString>(aIdx);
     assert(a != NULL);
     a->d().push_back(v);
   }
@@ -164,28 +306,28 @@ static bool has_field(const char *fmt, char c) {
 
 /*----------------------------------------------------------------------------*/
 
-struct FieldType {
-  uint32_t type;
+struct FieldTypeIdx {
+  FieldType type;
   uint32_t idx;
-  FieldType(uint32_t t, uint32_t i = 0) : type(t), idx(i) {
+  FieldTypeIdx(FieldType t, uint32_t i = 0) : type(t), idx(i) {
   }
 };
 
-std::vector<FieldType> getFields(const char *fmt) {
-  std::vector<FieldType> fieldTypes;
+static std::vector<FieldTypeIdx> getFields(const char *fmt) {
+  std::vector<FieldTypeIdx> fieldTypes;
   for (; fmt[0] != '\0'; fmt++) {
     switch (fmt[0]) {
-    case CHAR_CHROM:
-      fieldTypes.push_back(FieldType(FIELD_TYPE_CHR));
+    case fieldTypeChars[FIELD_TYPE_GCCHR]:
+      fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_GCCHR));
       break;
-    case CHAR_START:
-      fieldTypes.push_back(FieldType(FIELD_TYPE_BPS));
+    case fieldTypeChars[FIELD_TYPE_GCBPS]:
+      fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_GCBPS));
       break;
-    case CHAR_END:
-      fieldTypes.push_back(FieldType(FIELD_TYPE_BPE));
+    case fieldTypeChars[FIELD_TYPE_GCBPE]:
+      fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_GCBPE));
       break;
-    case CHAR_SKIP:
-      fieldTypes.push_back(FieldType(FIELD_TYPE_SKIP));
+    case fieldTypeChars[FIELD_TYPE_SKIP]:
+      fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_SKIP));
       break;
     default:
       {
@@ -194,7 +336,25 @@ std::vector<FieldType> getFields(const char *fmt) {
         uint64_t v = strtoul(fmt, &end, 10);
         if (fmt != end) {
           fmt = end;
-          fieldTypes.push_back(FieldType(FIELD_TYPE_FLOAT, v));
+          switch (fmt[0]) {
+            case fieldTypeChars[FIELD_TYPE_FLOAT]:
+              fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_FLOAT, v));
+              break;
+            case fieldTypeChars[FIELD_TYPE_CHR]:
+              fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_CHR, v));
+              break;
+            case fieldTypeChars[FIELD_TYPE_UINT]:
+              fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_UINT, v));
+              break;
+            case fieldTypeChars[FIELD_TYPE_STRING]:
+              fieldTypes.push_back(FieldTypeIdx(FIELD_TYPE_STRING, v));
+              break;
+            default:
+              fprintf(stderr, "error: unknown type at %lu in format '%s'\n", v, fmt);
+              exit(1);
+              break;
+          }
+          /* fmt++ is done by for */
           continue;
         }
         /* unknown field type */
@@ -209,9 +369,18 @@ std::vector<FieldType> getFields(const char *fmt) {
 
 /*----------------------------------------------------------------------------*/
 
-static void createFields(Annots* a, const std::vector<FieldType> & fields) {
+static void printFields(const std::vector<FieldTypeIdx> &fs) {
+  printf("input format:\n");
+  for (uint32_t i = 0; i < fs.size(); i++) {
+    printf("column %u : %s %u\n", i, fieldTypeStr[fs[i].type], fs[i].idx);
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
+static void createFields(Annots* a, const std::vector<FieldTypeIdx> & fields) {
   for (uint32_t i = 0; i < fields.size(); i++) {
-    if (fields[i].type == FIELD_TYPE_FLOAT) {
+    if (fields[i].type > FIELD_TYPE_GCBPE) {
       a->create(fields[i].idx, fields[i].type);
     }
   }
@@ -219,15 +388,15 @@ static void createFields(Annots* a, const std::vector<FieldType> & fields) {
 
 /*----------------------------------------------------------------------------*/
 
-char* read_token(char *pos, char delim, const FieldType &ft, GCord *s, Annots *a, const TokenReader &tr) {
+char* read_token(char *pos, char delim, const FieldTypeIdx &ft, GCord *s, Annots *a, const TokenReader &tr) {
   switch (ft.type) {
-    case FIELD_TYPE_CHR:
+    case FIELD_TYPE_GCCHR:
       return tr.read_chr(pos, delim, &s->chr);
       break;
-    case FIELD_TYPE_BPS:
+    case FIELD_TYPE_GCBPS:
       return tr.read_uint64(pos, delim, &s->s);
       break;
-    case FIELD_TYPE_BPE:
+    case FIELD_TYPE_GCBPE:
       return tr.read_uint64(pos, delim, &s->e);
       break;
     case FIELD_TYPE_SKIP:
@@ -241,6 +410,30 @@ char* read_token(char *pos, char delim, const FieldType &ft, GCord *s, Annots *a
         return end;
       }
       break;
+    case FIELD_TYPE_CHR:
+      {
+        ChrMap::ChrType v;
+        char *end = tr.read_chr(pos, delim, &v);
+        a->push(ft.idx, v);
+        return end;
+      }
+      break;
+    case FIELD_TYPE_UINT:
+      {
+        uint64_t v;
+        char *end = tr.read_uint64(pos, delim, &v);
+        a->push(ft.idx, v);
+        return end;
+      }
+      break;
+    case FIELD_TYPE_STRING:
+       {
+         char *v;
+         char *end = tr.read_string(pos, delim, &v);
+         a->push(ft.idx, v);
+         return end;
+       }
+       break;
     default:
       assert(false);
       break;
@@ -255,9 +448,10 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
   const char delim = '\t';
 
   /* check format */
-  const bool has_end = has_field(fmt, CHAR_END);
-  std::vector<FieldType> ft = getFields(fmt);
+  const bool has_end = has_field(fmt, fieldTypeChars[FIELD_TYPE_GCBPE]);
+  std::vector<FieldTypeIdx> ft = getFields(fmt);
   createFields(&m->annot, ft);
+  printFields(ft);
 
   //FILE *f = fopen(filename, "r");
   File f;
@@ -266,10 +460,11 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
     exit(1);
   }
   TokenReader tr;
-  char buffer[1024];
+  const uint32_t bufsize = 1024*64*8;
+  char *buffer = new char[bufsize];
+
   uint64_t lineno = 0;
- // while (fgets(buffer, sizeof(buffer)-1, f) != NULL) {}
-  while (f.gets(buffer, sizeof(buffer)-1) != NULL) {
+  while (f.gets(buffer, bufsize-1) != NULL) {
     lineno++;
     if (lineno <= skip) {
       continue;
@@ -288,11 +483,19 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
   }
   f.close();
   printf("read %lu genomic coordinates\n", m_d.size());
-#if 0
-  for (uint32_t i = 0; i < std::min(m_d.size(), (size_t)10); i++) {
-    printf("%s %lu %lu %f\n", chrmap.chrTypeStr(m_d[i].chr), m_d[i].s, m_d[i].e, get(i).getFloat(1));
+#if 1
+  {
+    const uint32_t n = numAnnot();
+    for (uint32_t i = 0; i < std::min(m_d.size(), (size_t)10); i++) {
+      printf("%s\t%lu\t%lu", chrmap.chrTypeStr(m_d[i].chr), m_d[i].s, m_d[i].e);
+      for (uint32_t j = 0; j < n; j++) {
+        printf("\t%s", get(i).str(j));
+      }
+      printf("\n");
+    }
   }
 #endif
+  delete [] buffer;
   return true;
 }
 
@@ -304,8 +507,32 @@ GCords::RowPtr GCords::get(uint64_t i) {
 
 /*----------------------------------------------------------------------------*/
 
-float GCords::annotFloat(uint32_t annotIdx, float rowIdx) const {
+float GCords::annotFloat(uint32_t annotIdx, uint64_t rowIdx) const {
   return m->annot.getFloat(annotIdx, rowIdx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+ChrMap::ChrType GCords::annotChr(uint32_t annotIdx, uint64_t rowIdx) const {
+  return m->annot.getChr(annotIdx, rowIdx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t GCords::annotUint(uint32_t annotIdx, uint64_t rowIdx) const {
+  return m->annot.getUint(annotIdx, rowIdx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+const char* GCords::annotStr(uint32_t annotIdx, uint64_t rowIdx) const {
+  return m->annot.str(annotIdx, rowIdx);
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint32_t GCords::numAnnot() const {
+  return m->annot.num();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -321,8 +548,7 @@ void GCords::intersect(const GCords* gca, const GCords* gcb) {
         gcb_curr = new IntervalTree<GCord>(gcb->getChr(chr_curr));
         printf("%s (%u)", ChrMap::chrTypeStr(chr_curr), gcb_curr->numNodes());
       }
-      const uint64_t bp = gca->data()[i].s;
-      annot[i] = gcb_curr->overlaps(bp);
+      annot[i] = gcb_curr->overlaps(gca->data()[i]);
       if (i % 10000 == 0) {
         printf(".");
         fflush(stdout);
