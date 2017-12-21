@@ -1,7 +1,6 @@
 OBJS := data/chrdef.cpp \
 				data/gcords.cpp \
 				data/ldinfo.cpp \
-				data/tokenreader.cpp \
 				int/cmd_base.cpp \
 				int/cmdparam.cpp \
 				int/command.cpp \
@@ -10,6 +9,7 @@ OBJS := data/chrdef.cpp \
 				int/scriptenv.cpp \
 				util/file.cpp \
 				util/timer.cpp \
+				util/tokenreader.cpp \
 				main.cpp
 
 gcop:

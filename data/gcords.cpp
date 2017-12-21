@@ -1,10 +1,10 @@
 #include "gcords.h"
-#include "tokenreader.h"
 #include "intervaltree.cpp"
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../util/tokenreader.h"
 
 /*----------------------------------------------------------------------------*/
 
@@ -388,40 +388,60 @@ static void createFields(Annots* a, const std::vector<FieldTypeIdx> & fields) {
 
 /*----------------------------------------------------------------------------*/
 
-char* read_token(char *pos, char delim, const FieldTypeIdx &ft, GCord *s, Annots *a, const TokenReader &tr) {
+class ChrConv : public TokenReader::IConv {
+public:
+  ChrConv() : m_t(ChrMap::CHRTYPE_NUMENTRIES) {};
+  virtual ~ChrConv() {};
+  virtual void operator()(const char* s) {
+    m_t = m_cm.unifyChr(s);
+  }
+  ChrMap::ChrType get() const {
+    return m_t;
+  }
+private:
+  ChrMap::ChrType m_t;
+  ChrMap m_cm;
+};
+
+/*----------------------------------------------------------------------------*/
+
+char* read_token(char *pos, char delim, const FieldTypeIdx &ft, GCord *s, Annots *a, ChrConv &cc) {
   switch (ft.type) {
     case FIELD_TYPE_GCCHR:
-      return tr.read_chr(pos, delim, &s->chr);
+      {
+         char *end = TokenReader::read_conv(pos, delim, &cc);
+         s->chr = cc.get();
+         return end;
+      }
       break;
     case FIELD_TYPE_GCBPS:
-      return tr.read_uint64(pos, delim, &s->s);
+      return TokenReader::read_uint64(pos, delim, &s->s);
       break;
     case FIELD_TYPE_GCBPE:
-      return tr.read_uint64(pos, delim, &s->e);
+      return TokenReader::read_uint64(pos, delim, &s->e);
       break;
     case FIELD_TYPE_SKIP:
-      return tr.read_forget(pos, delim);
+      return TokenReader::read_forget(pos, delim);
       break;
     case FIELD_TYPE_FLOAT:
       {
         float v;
-        char *end = tr.read_float(pos, delim, &v);
+        char *end = TokenReader::read_float(pos, delim, &v);
         a->push(ft.idx, v);
         return end;
       }
       break;
     case FIELD_TYPE_CHR:
       {
-        ChrMap::ChrType v;
-        char *end = tr.read_chr(pos, delim, &v);
-        a->push(ft.idx, v);
+        char *end = TokenReader::read_conv(pos, delim, &cc);
+        a->push(ft.idx, cc.get());
         return end;
       }
       break;
     case FIELD_TYPE_UINT:
       {
         uint64_t v;
-        char *end = tr.read_uint64(pos, delim, &v);
+        char *end = TokenReader::read_uint64(pos, delim, &v);
         a->push(ft.idx, v);
         return end;
       }
@@ -429,7 +449,7 @@ char* read_token(char *pos, char delim, const FieldTypeIdx &ft, GCord *s, Annots
     case FIELD_TYPE_STRING:
        {
          char *v;
-         char *end = tr.read_string(pos, delim, &v);
+         char *end = TokenReader::read_string(pos, delim, &v);
          a->push(ft.idx, v);
          return end;
        }
@@ -459,7 +479,7 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
     fprintf(stderr, "error: cannot open file %s\n", filename);
     exit(1);
   }
-  TokenReader tr;
+  ChrConv cc;
   const uint32_t bufsize = 1024*64*8;
   char *buffer = new char[bufsize];
 
@@ -473,7 +493,7 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
     /* parse line */
     char *pos = buffer;
     for (uint32_t i = 0; i < ft.size(); i++) {
-      pos = read_token(pos, delim, ft[i], &r, &m->annot, tr);
+      pos = read_token(pos, delim, ft[i], &r, &m->annot, cc);
     }
     /* no end? - assume we are reading points */
     if (!has_end) {
