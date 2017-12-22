@@ -232,10 +232,9 @@ IntervalTree<T>::IntervalTree(const std::vector<T> &is) {
   m_root = NULL;
   if (!is.empty()) {
     m_root = ItNode::build_tree(is);
+    m_numNodes = m_root->countNodes();
   }
-  m_numNodes = m_root->countNodes();
   m_numIntervals = is.size();
-
   m_bs = IndexedInterval::build(is);
   m_es = IndexedInterval::build(is);
   std::sort(m_bs.begin(), m_bs.end(), typename IndexedInterval::CmpStart());
