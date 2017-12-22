@@ -562,17 +562,17 @@ uint32_t GCords::numAnnot() const {
 /*----------------------------------------------------------------------------*/
 
 void GCords::intersect(const GCords* gca, const GCords* gcb) {
-  std::vector<char> annot(gca->data().size(), 0);
+  std::vector<char> annot(gca->cdata().size(), 0);
     ChrMap::ChrType chr_curr = ChrMap::CHRTYPE_NUMENTRIES;
     IntervalTree<GCord> *gcb_curr = NULL;
-    for (uint32_t i = 0; i < gca->data().size(); i++) {
-      if (chr_curr != gca->data()[i].chr) {
-        chr_curr = gca->data()[i].chr;
+    for (uint32_t i = 0; i < gca->cdata().size(); i++) {
+      if (chr_curr != gca->cdata()[i].chr) {
+        chr_curr = gca->cdata()[i].chr;
         delete gcb_curr;
         gcb_curr = new IntervalTree<GCord>(gcb->getChr(chr_curr));
         printf("%s (%u)", ChrMap::chrTypeStr(chr_curr), gcb_curr->numNodes());
       }
-      annot[i] = gcb_curr->overlaps(gca->data()[i]);
+      annot[i] = gcb_curr->overlaps(gca->cdata()[i]);
       if (i % 10000 == 0) {
         printf(".");
         fflush(stdout);

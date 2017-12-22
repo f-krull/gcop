@@ -38,8 +38,8 @@ public:
   GCords();
   virtual ~GCords();
   bool read(const char *filename, const char *format, uint32_t skip);
-  const std::vector<GCord> & data() const {return m_d;}
-  std::vector<GCord> data() {return m_d;}
+  const std::vector<GCord> & cdata() const {return m_d;}
+  std::vector<GCord> & data() {return m_d;}
   std::vector<GCord> getChr(ChrMap::ChrType) const;
 
   RowPtr get(uint64_t i);

@@ -192,7 +192,8 @@ std::string CmdGCordsInfo::PARAM_SRC_STR = "src";
 void CmdGCordsInfo::executeChild(const char *, GcObjSpace *os) {
   const char *src = getParam(PARAM_SRC_STR)->valStr().c_str();
   GcObjGCords *snps = os->getObj<GcObjGCords>(src);
-  printf("%s: number of genomic coordinates %lu\n", src, snps->d()->data().size());
+  const GCords *g = snps->d();
+  printf("%s: number of genomic coordinates %lu\n", src, g->cdata().size());
 }
 
 /*----------------------------------------------------------------------------*/

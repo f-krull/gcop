@@ -197,13 +197,13 @@ void LdInfo::test(const GCords *s) const {
   uint64_t num_found = 0;
   uint64_t num_snps = 0;
   const uint32_t num_neigbors = 1;
-  for (uint32_t i = num_neigbors; i < s->data().size(); i++) {
+  for (uint32_t i = num_neigbors; i < s->cdata().size(); i++) {
     num_snps++;
     for (uint32_t j = 1; j <= num_neigbors; j++) {
-      ChrMap::ChrType chra = s->data()[i-j].chr;
-      uint64_t        bpa  = s->data()[i-j].s;
-      ChrMap::ChrType chrb = s->data()[i].chr;
-      uint64_t        bpb  = s->data()[i].s;
+      ChrMap::ChrType chra = s->cdata()[i-j].chr;
+      uint64_t        bpa  = s->cdata()[i-j].s;
+      ChrMap::ChrType chrb = s->cdata()[i].chr;
+      uint64_t        bpb  = s->cdata()[i].s;
       if (chra != chrb) {
         continue;
       }
