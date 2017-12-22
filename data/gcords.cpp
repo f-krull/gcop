@@ -473,7 +473,6 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
   createFields(&m->annot, ft);
   printFields(ft);
 
-  //FILE *f = fopen(filename, "r");
   File f;
   if (!f.open(filename, "r", File::FILETYPE_AUTO)) {
     fprintf(stderr, "error: cannot open file %s\n", filename);
@@ -490,6 +489,11 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
       continue;
     }
     GCord r;
+    {
+      /* change line end to delimiter to simplify parsing */
+      assert(buffer[strlen(buffer)-1] == '\n');
+      buffer[strlen(buffer)-1] = delim;
+    }
     /* parse line */
     char *pos = buffer;
     for (uint32_t i = 0; i < ft.size(); i++) {
