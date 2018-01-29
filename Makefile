@@ -1,6 +1,9 @@
 OBJS := data/chrdef.cpp \
+				data/fieldformat.cpp \
+				data/fieldtypes.cpp \
 				data/gcords.cpp \
 				data/ldinfo.cpp \
+				data/tabfield.cpp \
 				int/cmd_base.cpp \
 				int/cmdparam.cpp \
 				int/command.cpp \

@@ -143,18 +143,21 @@ void CmdLoadGCords::executeChild(const char *, GcObjSpace *os) {
 class CmdIntersectGc : public GcCommand {
 public:
   CmdIntersectGc() {
+    addParam(GcCmdParam(PARAM_DST_STR,  GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_SRCA_STR, GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_SRCB_STR, GcCmdParam::PARAM_STRING, ""));
   }
   const char* name() const {
     return "intersect";
   }
+  static std::string PARAM_DST_STR;
   static std::string PARAM_SRCA_STR;
   static std::string PARAM_SRCB_STR;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
 
+std::string CmdIntersectGc::PARAM_DST_STR   = "dst";
 std::string CmdIntersectGc::PARAM_SRCA_STR = "srca";
 std::string CmdIntersectGc::PARAM_SRCB_STR = "srcb";
 
@@ -165,7 +168,9 @@ void CmdIntersectGc::executeChild(const char *, GcObjSpace *os) {
   const char *srcb = getParam(PARAM_SRCB_STR)->valStr().c_str();
   GcObjGCords *gca = os->getObj<GcObjGCords>(srca);
   GcObjGCords *gcb = os->getObj<GcObjGCords>(srcb);
-  GCords::intersect(gca->d(), gcb->d());
+  GcObjGCords *gci = new GcObjGCords();
+  GCords::intersect(gca->d(), gcb->d(), gci->d());
+  os->addObj(getParam(PARAM_DST_STR)->valStr(), gci);
 }
 
 
