@@ -13,7 +13,8 @@ GCord::GCord(std::vector<FieldType> fts) :
     Interval(0, 0), chr(ChrMap::CHRTYPE_NUMENTRIES) {
   m_d.reserve(fts.size());
   for (uint32_t i = 0; i < fts.size(); i++) {
-    m_d.push_back(FieldValue(fts[i]));
+    //m_d.push_back(FieldValue(fts[i]));
+    m_d.emplace_back(fts[i]);
   }
 }
 
