@@ -1,4 +1,5 @@
 OBJS := data/chrdef.cpp \
+				data/chrinfo.cpp \
 				data/fieldformat.cpp \
 				data/fieldtypes.cpp \
 				data/gcords.cpp \
