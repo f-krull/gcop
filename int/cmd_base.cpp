@@ -203,6 +203,35 @@ void CmdGCordsInfo::executeChild(const char *, GcObjSpace *os) {
 
 /*----------------------------------------------------------------------------*/
 
+class CmdLoadChrInfo : public GcCommand {
+public:
+  CmdLoadChrInfo() {
+    addParam(GcCmdParam(PARAM_DST_STR,    GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
+  }
+  const char* name() const {
+    return "load_chrinfo";
+  }
+  static std::string PARAM_DST_STR;
+  static std::string PARAM_FILE_STR;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLoadChrInfo::PARAM_DST_STR    = "dst";
+std::string CmdLoadChrInfo::PARAM_FILE_STR   = "file";
+
+#include <stdio.h>
+#include "../data/chrinfo.h"
+void CmdLoadChrInfo::executeChild(const char *, GcObjSpace *os) {
+  GcObjChrInfo *gci = new GcObjChrInfo();
+  gci->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str());
+  os->addObj(getParam(PARAM_DST_STR)->valStr(), gci);
+}
+
+
+/*----------------------------------------------------------------------------*/
+
 void cmd_base_add(ICmdSink *cs) {
   cs->addCmd(new CmdGCordsInfo);
   cs->addCmd(new CmdLoadLdInfo);
@@ -210,4 +239,5 @@ void cmd_base_add(ICmdSink *cs) {
   cs->addCmd(new CmdLdTest);
   cs->addCmd(new CmdLoadGCords);
   cs->addCmd(new CmdIntersectGc);
+  cs->addCmd(new CmdLoadChrInfo);
 }

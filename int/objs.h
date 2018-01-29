@@ -34,6 +34,10 @@ OBJS_DECL_GCCLASS(LdInfo, LdInfo)
 #include "../data/gcords.h"
 OBJS_DECL_GCCLASS(GCords, GCords)
 
+#include "../data/chrinfo.h"
+OBJS_DECL_GCCLASS(ChrInfo, ChrInfo)
+
+
 #undef OBJS_DECL_GCCLASS
 
 
