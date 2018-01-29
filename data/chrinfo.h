@@ -15,9 +15,10 @@ public:
   typedef uint8_t CType; /* chromosome id */
 
   void read(const char *fn);
-  uint64_t getLen(CType t) const;
-  CType str2type(const char *str) const; /* str with    "chr" prefix */
-  CType id2type(const char *str) const;  /* str without "chr" prefix */
+  uint64_t chrlen(CType t) const;
+  CType str2type(const char *str) const; /* str with "chr" prefix */
+  const char *ctype2str(CType t) const;
+  void print() const;
 private:
   ChrInfoPriv * m;
 };
