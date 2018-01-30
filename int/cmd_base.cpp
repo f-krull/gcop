@@ -3,6 +3,7 @@
 #include "objs.h"
 #include "objspace.h"
 #include "icmdsink.h"
+#include <assert.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -103,7 +104,7 @@ void CmdLdTest::executeChild(const char *, GcObjSpace *os) {
 }
 
 /*----------------------------------------------------------------------------*/
-
+#include "objs_base.h"
 class CmdLoadGCords : public GcCommand {
 public:
   CmdLoadGCords() {
@@ -111,6 +112,7 @@ public:
     addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_FORMAT_STR, GcCmdParam::PARAM_STRING, "cbe"));
     addParam(GcCmdParam(PARAM_SKIP_INT,   GcCmdParam::PARAM_INT,    "0"));
+    addParam(GcCmdParam(PARAM_BUILD_STR,  GcCmdParam::PARAM_STRING, OBJ_CHRINFO_HG19));
   }
   const char* name() const {
     return "load_gcords";
@@ -119,6 +121,7 @@ public:
   static std::string PARAM_FILE_STR;
   static std::string PARAM_FORMAT_STR;
   static std::string PARAM_SKIP_INT;
+  static std::string PARAM_BUILD_STR;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
@@ -127,14 +130,19 @@ std::string CmdLoadGCords::PARAM_DST_STR    = "dst";
 std::string CmdLoadGCords::PARAM_FILE_STR   = "file";
 std::string CmdLoadGCords::PARAM_FORMAT_STR = "format";
 std::string CmdLoadGCords::PARAM_SKIP_INT   = "skip";
+std::string CmdLoadGCords::PARAM_BUILD_STR  = "build";
 
 #include <stdio.h>
 #include "../data/gcords.h"
 void CmdLoadGCords::executeChild(const char *, GcObjSpace *os) {
+  const char *str_buid = getParam(PARAM_BUILD_STR)->valStr().c_str();
+  GcObjChrInfo *gchr = os->getObj<GcObjChrInfo>(str_buid);
+  assert(gchr != NULL);
   GcObjGCords *gcs = new GcObjGCords();
   gcs->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
                     getParam(PARAM_FORMAT_STR)->valStr().c_str(),
-                    getParam(PARAM_SKIP_INT)->valInt());
+                    getParam(PARAM_SKIP_INT)->valInt(),
+                    gchr->d());
   os->addObj(getParam(PARAM_DST_STR)->valStr(), gcs);
 }
 

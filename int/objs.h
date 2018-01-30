@@ -24,6 +24,7 @@ private:
       ~GcObj##name() { delete m_c; } \
       _class* d() { return m_c; } \
       const _class* d() const { return m_c; } \
+      void replace(_class *n) {delete m_c; m_c = n;} \
   private: \
       _class* m_c; \
   };

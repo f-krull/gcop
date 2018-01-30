@@ -61,8 +61,14 @@ void GcObjSpace::rmObj(const std::string &name) {
 /*----------------------------------------------------------------------------*/
 
 
-void GcObjSpace::err(const char* name, const char* type) {
-  fprintf(stderr, "error: object '%s' is not of type %s\n", name, type);
+void GcObjSpace::err_notfound(const char* name) {
+  fprintf(stderr, "error: object '%s' not found\n", name);
   exit(1);
 }
 
+/*----------------------------------------------------------------------------*/
+
+void GcObjSpace::err_type(const char* name, const char* type) {
+  fprintf(stderr, "error: object '%s' is not of type %s\n", name, type);
+  exit(1);
+}

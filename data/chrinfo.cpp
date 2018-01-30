@@ -34,6 +34,10 @@ ChrInfo::~ChrInfo() {
 
 /*----------------------------------------------------------------------------*/
 
+ChrInfo::CType ChrInfo::CTYPE_UNDEFINED = UINT8_MAX;
+
+/*----------------------------------------------------------------------------*/
+
 /* format: chrid\tlength\n
  *         str    uint64
  * */
@@ -57,21 +61,26 @@ void ChrInfo::read(const char *fn) {
     pos = TokenReader::read_string(pos, delim, &chrIdStr);
     uint64_t chrLen;
     pos = TokenReader::read_uint64(pos, delim, &chrLen);
-
-    const uint32_t currChrId = m->strs.size();
-    m->lenghts.insert(std::make_pair(currChrId, chrLen));
-    m->str2type.insert(std::make_pair(chrIdStr, currChrId));
-#if 0
-    /* skip "chr" in "chrX.." */
-    assert(chrIdStr != NULL);
-    assert(strlen(chrIdStr) > 3);
-    /* check "chr" prefix */
-    assert(chrIdStr[0] == 'c' && chrIdStr[1] == 'h' && chrIdStr[2] == 'r');
-    m->id2type.insert(std::make_pair(&chrIdStr[3], currChrId));
-#endif
-    m->strs.push_back(chrIdStr);
+    addEntry(chrIdStr, chrLen);
   }
   delete buffer;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void ChrInfo::addEntry(const char *chrIdStr, uint64_t chrLen) {
+  const uint32_t currChrId = m->strs.size();
+  m->lenghts.insert(std::make_pair(currChrId, chrLen));
+  m->str2type.insert(std::make_pair(chrIdStr, currChrId));
+#if 0
+  /* skip "chr" in "chrX.." */
+  assert(chrIdStr != NULL);
+  assert(strlen(chrIdStr) > 3);
+  /* check "chr" prefix */
+  assert(chrIdStr[0] == 'c' && chrIdStr[1] == 'h' && chrIdStr[2] == 'r');
+  m->id2type.insert(std::make_pair(&chrIdStr[3], currChrId));
+#endif
+  m->strs.push_back(chrIdStr);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -109,3 +118,33 @@ ChrInfo::CType ChrInfo::str2type(const char *str) const {
   return it->second;
 }
 
+/*----------------------------------------------------------------------------*/
+
+ChrInfoHg19::ChrInfoHg19() : ChrInfo() {
+  // cat testdata/hg19/hg19.chrom.sizes_common.txt | awk '{printf "addEntry(\"%s\", %s);\n", $1, $2}'
+  addEntry("chr1", 249250621);
+  addEntry("chr2", 243199373);
+  addEntry("chr3", 198022430);
+  addEntry("chr4", 191154276);
+  addEntry("chr5", 180915260);
+  addEntry("chr6", 171115067);
+  addEntry("chr7", 159138663);
+  addEntry("chr8", 146364022);
+  addEntry("chr9", 141213431);
+  addEntry("chr10", 135534747);
+  addEntry("chr11", 135006516);
+  addEntry("chr12", 133851895);
+  addEntry("chr13", 115169878);
+  addEntry("chr14", 107349540);
+  addEntry("chr15", 102531392);
+  addEntry("chr16", 90354753);
+  addEntry("chr17", 81195210);
+  addEntry("chr18", 78077248);
+  addEntry("chr19", 59128983);
+  addEntry("chr20", 63025520);
+  addEntry("chr21", 48129895);
+  addEntry("chr22", 51304566);
+  addEntry("chrX", 155270560);
+  addEntry("chrY", 59373566);
+
+}

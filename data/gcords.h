@@ -3,14 +3,14 @@
 #define DATA_GCORDS_H_
 
 #include "interval.h"
-#include "chrdef.h"
+#include "chrinfo.h"
 #include "tabfield.h"
 
 /*----------------------------------------------------------------------------*/
 
 class GCord : public Interval {
 public:
-  ChrMap::ChrType chr;
+  ChrInfo::CType chr;
   GCord(std::vector<FieldType> fts = std::vector<FieldType>());
   FieldValue & d(uint32_t i) {return m_d[i];}
   const FieldValue & d(uint32_t i) const {return m_d[i];}
@@ -30,18 +30,19 @@ class GCordsPriv;
 class GCords {
 public:
   virtual ~GCords() {};
-  bool read(const char *filename, const char *format, uint32_t skip);
+  bool read(const char *filename, const char *format, uint32_t skip, const ChrInfo *ci);
   void clear() {m_d.resize(0);}
   uint32_t ncols() const { return m_d.empty() ? 0 : m_d.back().nCols(); }
   const std::vector<GCord> & cdata() const {return m_d;}
   std::vector<GCord> & data() {return m_d;}
-  std::vector<GCord> getChr(ChrMap::ChrType) const;
+  std::vector<GCord> getChr(ChrInfo::CType) const;
 
   static void intersect(const GCords* gca, const GCords* gcb, GCords* gci);
   static void join(const GCords* gca, const GCords* gcb);
 
 protected:
   std::vector<GCord> m_d;
+  ChrInfo m_ci;
 
   void addGCord(const GCord &c);
 };

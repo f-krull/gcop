@@ -18,13 +18,14 @@ public:
   void addObj(const std::string &name, GcObj *o);
   void rmObj(const std::string &name);
   template <typename T>
-  T *getObj(const char* name);
+  T *getObj(const char* name, bool allowNull = false);
 private:
   typedef std::map<std::string, GcObj*> GcObjMap;
   GcObjMap m_obs;
   typedef std::map<std::string, GcCommand*> GcCmdMap;
   GcCmdMap m_cmds;
-  static void err(const char  *name, const char* type);
+  static void err_notfound(const char *name);
+  static void err_type(const char *name, const char* type);
 };
 
 
@@ -32,14 +33,17 @@ private:
 
 #include <typeinfo>
 template <typename T>
-T *GcObjSpace::getObj(const char* name) {
+T *GcObjSpace::getObj(const char* name, bool allowNull) {
   GcObjMap::iterator it = m_obs.find(name);
   if (it == m_obs.end()) {
+    if (!allowNull) {
+      err_notfound(name);
+    }
     return NULL;
   }
   T *o = dynamic_cast<T*>(it->second);
   if (o == NULL) {
-    err(name, typeid(T).name());
+    err_type(name, typeid(T).name());
   }
   return o;
 }

@@ -4,16 +4,18 @@
 
 #include "objspace.h"
 #include "icmdsink.h"
+#include "iobjsink.h"
 #include <stdint.h>
 #include <stdio.h>
 
 /*----------------------------------------------------------------------------*/
 
-class GcScriptEnv : public ICmdSink {
+class GcScriptEnv : public ICmdSink, public IObjSink {
 public:
   GcScriptEnv();
   void run(FILE* f);
   void addCmd(GcCommand *cmd);
+  void addObj(const char *name, GcObj *obj);
 private:
   void run(const char *s, uint32_t line);
   GcObjSpace m_os;

@@ -10,7 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 GCord::GCord(std::vector<FieldType> fts) :
-    Interval(0, 0), chr(ChrMap::CHRTYPE_NUMENTRIES) {
+    Interval(0, 0), chr(ChrInfo::CTYPE_UNDEFINED) {
   m_d.reserve(fts.size());
   for (uint32_t i = 0; i < fts.size(); i++) {
     //m_d.push_back(FieldValue(fts[i]));
@@ -20,7 +20,7 @@ GCord::GCord(std::vector<FieldType> fts) :
 
 /*----------------------------------------------------------------------------*/
 
-std::vector<GCord> GCords::getChr(ChrMap::ChrType ct) const {
+std::vector<GCord> GCords::getChr(ChrInfo::CType ct) const {
   std::vector<GCord> cseg;
   /* TODO: optimize */
   for (uint32_t i = 0; i < m_d.size(); i++) {
@@ -35,17 +35,17 @@ std::vector<GCord> GCords::getChr(ChrMap::ChrType ct) const {
 
 class ChrConv : public TokenReader::IConv {
 public:
-  ChrConv() : m_t(ChrMap::CHRTYPE_NUMENTRIES) {};
+  ChrConv(const ChrInfo *ci) : m_t(ChrInfo::CTYPE_UNDEFINED), m_ci(ci) {};
   virtual ~ChrConv() {};
   virtual void operator()(const char* s) {
-    m_t = m_cm.unifyChr(s);
+    m_t = m_ci->str2type(s);
   }
-  ChrMap::ChrType get() const {
+  ChrInfo::CType get() const {
     return m_t;
   }
 private:
-  ChrMap::ChrType m_t;
-  ChrMap m_cm;
+  ChrInfo::CType m_t;
+  const ChrInfo *m_ci;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -126,10 +126,8 @@ std::string field2str(const FieldValue &f) {
 
 
 #include "../util/file.h"
-bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
-  ChrMap chrmap;
+bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const ChrInfo *chrinf) {
   const char delim = '\t';
-
   /* check format */
   const FieldFormat ffmt(fmt);
   const bool has_end = ffmt.hasField(FIELD_TYPE_GCBPE);
@@ -143,7 +141,7 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
     fprintf(stderr, "error: cannot open file %s\n", filename);
     exit(1);
   }
-  ChrConv cc;
+  ChrConv cc(chrinf);
   const uint32_t bufsize = 1024*64*8;
   char *buffer = new char[bufsize];
 
@@ -184,7 +182,7 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
     /* print head */
     const uint32_t num = 10;
     for (uint32_t i = 0; i < std::min(m_d.size(), (size_t)num); i++) {
-      printf("%s\t%lu\t%lu", chrmap.chrTypeStr(m_d[i].chr), m_d[i].s, m_d[i].e);
+      printf("%s\t%lu\t%lu", chrinf->ctype2str(m_d[i].chr), m_d[i].s, m_d[i].e);
       for (uint32_t j = 0; j < ncols(); j++) {
         printf("\t%s", field2str(cdata()[i].d(j)).c_str());
       }
@@ -193,6 +191,7 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip) {
   }
 #endif
   delete [] buffer;
+  m_ci = *chrinf;
   return true;
 }
 
@@ -237,17 +236,18 @@ uint32_t GCords::numAnnot() const {
 /*----------------------------------------------------------------------------*/
 
 void GCords::intersect(const GCords* gca, const GCords* gcb, GCords* gci) {
+  ChrInfo chrinf;
   assert(gci != NULL);
   gci->clear();
   std::vector<char> annot(gca->cdata().size(), 0);
-  ChrMap::ChrType chr_curr = ChrMap::CHRTYPE_NUMENTRIES;
+  ChrInfo::CType chr_curr = ChrInfo::CTYPE_UNDEFINED;
   IntervalTree<GCord> *gcb_curr = NULL;
   for (uint32_t i = 0; i < gca->cdata().size(); i++) {
     if (chr_curr != gca->cdata()[i].chr) {
       chr_curr = gca->cdata()[i].chr;
       delete gcb_curr;
       gcb_curr = new IntervalTree<GCord>(gcb->getChr(chr_curr));
-      printf("%s (%u)", ChrMap::chrTypeStr(chr_curr), gcb_curr->numNodes());
+      printf("%s (%u)", chrinf.ctype2str(chr_curr), gcb_curr->numNodes());
     }
     std::vector<char> hasOverLap;
     annot[i] = gcb_curr->overlaps(gca->cdata()[i]);

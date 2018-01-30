@@ -2,7 +2,8 @@
 #ifndef DATA_LDINFO_H_
 #define DATA_LDINFO_H_
 
-#include "chrdef.h"
+#include "chrinfo.h"
+#include <stdlib.h>
 #include <map>
 
 
@@ -14,18 +15,18 @@ class GCords;
 class LdInfo {
 public:
   ~LdInfo();
-  void read(const char *fn);
+  void read(const char *fn, const ChrInfo *ci = NULL);
   float getLd(const char* c, uint64_t bpa, uint64_t bpb) const;
-  float getLd(ChrMap::ChrType ct, uint64_t bpa, uint64_t bpb) const;
-
+  float getLd(ChrInfo::CType ct, uint64_t bpa, uint64_t bpb) const;
   void test(const GCords *s) const;
 
 private:
-  typedef std::map<ChrMap::ChrType, LdDataList*> LdlMap;
+  typedef std::map<ChrInfo::CType, LdDataList*> LdlMap;
   LdlMap m_lddat;
-  LdDataList* find(ChrMap::ChrType c);
-  const LdDataList* find(ChrMap::ChrType c) const;
-  void addEntry(uint64_t chr, uint64_t bpa, uint64_t bpb, float r2, const ChrMap &cm);
+  LdDataList* find(ChrInfo::CType c);
+  const LdDataList* find(ChrInfo::CType c) const;
+  void addEntry(uint64_t chr, uint64_t bpa, uint64_t bpb, float r2, const ChrInfo *ci);
+  ChrInfo m_ci;
 };
 
 

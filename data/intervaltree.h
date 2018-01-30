@@ -74,3 +74,4 @@ private:
 };
 
 #endif /* INTERVALTREE_H_ */
+typedef std::map<ChrInfo::CType, uint64_t>    MapLengths;

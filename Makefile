@@ -1,5 +1,4 @@
-OBJS := data/chrdef.cpp \
-				data/chrinfo.cpp \
+OBJS := data/chrinfo.cpp \
 				data/fieldformat.cpp \
 				data/fieldtypes.cpp \
 				data/gcords.cpp \
@@ -9,6 +8,7 @@ OBJS := data/chrdef.cpp \
 				int/cmdparam.cpp \
 				int/command.cpp \
 				int/objs.cpp \
+				int/objs_base.cpp \
 				int/objspace.cpp \
 				int/scriptenv.cpp \
 				util/file.cpp \

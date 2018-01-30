@@ -4,6 +4,8 @@
 
 class GcCommand;
 
+/*----------------------------------------------------------------------------*/
+
 class ICmdSink {
 public:
   virtual ~ICmdSink() {};

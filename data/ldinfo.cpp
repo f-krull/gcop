@@ -96,8 +96,7 @@ LdInfo::~LdInfo() {
 
 /*----------------------------------------------------------------------------*/
 
-void LdInfo::read(const char *fn) {
-  ChrMap cm;
+void LdInfo::read(const char *fn, const ChrInfo *ci) {
   const uint32_t skip = 1; /* skip header */
   FILE *f = fopen(fn, "r");
   if (f == NULL) {
@@ -127,7 +126,7 @@ void LdInfo::read(const char *fn) {
     READ_FIELD_FLOAT(r2,   line, len, 63, 13);
     assert(chra == chrb && "CHR_A != CHR_B");
     //printf("%lu %lu %lu %lu %.6f\n", chra, bpa, chrb, bpb, r2);
-    addEntry(chra, bpa, bpb, r2, cm);
+    addEntry(chra, bpa, bpb, r2, ci);
     num_read++;
   }
   /* sort data */
@@ -143,7 +142,8 @@ void LdInfo::read(const char *fn) {
 /*----------------------------------------------------------------------------*/
 
 void LdInfo::addEntry(uint64_t chr, uint64_t bpa, uint64_t bpb, float r2,
-    const ChrMap &cm) {
+    const ChrInfo *ci) {
+#if 0
   ChrMap::ChrType c = cm.unifyChr(chr);
   LdlMap::iterator it = m_lddat.find(c);
     if (it == m_lddat.end()) {
@@ -152,21 +152,26 @@ void LdInfo::addEntry(uint64_t chr, uint64_t bpa, uint64_t bpb, float r2,
     }
     assert(it != m_lddat.end());
     it->second->add(bpa, bpb, r2);
-  }
+#endif
+}
 
 /*----------------------------------------------------------------------------*/
 
 float LdInfo::getLd(const char* c, uint64_t bpa, uint64_t bpb) const {
+#if 0
   ChrMap cm;
   ChrMap::ChrType ct = cm.unifyChr(c);
   float ld = getLd(ct, bpa, bpb);
   printf("%s %lu %lu %f\n", c, bpa, bpb, ld);
   return ld;
+#else
+  return 0;
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
 
-float LdInfo::getLd(ChrMap::ChrType ct, uint64_t bpa, uint64_t bpb) const {
+float LdInfo::getLd(ChrInfo::CType ct, uint64_t bpa, uint64_t bpb) const {
   const LdDataList* ldl = find(ct);
   if (ldl == NULL) {
     fprintf(stderr, "error: no ld info for chr '%d'\n", ct);
@@ -177,14 +182,14 @@ float LdInfo::getLd(ChrMap::ChrType ct, uint64_t bpa, uint64_t bpb) const {
 
 /*----------------------------------------------------------------------------*/
 
-LdDataList* LdInfo::find(ChrMap::ChrType c) {
+LdDataList* LdInfo::find(ChrInfo::CType c) {
   LdlMap::iterator it = m_lddat.find(c);
   return it->second;
 }
 
 /*----------------------------------------------------------------------------*/
 
-const LdDataList* LdInfo::find(ChrMap::ChrType c) const {
+const LdDataList* LdInfo::find(ChrInfo::CType c) const {
   LdlMap::const_iterator it = m_lddat.find(c);
   return it->second;
 }
@@ -200,10 +205,10 @@ void LdInfo::test(const GCords *s) const {
   for (uint32_t i = num_neigbors; i < s->cdata().size(); i++) {
     num_snps++;
     for (uint32_t j = 1; j <= num_neigbors; j++) {
-      ChrMap::ChrType chra = s->cdata()[i-j].chr;
-      uint64_t        bpa  = s->cdata()[i-j].s;
-      ChrMap::ChrType chrb = s->cdata()[i].chr;
-      uint64_t        bpb  = s->cdata()[i].s;
+      ChrInfo::CType chra = s->cdata()[i-j].chr;
+      uint64_t       bpa  = s->cdata()[i-j].s;
+      ChrInfo::CType chrb = s->cdata()[i].chr;
+      uint64_t       bpb  = s->cdata()[i].s;
       if (chra != chrb) {
         continue;
       }

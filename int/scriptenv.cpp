@@ -1,6 +1,7 @@
 #include "scriptenv.h"
 #include "cmd_base.h"
 #include "command.h"
+#include "objs_base.h"
 #include "../util/timer.h"
 #include <string.h>
 #include <stdio.h>
@@ -11,6 +12,7 @@
 
 GcScriptEnv::GcScriptEnv() {
   cmd_base_add(this);
+  objs_base_add(this);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -58,6 +60,13 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
 
 void GcScriptEnv::addCmd(GcCommand *cmd) {
   m_os.addCmd(cmd);
+}
+
+
+/*----------------------------------------------------------------------------*/
+
+void GcScriptEnv::addObj(const char *name, GcObj *obj) {
+  m_os.addObj(name, obj);
 }
 
 /*----------------------------------------------------------------------------*/
