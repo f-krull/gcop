@@ -236,7 +236,6 @@ uint32_t GCords::numAnnot() const {
 /*----------------------------------------------------------------------------*/
 
 void GCords::intersect(const GCords* gca, const GCords* gcb, GCords* gci) {
-  ChrInfo chrinf;
   assert(gci != NULL);
   gci->clear();
   std::vector<char> annot(gca->cdata().size(), 0);
@@ -247,7 +246,7 @@ void GCords::intersect(const GCords* gca, const GCords* gcb, GCords* gci) {
       chr_curr = gca->cdata()[i].chr;
       delete gcb_curr;
       gcb_curr = new IntervalTree<GCord>(gcb->getChr(chr_curr));
-      printf("%s (%u)", chrinf.ctype2str(chr_curr), gcb_curr->numNodes());
+      printf("%s (%u)", gca->chrinfo().ctype2str(chr_curr), gcb_curr->numNodes());
     }
     std::vector<char> hasOverLap;
     annot[i] = gcb_curr->overlaps(gca->cdata()[i]);

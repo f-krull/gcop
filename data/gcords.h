@@ -42,6 +42,7 @@ public:
 
 protected:
   std::vector<GCord> m_d;
+  const ChrInfo & chrinfo() const {return m_ci;}
   ChrInfo m_ci;
 
   void addGCord(const GCord &c);

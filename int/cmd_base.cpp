@@ -137,7 +137,6 @@ std::string CmdLoadGCords::PARAM_BUILD_STR  = "build";
 void CmdLoadGCords::executeChild(const char *, GcObjSpace *os) {
   const char *str_buid = getParam(PARAM_BUILD_STR)->valStr().c_str();
   GcObjChrInfo *gchr = os->getObj<GcObjChrInfo>(str_buid);
-  assert(gchr != NULL);
   GcObjGCords *gcs = new GcObjGCords();
   gcs->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
                     getParam(PARAM_FORMAT_STR)->valStr().c_str(),

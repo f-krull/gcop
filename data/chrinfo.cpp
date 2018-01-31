@@ -34,6 +34,20 @@ ChrInfo::~ChrInfo() {
 
 /*----------------------------------------------------------------------------*/
 
+ChrInfo::ChrInfo(const ChrInfo &c) {
+  m = new ChrInfoPriv(*c.m);
+}
+
+/*----------------------------------------------------------------------------*/
+
+ChrInfo & ChrInfo::operator=(const ChrInfo &o) {
+  delete m;
+  m = new ChrInfoPriv(*o.m);
+  return *this;
+}
+
+/*----------------------------------------------------------------------------*/
+
 ChrInfo::CType ChrInfo::CTYPE_UNDEFINED = UINT8_MAX;
 
 /*----------------------------------------------------------------------------*/
@@ -47,8 +61,8 @@ void ChrInfo::read(const char *fn) {
     fprintf(stderr, "error: cannot open file %s\n", fn);
     exit(1);
   }
-  const uint32_t bufsize = 1024*64*8;
-  char *buffer = new char[bufsize];
+  const uint32_t bufsize = 1024;
+  char buffer[bufsize];
   const char delim = '\t';
   while (f.gets(buffer, bufsize-1) != NULL) {
     char *pos = buffer;
@@ -63,7 +77,6 @@ void ChrInfo::read(const char *fn) {
     pos = TokenReader::read_uint64(pos, delim, &chrLen);
     addEntry(chrIdStr, chrLen);
   }
-  delete buffer;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -122,15 +135,15 @@ ChrInfo::CType ChrInfo::str2type(const char *str) const {
 
 ChrInfoHg19::ChrInfoHg19() : ChrInfo() {
   // cat testdata/hg19/hg19.chrom.sizes_common.txt | awk '{printf "addEntry(\"%s\", %s);\n", $1, $2}'
-  addEntry("chr1", 249250621);
-  addEntry("chr2", 243199373);
-  addEntry("chr3", 198022430);
-  addEntry("chr4", 191154276);
-  addEntry("chr5", 180915260);
-  addEntry("chr6", 171115067);
-  addEntry("chr7", 159138663);
-  addEntry("chr8", 146364022);
-  addEntry("chr9", 141213431);
+  addEntry("chr1",  249250621);
+  addEntry("chr2",  243199373);
+  addEntry("chr3",  198022430);
+  addEntry("chr4",  191154276);
+  addEntry("chr5",  180915260);
+  addEntry("chr6",  171115067);
+  addEntry("chr7",  159138663);
+  addEntry("chr8",  146364022);
+  addEntry("chr9",  141213431);
   addEntry("chr10", 135534747);
   addEntry("chr11", 135006516);
   addEntry("chr12", 133851895);
@@ -144,7 +157,6 @@ ChrInfoHg19::ChrInfoHg19() : ChrInfo() {
   addEntry("chr20", 63025520);
   addEntry("chr21", 48129895);
   addEntry("chr22", 51304566);
-  addEntry("chrX", 155270560);
-  addEntry("chrY", 59373566);
-
+  addEntry("chrX",  155270560);
+  addEntry("chrY",  59373566);
 }

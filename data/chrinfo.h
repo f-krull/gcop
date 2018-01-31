@@ -10,17 +10,19 @@ class ChrInfoPriv;
 
 class ChrInfo {
 public:
-  ChrInfo();
-  virtual ~ChrInfo();
   typedef uint8_t CType; /* chromosome id */
+  static CType CTYPE_UNDEFINED;
+
+  ChrInfo();
+  ChrInfo(const ChrInfo &c);
+  virtual ~ChrInfo();
+  ChrInfo & operator=(const ChrInfo &o);
 
   void read(const char *fn);
   uint64_t chrlen(CType t) const;
   CType str2type(const char *str) const; /* str with "chr" prefix */
   const char *ctype2str(CType t) const;
   void print() const;
-
-  static CType CTYPE_UNDEFINED;
 protected:
   void addEntry(const char* str, uint64_t len);
 private:
