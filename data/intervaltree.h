@@ -1,8 +1,7 @@
 #ifndef INTERVALTREE_H_
 #define INTERVALTREE_H_
 
-
-#include "segment.h"
+#include <stdint.h>
 #include <vector>
 
 /*----------------------------------------------------------------------------*/
