@@ -2,7 +2,6 @@
 #include "../util/file.h"
 #include "../util/tokenreader.h"
 #include <map>
-#include <vector>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +17,7 @@ public:
   MapLengths lenghts;
   MapStr2type str2type;
   std::vector<std::string> strs;
+  std::vector<ChrInfo::CType> cts;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -85,6 +85,7 @@ void ChrInfo::addEntry(const char *chrIdStr, uint64_t chrLen) {
   const uint32_t currChrId = m->strs.size();
   m->lenghts.insert(std::make_pair(currChrId, chrLen));
   m->str2type.insert(std::make_pair(chrIdStr, currChrId));
+  m->cts.push_back(currChrId);
 #if 0
   /* skip "chr" in "chrX.." */
   assert(chrIdStr != NULL);
@@ -127,7 +128,11 @@ const char * ChrInfo::ctype2str(CType t) const {
 
 ChrInfo::CType ChrInfo::str2type(const char *str) const {
   const ChrInfoPriv::MapStr2type::const_iterator it = m->str2type.find(str);
-  assert(it != m->str2type.end());
+  if (it == m->str2type.end()) {
+    fprintf(stderr, "error: chromosome %s not defined\n", str);
+    print();
+    exit(1);
+  }
   return it->second;
 }
 
@@ -159,4 +164,23 @@ ChrInfoHg19::ChrInfoHg19() : ChrInfo() {
   addEntry("chr22", 51304566);
   addEntry("chrX",  155270560);
   addEntry("chrY",  59373566);
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool ChrInfo::operator==(const ChrInfo &b) const {
+  bool ret = true;
+  for (uint32_t i = 0; ret && i < m->strs.size(); i++) {
+    std::string a_s = m->strs[i];
+    CType       a_t = str2type(a_s.c_str());
+    ret = ret && a_t == b.str2type(a_s.c_str());
+    ret = ret && chrlen(a_t) == b.chrlen(a_t);
+  }
+  return ret;
+}
+
+/*----------------------------------------------------------------------------*/
+
+const std::vector<ChrInfo::CType> & ChrInfo::chrs() const {
+  return m->cts;
 }

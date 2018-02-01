@@ -38,7 +38,7 @@ public:
   std::vector<GCord> getChr(ChrInfo::CType) const;
 
   static void intersect(const GCords* gca, const GCords* gcb, GCords* gci);
-  static void join(const GCords* gca, const GCords* gcb);
+  static void forbes(const GCords* gca, const GCords* gcb);
 
 protected:
   std::vector<GCord> m_d;

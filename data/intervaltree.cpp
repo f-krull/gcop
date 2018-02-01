@@ -2,6 +2,20 @@
 #include <stdio.h>
 #include <assert.h>
 
+
+//#define DEBUG
+
+#ifdef DEBUG
+#define DEBUG_OUT(...) fprintf(stdout, __VA_ARGS__)
+#else
+void dummyout(...) {}
+#define DEBUG_OUT(...) dummyout(__VA_ARGS__)
+#endif
+
+
+
+
+
 /*----------------------------------------------------------------------------*/
 
 template <typename T>
@@ -33,7 +47,7 @@ typename IntervalTree<T>::ItNode* IntervalTree<T>::ItNode::build_tree(const std:
 template<typename T>
 bool IntervalTree<T>::IndexedInterval::findSmallerPoints(
     const std::vector<IndexedInterval> &bs, uint64_t b,
-    std::vector<char> *res) {
+    std::vector<uint32_t> *res) {
   bool ret = false;
   typename std::vector<IndexedInterval>::const_iterator it;
   for (it = bs.begin(); it != bs.end(); ++it) {
@@ -44,7 +58,7 @@ bool IntervalTree<T>::IndexedInterval::findSmallerPoints(
     ret = true;
     if (res) {
       /* mark result */
-      (*res)[it->srcIdx] = true;
+      (*res).push_back(it->srcIdx);
     }
   }
   return ret;
@@ -56,18 +70,24 @@ bool IntervalTree<T>::IndexedInterval::findSmallerPoints(
 template<typename T>
 bool IntervalTree<T>::IndexedInterval::findGreaterPoints(
     const std::vector<IndexedInterval> &es, uint64_t b,
-    std::vector<char> *res) {
-  bool ret = true;
+    std::vector<uint32_t> *res) {
+  bool ret = false;
   typename std::vector<IndexedInterval>::const_reverse_iterator it;
   for (it = es.rbegin(); it != es.rend(); ++it) {
-    /* use all greater or equal ends */
+    /* use all ends that are bigger
+     *
+     * query: 3
+     * data: [1,2] [1,3] [1,4] [1,5]
+     *        no    no    yes   yes
+     *
+     * */
     if (it->iv.e <= b) {
       break;
     }
     ret = true;
     if (res) {
       /* mark result */
-      (*res)[it->srcIdx] = true;
+      (*res).push_back(it->srcIdx);
     }
   }
   return ret;
@@ -78,7 +98,7 @@ bool IntervalTree<T>::IndexedInterval::findGreaterPoints(
 template<typename T>
 bool IntervalTree<T>::IndexedInterval::findRightOv(
     const std::vector<IndexedInterval> &bs, T i,
-    std::vector<char> *res) {
+    std::vector<uint32_t> *res) {
   /*
    * query i:  s---------e
    *      bs:   s------------e
@@ -94,7 +114,7 @@ bool IntervalTree<T>::IndexedInterval::findRightOv(
   typename std::vector<IndexedInterval>::const_iterator end =
       std::upper_bound(bs.begin(), bs.end(), i.e > 0 ? i.e - 1 : 0, IndexedInterval::CmpStart());
   for (; res != NULL && beg != end; ++beg) {
-    res->at(beg->srcIdx) = true;
+    res->push_back(beg->srcIdx);
   }
   return beg != end;
 }
@@ -167,29 +187,32 @@ bool IntervalTree<T>::ItNode::overlaps(uint64_t p) const {
 /*----------------------------------------------------------------------------*/
 
 template <typename T>
-bool IntervalTree<T>::ItNode::getOverlaps(uint64_t p, std::vector<char> *res, uint32_t depth) const {
+bool IntervalTree<T>::ItNode::getOverlaps(uint64_t p, std::vector<uint32_t> *res, uint32_t depth) const {
   bool ret = false;
-  //printf("%*s (%lu)\n", depth, "", m_center);
+  DEBUG_OUT("%*s (%lu)\n", depth, "", m_center);
   /* point is outside of node */
   if (p < m_center && m_s != NULL) {
-    //printf("%*s s\n", depth, "");
-    ret = ret || m_s->getOverlaps(p, res, depth+1);
+    DEBUG_OUT("%*s s\n", depth, "");
+    ret = m_s->getOverlaps(p, res, depth+1) || ret;
   } else
   /* point is outside of node */
   if (p > m_center && m_g != NULL) {
-    //printf("%*s g\n", depth, "");
-    ret = ret || m_g->getOverlaps(p, res, depth+1);
+    DEBUG_OUT("%*s g\n", depth, "");
+    ret = m_g->getOverlaps(p, res, depth+1) || ret;
   }
-  /* check for overlap with node - bs must be smaller */
+  /* check for overlap with node - their bs must be smaller */
   if (p <= m_center && !m_bs.empty()) {
-    //printf("%*s bs\n", depth, "");
-    ret = ret || IndexedInterval::findSmallerPoints(m_bs, p, res);
+    DEBUG_OUT("%*s bs\n", depth, "");
+    ret = IndexedInterval::findSmallerPoints(m_bs, p, res) || ret;
+    for (uint32_t i = 0; i < m_bs.size(); i++) {
+      DEBUG_OUT("%*s %lu,%lu\n", depth, "", m_bs[i].iv.s, m_bs[i].iv.e);
+    }
     return ret;
   }
   /* check for overlap with node - es must be equal or greater  */
   if (p >  m_center && !m_es.empty()) {
-    //printf("%*s es\n", depth, "");
-    ret = ret || IndexedInterval::findGreaterPoints(m_es, p, res);
+    DEBUG_OUT("%*s es p(%lu) > center(%lu) : \n", depth, "", p, m_center);
+    ret = IndexedInterval::findGreaterPoints(m_es, p, res) || ret;
     return ret;
   }
   return ret;
@@ -256,22 +279,44 @@ void IntervalTree<T>::print() const {
 }
 
 /*----------------------------------------------------------------------------*/
+
 template <typename T>
-bool IntervalTree<T>::overlaps(const T &i, std::vector<char> *res) const {
+bool IntervalTree<T>::overlapsInterval(const T &i, std::vector<uint32_t> *res) const {
+  bool ret = false;
   if (res) {
-    res->resize(m_numIntervals, false);
+    res->clear();
   }
   if (m_root != NULL) {
-    m_root->getOverlaps(i.s, res, 0);
+    ret = m_root->getOverlaps(i.s, res, 0) || ret;
   }
-  IndexedInterval::findRightOv(m_bs, i, res);
+  /* skip this step, if result list isn't required overlap already found */
+  if (!res) {
+    ret = ret || IndexedInterval::findRightOv(m_bs, i, res);
+  } else {
+    ret = IndexedInterval::findRightOv(m_bs, i, res) || ret;
+  }
   //IndexedInterval::findLeftOv(m_bs, i, &res);
-  return res;
+  return ret;
+}
+
+/*----------------------------------------------------------------------------*/
+
+
+template <typename T>
+bool IntervalTree<T>::overlapsInterval_(const T &i, std::vector<char> *res) const {
+  assert(false && "broken function");
+  return false;
 }
 
 /*----------------------------------------------------------------------------*/
 template <typename T>
-bool IntervalTree<T>::overlaps(uint64_t p, std::vector<char> *res) const {
-  return overlaps(Interval(p,p+1), res);
+bool IntervalTree<T>::overlapsPoint(uint64_t p, std::vector<uint32_t> *res) const {
+  T t;
+  t.s = p;
+  t.e = p+1;
+  const bool ret = overlapsInterval(t, res);
+#ifdef DEBUG
+  //assert(ret == overlaps(p));
+#endif
+  return ret;
 }
-

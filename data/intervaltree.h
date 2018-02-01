@@ -1,8 +1,10 @@
 #ifndef INTERVALTREE_H_
 #define INTERVALTREE_H_
 
+#include "interval.h"
 #include <stdint.h>
 #include <vector>
+#include <map>
 
 /*----------------------------------------------------------------------------*/
 
@@ -13,8 +15,9 @@ public:
   ~IntervalTree();
   bool overlaps(uint64_t p) const;
 
-  bool overlaps(uint64_t p, std::vector<char> *res = NULL) const;
-  bool overlaps(const T &i, std::vector<char> *res = NULL) const;
+  bool overlapsPoint(uint64_t p, std::vector<uint32_t> *res = NULL) const;
+  bool overlapsInterval_(const T &i, std::vector<char> *res = NULL) const;
+  bool overlapsInterval(const T &i, std::vector<uint32_t> *res) const;
 
   void print() const;
   uint32_t numNodes() const     { return m_numNodes; }
@@ -40,20 +43,20 @@ private:
     };
     static std::vector<IndexedInterval> build(const std::vector<T> &);
     static bool findSmallerPoints(const std::vector<IndexedInterval> &es,
-        uint64_t e, std::vector<char> *res);
+        uint64_t e, std::vector<uint32_t> *res);
     static bool findGreaterPoints(const std::vector<IndexedInterval> &bs,
-        uint64_t s, std::vector<char> *res);
+        uint64_t s, std::vector<uint32_t> *res);
     static bool findLeftOv(const std::vector<IndexedInterval> &es,
-        T i, std::vector<char> *res);
+        T i, std::vector<uint32_t> *res);
     static bool findRightOv(const std::vector<IndexedInterval> &bs,
-        T i, std::vector<char> *res);
+        T i, std::vector<uint32_t> *res);
   };
   class ItNode {
   public:
     static ItNode* build_tree(const std::vector<T> &is);
     ~ItNode();
     bool overlaps(uint64_t p) const;
-    bool getOverlaps(uint64_t p, std::vector<char> *res, uint32_t depth) const;
+    bool getOverlaps(uint64_t p, std::vector<uint32_t> *res, uint32_t depth) const;
     void print(uint32_t lvl, const char *s) const;
     uint32_t countNodes() const;
   private:
@@ -73,4 +76,3 @@ private:
 };
 
 #endif /* INTERVALTREE_H_ */
-typedef std::map<ChrInfo::CType, uint64_t>    MapLengths;
