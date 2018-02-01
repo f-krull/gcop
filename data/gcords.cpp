@@ -222,37 +222,9 @@ void GCords::intersect(const GCords* gca, const GCords* gcb, GCords* gci) {
   return;
 }
 
-#if 0
-/*----------------------------------------------------------------------------*/
-//
-//static bool inside(const std::vector<GCord> &gc, uint64_t pos) {
-//  for (uint32_t i = 0; i < gc.size(); i++) {
-//    if (gc[i].inside(pos)) {
-//      return true;
-//    }
-//  }
-//  return false;
-//}
-
 /*----------------------------------------------------------------------------*/
 
-//static bool inside(const IntervalTree<GCord> &it, uint64_t pos) {
-//  return it.overlapsPoint(pos);
-//}
-//
-///*----------------------------------------------------------------------------*/
-//
-//static uint64_t maxBpe(const std::vector<GCord> &gc) {
-//  assert(!gc.empty());
-//  uint64_t max = gc.front().e;
-//  for (uint32_t i = 0; i < gc.size(); i++) {
-//    max = max < gc[i].e ? gc[i].e : max;
-//  }
-//  return max;
-//}
-#endif
-
-/* A and B */
+/* forbes: A and B */
 static uint64_t overlapLen(const GCord &a, const std::vector<GCord> &bs) {
   uint64_t n = 0;
   for (uint32_t i = 0; i < bs.size(); i++) {
@@ -261,7 +233,7 @@ static uint64_t overlapLen(const GCord &a, const std::vector<GCord> &bs) {
   return n;
 }
 
-/* A and !B */
+/* forbes: A and !B */
 static uint64_t intersectLen(const GCord &a, const std::vector<GCord> &bs) {
   uint64_t n = a.len();
   for (uint32_t i = 0; i < bs.size(); i++) {
@@ -276,101 +248,35 @@ static uint64_t calcAvsB(const std::vector<GCord> &ac,
                          uint64_t(*fun)(const GCord &, const std::vector<GCord>&)
                         ) {
   uint64_t res = 0;
+  std::vector<GCord> bovac;
   for (uint64_t j = 0; j < ac.size(); j++) {
     /* get all overlapping intervals */
     std::vector<uint32_t> bova_idx;
-      bit.overlapsInterval(ac[j], &bova_idx);
-      /* to collection of gcords */
-      std::vector<GCord> bovac;
-      for (uint32_t k = 0; k < bova_idx.size(); k++) {
-        bovac.push_back(bc[bova_idx[k]]);
-      }
-      /* compute length of fun */
-      res += fun(ac[j], bovac);
+    bit.overlapsInterval(ac[j], &bova_idx);
+    /* to collection of gcords */
+    bovac.clear();
+    for (uint32_t k = 0; k < bova_idx.size(); k++) {
+      bovac.push_back(bc[bova_idx[k]]);
     }
+    /* compute length of fun */
+    res += fun(ac[j], bovac);
+  }
   return res;
 }
 
+/*----------------------------------------------------------------------------*/
+
 void GCords::forbes(const GCords* gca, const GCords* gcb) {
-#if 0
-  assert(gca->chrinfo() == gcb->chrinfo());
-  //const ChrInfo & chrinfo = gca->chrinfo();
-  uint64_t r_a = 0;
-  uint64_t r_b = 0;
-  uint64_t r_c = 0;
-  uint64_t r_d = 0;
-  /* by chromosome */
-  for (uint32_t i = 0; i < gca->m_ci.chrs().size(); i++) {
-    ChrInfo::CType chr_curr = gca->m_ci.chrs()[i];
-    std::vector<GCord> ac = gca->getChr(chr_curr);
-    std::vector<GCord> bc = gcb->getChr(chr_curr);
-    if (ac.empty() && bc.empty()) {
-      continue;
-    }
-    uint64_t bp_end = std::max(maxBpe(ac), maxBpe(bc));
-    /* for each bp pos */
-    for (uint64_t j = 0; j < bp_end; j++) {
-      if (j % 100000 == 0) {
-        printf("chr %u bp: %lu   %f.4\n", chr_curr, j, float(j)/bp_end);
-      }
-      const bool inside_a = inside(ac, j);
-      const bool inside_b = inside(bc, j);
-      r_a += ( inside_a   &&   inside_b ) ? 1 : 0;
-      r_b += ( inside_a   && ! inside_b ) ? 1 : 0;
-      r_c += ( ! inside_a &&   inside_b ) ? 1 : 0;
-      r_d += ( ! inside_a && ! inside_b ) ? 1 : 0;
-    }
-  }
-  printf("a: %lu\n", r_a);
-  printf("b: %lu\n", r_b);
-  printf("c: %lu\n", r_c);
-  printf("d: %lu\n", r_d);
+/*
+ * a = A  and B
+ * b = A  and !B
+ * c = !A and B
+ * d = !B and !A
+ *
+ * forbes = a(a+b+c+d)/((a+b)(a+c))
+ *
+ */
 
-  float num = r_a * (r_a + r_b + r_c + r_d);
-  float den = (r_a*r_b)*(r_a*r_c);
-  printf("forbes: %f\n", den > 0 ? num/den : 0);
-#elif 0
-  assert(gca->chrinfo() == gcb->chrinfo());
-  const ChrInfo & chrinfo = gca->chrinfo();
-  uint64_t r_a = 0;
-  uint64_t r_b = 0;
-  uint64_t r_c = 0;
-  uint64_t r_d = 0;
-  /* by chromosome */
-  for (uint32_t i = 0; i < gca->m_ci.chrs().size(); i++) {
-    ChrInfo::CType chr_curr = gca->m_ci.chrs()[i];
-    std::vector<GCord> ac = gca->getChr(chr_curr);
-    std::vector<GCord> bc = gcb->getChr(chr_curr);
-    if (ac.empty() && bc.empty()) {
-      continue;
-    }
-    IntervalTree<GCord> ait(ac);
-    IntervalTree<GCord> bit(bc);
-    uint64_t bp_end = std::max(maxBpe(ac), maxBpe(bc));
-    /* for each bp pos */
-    for (uint64_t j = 0; j < bp_end; j++) {
-      if (j % 100000 == 0) {
-        printf("chr %u bp: %lu   %f.4\n", chr_curr, j, float(j)/bp_end);
-      }
-      const bool inside_a = inside(ait, j);
-      const bool inside_b = inside(bit, j);
-      r_a += ( inside_a   &&   inside_b ) ? 1 : 0;
-      r_b += ( inside_a   && ! inside_b ) ? 1 : 0;
-      r_c += ( ! inside_a &&   inside_b ) ? 1 : 0;
-      r_d += ( ! inside_a && ! inside_b ) ? 1 : 0;
-    }
-    assert(chrinfo.chrlen(chr_curr) > bp_end);
-    r_d += chrinfo.chrlen(chr_curr) - bp_end;
-  }
-  printf("a: %lu\n", r_a);
-  printf("b: %lu\n", r_b);
-  printf("c: %lu\n", r_c);
-  printf("d: %lu\n", r_d);
-
-  float num = r_a * (r_a + r_b + r_c + r_d);
-  float den = (r_a*r_b)*(r_a*r_c);
-  printf("forbes: %f\n", den > 0 ? num/den : 0);
-#else
   assert(gca->chrinfo() == gcb->chrinfo());
   const ChrInfo & chrinfo = gca->chrinfo();
   uint64_t r_a = 0;
@@ -401,40 +307,5 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
   float num = r_a * (r_a + r_b + r_c + r_d);
   float den = (r_a*r_b)*(r_a*r_c);
   printf("forbes: %f\n", den > 0 ? num/den : 0);
-#endif
 }
 
-/*
- * a = A  and B
- * b = A  and !B
- * c = !A and B
- * d = !B and !A
- *
- * forbes = a(a+b+c+d)/((a+b)(a+c))
- *
- *
- *
- *
- *
- *
- *
- * a: 41
- * b: 957
- * c: 150099
- * d: 11182193
- * forbes: 0.001924
- * took 140.174 seconds
- * a: 41
- * b: 957
- * c: 150099
- * d: 249099524
- * forbes: 0.042322
- * took 6.663 seconds
- * a: 41
- * b: 958
- * c: 150099
- * d: 249099523
- * forbes: 0.042277
- * took 0.015 seconds
- *
- */
