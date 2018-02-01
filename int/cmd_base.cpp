@@ -236,6 +236,35 @@ void CmdLoadChrInfo::executeChild(const char *, GcObjSpace *os) {
   os->addObj(getParam(PARAM_DST_STR)->valStr(), gci);
 }
 
+/*----------------------------------------------------------------------------*/
+
+class CmdForbes : public GcCommand {
+public:
+  CmdForbes() {
+    addParam(GcCmdParam(PARAM_SRCA_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_SRCB_STR, GcCmdParam::PARAM_STRING, ""));
+  }
+  const char* name() const {
+    return "forbes";
+  }
+  static std::string PARAM_SRCA_STR;
+  static std::string PARAM_SRCB_STR;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdForbes::PARAM_SRCA_STR = "srca";
+std::string CmdForbes::PARAM_SRCB_STR = "srcb";
+
+#include <stdio.h>
+#include "../data/gcords.h"
+void CmdForbes::executeChild(const char *, GcObjSpace *os) {
+  const char *srca = getParam(PARAM_SRCA_STR)->valStr().c_str();
+  const char *srcb = getParam(PARAM_SRCB_STR)->valStr().c_str();
+  GcObjGCords *gca = os->getObj<GcObjGCords>(srca);
+  GcObjGCords *gcb = os->getObj<GcObjGCords>(srcb);
+  GCords::forbes(gca->d(), gcb->d());
+}
 
 /*----------------------------------------------------------------------------*/
 
@@ -247,4 +276,5 @@ void cmd_base_add(ICmdSink *cs) {
   cs->addCmd(new CmdLoadGCords);
   cs->addCmd(new CmdIntersectGc);
   cs->addCmd(new CmdLoadChrInfo);
+  cs->addCmd(new CmdForbes);
 }
