@@ -1,9 +1,21 @@
 #include "intervaltree.cpp"
 #include "interval.h"
+#include <set>
 
+/*----------------------------------------------------------------------------*/
+static void test_interval_end() {
+  std::vector<Interval> is;
+  is.push_back(Interval(1,3));
+  IntervalTree<Interval> it(is);
+  assert(it.overlaps(3) == false);
+  assert(it.overlapsPoint(3) == false);
+  std::vector<uint32_t> res;
+  assert(it.overlapsPoint(3, &res) == false);
+}
 /*----------------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
+  test_interval_end();
   std::vector<Interval> is;
   is.push_back(Interval( 5, 10));
   is.push_back(Interval(15, 25));
@@ -39,21 +51,18 @@ int main(int argc, char **argv) {
     res.push_back(std::vector<Interval>());
     for (uint32_t i = 0; i < queries.size(); i++) {
       printf("query: (%lu)\n", queries[i]);
-      std::vector<char> ov;
-      it.overlaps(queries[i], &ov);
+      std::vector<uint32_t> ov;
+      it.overlapsPoint(queries[i], &ov);
       printf("ov size %lu\n", ov.size());
       printf("is size %lu\n", is.size());
       fflush(stdout);
-      assert(ov.size() == is.size());
       uint32_t residx = 0;
+      std::set<Interval> resset(res[i].begin(), res[i].end());
       for (uint32_t j = 0; j < ov.size(); j++) {
-        if (ov[j] == false) {
-          continue;
-        }
-        printf("%u,%u   result: (%lu/%lu) ", i,j, is[j].s, is[j].e);
-        printf("expected: (%lu/%lu)\n", res.at(i).at(residx).s, res.at(i).at(residx).e);
+        printf("%u,%u   result: (%lu/%lu) ", i,ov[j], is[ov[j]].s, is[ov[j]].e);
+        printf("expected: %s\n", resset.erase(Interval(is[ov[j]].s, is[ov[j]].e)) ? "yes" : "no");
         fflush(stdout);
-        assert(is[j] == res.at(i).at(residx));
+        //assert(is[ov[j]] == res.at(i).at(residx));
         residx++;
       }
       printf("\n");
@@ -69,14 +78,10 @@ int main(int argc, char **argv) {
     queries.push_back(Interval(0,10));
     for (uint32_t i = 0; i < queries.size(); i++) {
       printf("query: (%lu/%lu)\n", queries[i].s, queries[i].e);
-      std::vector<char> ov;
-      it.overlaps(queries[i], &ov);
-      assert(ov.size() == is.size());
+      std::vector<uint32_t> ov;
+      it.overlapsInterval(queries[i], &ov);
       for (uint32_t j = 0; j < ov.size(); j++) {
-        if (ov[j] == false) {
-          continue;
-        }
-        printf("   result: (%lu/%lu)", is[j].s, is[j].e);
+        printf("   result: (%lu/%lu)", is[ov[j]].s, is[ov[j]].e);
       }
       printf("\n");
     }
