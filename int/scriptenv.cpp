@@ -43,7 +43,7 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
   assert(ce != s);
   std::string cmd_str;
   cmd_str.assign(s, ce);
-  printf("executing: %3u %s %s%s", line, cmd_str.c_str(),
+  printf("(%u) exec: %s %s%s", line, cmd_str.c_str(),
       ce, strlen(ce)>0 && ce[strlen(ce)-1]=='\n' ? "" : "\n");
   GcCommand *cmd = m_os.getCmd(cmd_str.c_str());
   if (cmd == NULL) {
@@ -53,7 +53,7 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
   Timer t;
   cmd->execute(ce, &m_os);
   t.stop();
-  printf("took %.3f seconds\n", t.getSec());
+  printf("(%u) done - took %.3f seconds\n", line, t.getSec());
 }
 
 /*----------------------------------------------------------------------------*/
@@ -61,7 +61,6 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
 void GcScriptEnv::addCmd(GcCommand *cmd) {
   m_os.addCmd(cmd);
 }
-
 
 /*----------------------------------------------------------------------------*/
 
