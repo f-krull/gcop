@@ -13,8 +13,11 @@ GCord::GCord(std::vector<FieldType> fts) :
     Interval(0, 0), chr(ChrInfo::CTYPE_UNDEFINED) {
   m_d.reserve(fts.size());
   for (uint32_t i = 0; i < fts.size(); i++) {
-    //m_d.push_back(FieldValue(fts[i]));
+#if __cplusplus >= 201103L
     m_d.emplace_back(fts[i]);
+#else
+    m_d.push_back(FieldValue(fts[i]));
+#endif
   }
 }
 
@@ -151,7 +154,11 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const Ch
     if (lineno <= skip) {
       continue;
     }
+#if __cplusplus >= 201103L
     m_d.emplace_back(ffmt.types());
+#else
+    m_d.push_back(GCord(ffmt.types()));
+#endif
     GCord &r = m_d.back();
     {
       /* change line end to delimiter to simplify parsing */
@@ -167,7 +174,6 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const Ch
     if (!has_end) {
       r.e = r.s + 1;
     }
-    //m_d.push_back(r);
   }
   f.close();
   printf("read %lu genomic coordinate%s\n", m_d.size(), m_d.size() > 1 ? "s" : "");
