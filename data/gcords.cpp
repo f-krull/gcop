@@ -238,7 +238,7 @@ static uint64_t overlapLen(const GCord &a, const std::vector<GCord> &bs) {
   }
   return n;
 }
-
+#if 0
 /* forbes: A and !B */
 static uint64_t intersectLen(const GCord &a, const std::vector<GCord> &bs) {
   uint64_t n = a.len();
@@ -247,6 +247,7 @@ static uint64_t intersectLen(const GCord &a, const std::vector<GCord> &bs) {
   }
   return n;
 }
+#endif
 
 static uint64_t calcAvsB(const std::vector<GCord> &ac,
                          const std::vector<GCord> &bc,
@@ -270,25 +271,26 @@ static uint64_t calcAvsB(const std::vector<GCord> &ac,
   return res;
 }
 
+static uint64_t calcSum(const std::vector<GCord> &ac) {
+  uint64_t sum = 0;
+  for (uint32_t i = 0; i < ac.size(); i++) {
+    sum += ac[i].len();
+  }
+  return sum;
+}
+
 /*----------------------------------------------------------------------------*/
 
 void GCords::forbes(const GCords* gca, const GCords* gcb) {
-/*
- * a = A  and B
- * b = A  and !B
- * c = !A and B
- * d = !B and !A
- *
- * forbes = a(a+b+c+d)/((a+b)(a+c))
- *
- */
-
+ /*
+  * forbes = N * |A and B| / ( |A| * |B| )
+  */
   assert(gca->chrinfo() == gcb->chrinfo());
   const ChrInfo & chrinfo = gca->chrinfo();
-  uint64_t r_a = 0;
-  uint64_t r_b = 0;
-  uint64_t r_c = 0;
-  uint64_t r_d = 0;
+  uint64_t n_ab = 0;
+  uint64_t n_a = 0;
+  uint64_t n_b = 0;
+  uint64_t n_c = 0;
   /* by chromosome */
   for (uint32_t i = 0; i < gca->m_ci.chrs().size(); i++) {
     ChrInfo::CType chr_curr = gca->m_ci.chrs()[i];
@@ -298,20 +300,18 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
     if (ac.empty() && bc.empty()) {
       continue;
     }
-    IntervalTree<GCord> ait(ac);
     IntervalTree<GCord> bit(bc);
-    r_a += calcAvsB(ac, bc, bit, overlapLen);
-    r_b += calcAvsB(ac, bc, bit, intersectLen);
-    r_c += calcAvsB(bc, ac, ait, intersectLen);
-    r_d += chrinfo.chrlen(chr_curr) - r_a - r_b - r_c;
+    n_ab += calcAvsB(ac, bc, bit, overlapLen);
+    n_a += calcSum(ac);
+    n_b += calcSum(bc);
+    n_c += chrinfo.chrlen(chr_curr);
   }
-  printf("a: %lu\n", r_a);
-  printf("b: %lu\n", r_b);
-  printf("c: %lu\n", r_c);
-  printf("d: %lu\n", r_d);
+  printf("ab: %lu\n", n_ab);
+  printf("a: %lu\n", n_a);
+  printf("b: %lu\n", n_b);
 
-  float num = r_a * (r_a + r_b + r_c + r_d);
-  float den = (r_a*r_b)*(r_a*r_c);
+  float num = n_c * n_ab;
+  float den = n_a * n_b;
   printf("forbes: %f\n", den > 0 ? num/den : 0);
 }
 
