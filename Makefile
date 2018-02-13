@@ -22,7 +22,7 @@ CXXFLAGS ?= -std=c++11 -Ofast -Wall -g2
 
 all: gcop
 
-libgcop.a:
+libgcop.a: $(OBJECTS)
 	$(AR) rcs libgcop.a $(OBJECTS)
 
 gcop: $(OBJECTS) main.o
@@ -35,6 +35,6 @@ clean:
 	$(RM) gcop intervaltree_test
 	$(RM) */*.o *.o
 	$(RM) libgcop.a
-	
+
 test:
 	$(CXX) -DDEBUG -g2 -Wall data/intervaltree_test.cpp -o intervaltree_test
