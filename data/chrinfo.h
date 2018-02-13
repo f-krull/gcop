@@ -23,7 +23,8 @@ public:
 
   void read(const char *fn);
   uint64_t chrlen(CType t) const;
-  CType str2type(const char *str) const; /* str with "chr" prefix */
+  CType str2type(const char *str) const;       /* str with or without "chr" pfx */
+  CType str2typeStrict(const char *str) const; /* str with "chr" prefix */
   const std::vector<CType> & chrs() const;
   const char *ctype2str(CType t) const;
   void print() const;

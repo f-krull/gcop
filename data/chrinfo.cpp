@@ -127,9 +127,26 @@ const char * ChrInfo::ctype2str(CType t) const {
 /*----------------------------------------------------------------------------*/
 
 ChrInfo::CType ChrInfo::str2type(const char *str) const {
+  /* no chr prefix? */
+  if (str[0] == 'c' || str[0] == '\0') {
+    return str2typeStrict(str);
+  }
+  CType ret;
+  const char chrpfx[] = "chr";
+  char * sc = new char[strlen(chrpfx)+strlen(str)+1];
+  strcpy(sc, chrpfx);
+  strcat(sc, str);
+  ret = str2typeStrict(sc);
+  delete [] sc;
+  return ret;
+}
+
+/*----------------------------------------------------------------------------*/
+
+ChrInfo::CType ChrInfo::str2typeStrict(const char *str) const {
   const ChrInfoPriv::MapStr2type::const_iterator it = m->str2type.find(str);
   if (it == m->str2type.end()) {
-    fprintf(stderr, "error: chromosome %s not defined\n", str);
+    fprintf(stderr, "error: chromosome \'%s\' not defined\n", str);
     print();
     exit(1);
   }
