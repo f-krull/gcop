@@ -297,6 +297,7 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
     printf("%s\n", gca->m_ci.ctype2str(chr_curr));
     std::vector<GCord> ac = gca->getChr(chr_curr);
     std::vector<GCord> bc = gcb->getChr(chr_curr);
+    n_c += chrinfo.chrlen(chr_curr);
     if (ac.empty() && bc.empty()) {
       continue;
     }
@@ -304,7 +305,6 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
     n_ab += calcAvsB(ac, bc, bit, overlapLen);
     n_a += calcSum(ac);
     n_b += calcSum(bc);
-    n_c += chrinfo.chrlen(chr_curr);
   }
   printf("ab: %lu\n", n_ab);
   printf("a: %lu\n", n_a);
@@ -312,6 +312,7 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
 
   float num = n_c * n_ab;
   float den = n_a * n_b;
-  printf("forbes: %f\n", den > 0 ? num/den : 0);
+  float ret = den > 0 ? num/den : 0;
+  printf("forbes: %f\n", ret);
 }
 

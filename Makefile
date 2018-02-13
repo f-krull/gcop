@@ -22,6 +22,10 @@ CXXFLAGS ?= -std=c++11 -Ofast -Wall -g2
 
 all: gcop
 
+
+disreg: libgcop.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -L. -lgcop -lz -o prj/disreg/disreg
+
 libgcop.a: $(OBJECTS)
 	$(AR) rcs libgcop.a $(OBJECTS)
 

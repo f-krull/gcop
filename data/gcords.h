@@ -39,13 +39,11 @@ public:
 
   static void intersect(const GCords* gca, const GCords* gcb, GCords* gci);
   static void forbes(const GCords* gca, const GCords* gcb);
+  const ChrInfo & chrinfo() const {return m_ci;}
 
 protected:
   std::vector<GCord> m_d;
-  const ChrInfo & chrinfo() const {return m_ci;}
   ChrInfo m_ci;
-
-  void addGCord(const GCord &c);
 };
 
 
