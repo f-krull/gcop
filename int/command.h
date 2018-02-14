@@ -11,6 +11,7 @@ class GcObjSpace;
 
 class GcCommand {
 public:
+  GcCommand() {};
   virtual ~GcCommand() {};
   virtual const char* name() const = 0;
   void execute(const char *str, GcObjSpace *os);
@@ -24,6 +25,8 @@ protected:
   static const std::string STR_ASSIGN;
 
   std::map<std::string, GcCmdParam> m_params;
+private:
+  GcCommand(const GcCommand &o);
 };
 
 
