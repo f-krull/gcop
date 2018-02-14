@@ -36,6 +36,7 @@ public:
   const std::vector<GCord> & cdata() const {return m_d;}
   std::vector<GCord> & data() {return m_d;}
   std::vector<GCord> getChr(ChrInfo::CType) const;
+  void expand(uint64_t len);
 
   static void intersect(const GCords* gca, const GCords* gcb, GCords* gci);
   static void forbes(const GCords* gca, const GCords* gcb);

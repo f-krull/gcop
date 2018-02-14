@@ -316,3 +316,13 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
   printf("forbes: %f\n", ret);
 }
 
+/*----------------------------------------------------------------------------*/
+
+void GCords::expand(uint64_t len) {
+  for (uint32_t i = 0; i < data().size(); i++) {
+    GCord &g = data()[i];
+    const uint64_t chrlen = chrinfo().chrlen(g.chr);
+    g.s = (g.s > len) ? g.s - len : 0;
+    g.e = std::min(chrlen, g.e + len);
+  }
+}
