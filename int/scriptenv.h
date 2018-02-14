@@ -13,12 +13,13 @@
 class GcScriptEnv : public ICmdSink, public IObjSink {
 public:
   GcScriptEnv();
-  void run(FILE* f);
+  void runFile(const char * filename = NULL); /* fn=NULL for stdin */
   void addCmd(GcCommand *cmd);
   void addObj(const char *name, GcObj *obj);
 private:
-  void run(const char *s, uint32_t line);
+  void runLine(const char *s, uint32_t line);
   GcObjSpace m_os;
+  void runFile(FILE* f);
 };
 
 #endif /* INT_SCRIPTENV_H_ */

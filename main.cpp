@@ -8,17 +8,7 @@ int main(int argc, char **argv) {
    if (argc > 1) {
      fnscript = argv[1];
    }
-   FILE *f = stdin;
-   if (fnscript != NULL) {
-     f = fopen(fnscript, "r");
-   }
-   if (f == NULL) {
-     fprintf(stderr, "error: cannot open file '%s'\n", fnscript ? fnscript : "stdin");
-     exit(1);
-   }
    GcScriptEnv e;
-   e.run(f);
-   if (fnscript) {
-     fclose(f);
-   }
+   e.runFile(fnscript);
+   return(0);
 }

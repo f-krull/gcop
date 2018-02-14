@@ -17,7 +17,24 @@ GcScriptEnv::GcScriptEnv() {
 
 /*----------------------------------------------------------------------------*/
 
-void GcScriptEnv::run(const char *s, uint32_t line) {
+void GcScriptEnv::runFile(const char *fnscript) {
+  FILE *f = stdin;
+  if (fnscript != NULL) {
+    f = fopen(fnscript, "r");
+  }
+  if (f == NULL) {
+    fprintf(stderr, "error: cannot open file '%s'\n", fnscript ? fnscript : "stdin");
+    exit(1);
+  };
+  runFile(f);
+  if (fnscript) {
+    fclose(f);
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GcScriptEnv::runLine(const char *s, uint32_t linenum) {
   /* skip spaces */
   while (s[0] == ' ' || s[0] == '\t' || s[0] == '\n') {
     s++;
@@ -36,24 +53,24 @@ void GcScriptEnv::run(const char *s, uint32_t line) {
     ce = strchr(s, '\n');
   }
   if (ce == NULL) {
-    fprintf(stderr, "error: command not found - line %u:\n", line);
+    fprintf(stderr, "error: command not found - line %u:\n", linenum);
     fprintf(stderr, "%s\n", s);
     exit(1);
   }
   assert(ce != s);
   std::string cmd_str;
   cmd_str.assign(s, ce);
-  printf("(%u) exec: %s %s%s", line, cmd_str.c_str(),
+  printf("(%u) exec: %s %s%s", linenum, cmd_str.c_str(),
       ce, strlen(ce)>0 && ce[strlen(ce)-1]=='\n' ? "" : "\n");
   GcCommand *cmd = m_os.getCmd(cmd_str.c_str());
   if (cmd == NULL) {
-    fprintf(stderr, "error: command '%s' not found - line %u:\n", cmd_str.c_str(), line);
+    fprintf(stderr, "error: command '%s' not found - line %u:\n", cmd_str.c_str(), linenum);
     exit(1);
   }
   Timer t;
   cmd->execute(ce, &m_os);
   t.stop();
-  printf("(%u) done - took %.3f seconds\n", line, t.getSec());
+  printf("(%u) done - took %.3f seconds\n", linenum, t.getSec());
 }
 
 /*----------------------------------------------------------------------------*/
@@ -70,11 +87,11 @@ void GcScriptEnv::addObj(const char *name, GcObj *obj) {
 
 /*----------------------------------------------------------------------------*/
 
-void GcScriptEnv::run(FILE *f) {
+void GcScriptEnv::runFile(FILE *f) {
   char buffer[1024];
   uint32_t line = 1;
   while (fgets(buffer, sizeof(buffer) - 1, f) != NULL) {
-    run(buffer, line);
+    runLine(buffer, line);
     line++;
   }
 }
