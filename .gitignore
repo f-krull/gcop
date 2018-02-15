@@ -6,7 +6,7 @@ gcop
 *.o
 libgcop.a
 
-prj/*/*
-!prj/*/*.cpp
-!prj/*/*.h
+prj/*/*.o
+bin/*
+
 

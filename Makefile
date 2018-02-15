@@ -24,21 +24,21 @@ all: gcop
 
 
 disreg: libgcop.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -L. -lgcop -lz -o prj/disreg/disreg
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -L. -lgcop -lz -o bin/disreg
 
 libgcop.a: $(OBJECTS)
 	$(AR) rcs libgcop.a $(OBJECTS)
 
 gcop: $(OBJECTS) main.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) main.o -lz -o gcop
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) main.o -lz -o bin/gcop
 
 %.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	$(RM) gcop intervaltree_test
+	$(RM) bin/*
 	$(RM) */*.o *.o
 	$(RM) libgcop.a
 
 test:
-	$(CXX) -DDEBUG -g2 -Wall data/intervaltree_test.cpp -o intervaltree_test
+	$(CXX) -DDEBUG -g2 -Wall data/intervaltree_test.cpp -o bin/intervaltree_test
