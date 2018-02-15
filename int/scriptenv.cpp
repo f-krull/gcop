@@ -88,39 +88,23 @@ void GcScriptEnv::addObj(const char *name, GcObj *obj) {
 /*----------------------------------------------------------------------------*/
 
 void GcScriptEnv::runFile(FILE *f) {
+  const char line_cont_char = '\\';
   char buffer[1024];
-  uint32_t line = 1;
-  while (fgets(buffer, sizeof(buffer) - 1, f) != NULL) {
-    runLine(buffer, line);
+  uint32_t len = 0;
+  uint32_t line = 0;
+  while (fgets(&buffer[len], sizeof(buffer) - len - 1, f) != NULL) {
     line++;
+    len = strlen(buffer);
+    /* do we see a line-continuation character? */
+    if (len == 0 || buffer[len-1] != line_cont_char) {
+      /* no - execute line */
+      runLine(buffer, line);
+      /* reset buffer start */
+      len = 0;
+      continue;
+    }
+    /* yes - skip '\' and append to buffer on next iteration */
+    assert(len && buffer[len] == line_cont_char);
+    len -= 1;
   }
 }
-
-#if 0
-
-#include <string>
-#include <stdint.h>
-class GcScriptInfo {
-public:
-  GcScriptInfo(const std::string &fn, uint32_t line) :
-      m_filename(fn), m_line(line) {}
-
-private:
-  std::string m_filename;
-  uint32_t    m_line;
-};
-
-
-class GcObjSpace;
-
-
-
-/*
- * a = load_snp file=fn format=1..2.3 skip=1
- * b = load_seg file=fn format=1..2.3 skip=1
- * b = intersect a b
- *
- *
- * */
-#endif
-
