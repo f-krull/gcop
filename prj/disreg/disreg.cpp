@@ -241,10 +241,9 @@ static std::vector<std::vector<float>> disreg(const StrList &l1, const StrList &
     GCordsInfoCache g1inf(&g1);
     for (uint32_t j = 0; j < l2.get().size(); j++) {
       GCords g2;
-
-      GCordsInfoCache g2inf(&g2);
       g2.read(l2.get()[j].c_str(), fmt2, 0, &hg19);
-      //g2.expand(25000);
+      g2.expand(25000);
+      GCordsInfoCache g2inf(&g2);
       mat[i][j] = forbes(g2inf, g1inf);
     }
 #endif
