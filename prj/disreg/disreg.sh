@@ -18,13 +18,14 @@ load_strlist \
 
 disreg list1=list_dnase fmt1=cse \
        list2=list_gwas  fmt2=...........cs \
-       expand2=25000
+       expand2=25000 \
+       output=/tmp/disreg_matrix.txt
 " \
   | "$GCOPDIR"/bin/disreg > /tmp/log
 
 
 time Rscript <(echo '
-t <- read.table("/tmp/mat.txt", header=T, row.names=1)
+t <- read.table("/tmp/disreg_matrix.txt", header=T, row.names=1)
 t <- as.matrix(t)
 max_val <- 8
 t[which(t>max_val)] <- max_val

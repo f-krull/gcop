@@ -94,7 +94,8 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
 /*----------------------------------------------------------------------------*/
 
 static std::vector<std::vector<float>> disreg(const StrList &l1,
-    const StrList &l2, const char *fmt1, const char *fmt2, uint64_t expand2) {
+    const StrList &l2, const char *fmt1, const char *fmt2, uint64_t expand2,
+    const char *outfn) {
   ChrInfoHg19 hg19;
   std::vector<std::vector<float>> mat;
   mat.resize(l1.get().size());
@@ -113,7 +114,7 @@ static std::vector<std::vector<float>> disreg(const StrList &l1,
   }
 
   /* write matrix */
-  FILE *f = fopen("/tmp/mat.txt", "w");
+  FILE *f = fopen(outfn, "w");
   assert(f);
   /* header */
   for (uint32_t j = 0; j < l2.get().size(); j++) {
@@ -177,6 +178,7 @@ public:
     addParam(GcCmdParam(PARAM_FORMAT1_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_FORMAT2_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_EXPAND2_INT, GcCmdParam::PARAM_INT, "0"));
+    addParam(GcCmdParam(PARAM_OUTPUT_STR, GcCmdParam::PARAM_STRING, "/tmp/disreg_mat.txt"));
   }
   const char* name() const {
     return "disreg";
@@ -186,6 +188,7 @@ public:
   static std::string PARAM_FORMAT1_STR;
   static std::string PARAM_FORMAT2_STR;
   static std::string PARAM_EXPAND2_INT;
+  static std::string PARAM_OUTPUT_STR;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
@@ -195,14 +198,16 @@ std::string CmdDisReg::PARAM_LIST2_STR  = "list2";
 std::string CmdDisReg::PARAM_FORMAT1_STR  = "fmt1";
 std::string CmdDisReg::PARAM_FORMAT2_STR  = "fmt2";
 std::string CmdDisReg::PARAM_EXPAND2_INT  = "expand2";
+std::string CmdDisReg::PARAM_OUTPUT_STR   = "output";
 
 void CmdDisReg::executeChild(const char *, GcObjSpace *os) {
   GcObjStrList *gcl1 = os->getObj<GcObjStrList>(getParam(PARAM_LIST1_STR)->valStr().c_str());
   GcObjStrList *gcl2 = os->getObj<GcObjStrList>(getParam(PARAM_LIST2_STR)->valStr().c_str());
-  const char *fmt1 = getParam(PARAM_FORMAT1_STR)->valStr().c_str();
-  const char *fmt2 = getParam(PARAM_FORMAT2_STR)->valStr().c_str();
   const uint64_t expand2 = getParam(PARAM_EXPAND2_INT)->valInt();
-  disreg(*gcl1->d(), *gcl2->d(), fmt1, fmt2, expand2);
+  const char *fmt1 =  getParam(PARAM_FORMAT1_STR)->valStr().c_str();
+  const char *fmt2 =  getParam(PARAM_FORMAT2_STR)->valStr().c_str();
+  const char *outfn = getParam(PARAM_OUTPUT_STR)->valStr().c_str();
+  disreg(*gcl1->d(), *gcl2->d(), fmt1, fmt2, expand2, outfn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -218,7 +223,7 @@ int main(int argc, char **argv) {
 
     l1.readList(fnl1);
     l2.readList(fnl2);
-    disreg(l1, l2, "cse", "...........cs", expand2);
+    disreg(l1, l2, "cse", "...........cs", expand2, "/tmp/disreg_mat.txt");
   } else {
     GcScriptEnv e;
     e.addCmd(new CmdLoadStrList);
