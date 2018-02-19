@@ -319,6 +319,9 @@ void GCords::forbes(const GCords* gca, const GCords* gcb) {
 /*----------------------------------------------------------------------------*/
 
 void GCords::expand(uint64_t len) {
+  if (!len) {
+    return;
+  }
   for (uint32_t i = 0; i < data().size(); i++) {
     GCord &g = data()[i];
     const uint64_t chrlen = chrinfo().chrlen(g.chr);

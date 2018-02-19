@@ -94,7 +94,7 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
 /*----------------------------------------------------------------------------*/
 
 static std::vector<std::vector<float>> disreg(const StrList &l1,
-    const StrList &l2, const char *fmt1, const char *fmt2) {
+    const StrList &l2, const char *fmt1, const char *fmt2, uint64_t expand2) {
   ChrInfoHg19 hg19;
   std::vector<std::vector<float>> mat;
   mat.resize(l1.get().size());
@@ -106,7 +106,7 @@ static std::vector<std::vector<float>> disreg(const StrList &l1,
     for (uint32_t j = 0; j < l2.get().size(); j++) {
       GCords g2;
       g2.read(l2.get()[j].c_str(), fmt2, 0, &hg19);
-      g2.expand(25000);
+      g2.expand(expand2);
       GCordsInfoCache g2inf(&g2);
       mat[i][j] = forbes(g2inf, g1inf);
     }
@@ -176,6 +176,7 @@ public:
     addParam(GcCmdParam(PARAM_LIST2_STR, GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_FORMAT1_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_FORMAT2_STR, GcCmdParam::PARAM_STRING, "cse"));
+    addParam(GcCmdParam(PARAM_EXPAND2_INT, GcCmdParam::PARAM_INT, "0"));
   }
   const char* name() const {
     return "disreg";
@@ -184,6 +185,7 @@ public:
   static std::string PARAM_LIST2_STR;
   static std::string PARAM_FORMAT1_STR;
   static std::string PARAM_FORMAT2_STR;
+  static std::string PARAM_EXPAND2_INT;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
@@ -192,28 +194,31 @@ std::string CmdDisReg::PARAM_LIST1_STR  = "list1";
 std::string CmdDisReg::PARAM_LIST2_STR  = "list2";
 std::string CmdDisReg::PARAM_FORMAT1_STR  = "fmt1";
 std::string CmdDisReg::PARAM_FORMAT2_STR  = "fmt2";
+std::string CmdDisReg::PARAM_EXPAND2_INT  = "expand2";
 
 void CmdDisReg::executeChild(const char *, GcObjSpace *os) {
   GcObjStrList *gcl1 = os->getObj<GcObjStrList>(getParam(PARAM_LIST1_STR)->valStr().c_str());
   GcObjStrList *gcl2 = os->getObj<GcObjStrList>(getParam(PARAM_LIST2_STR)->valStr().c_str());
   const char *fmt1 = getParam(PARAM_FORMAT1_STR)->valStr().c_str();
   const char *fmt2 = getParam(PARAM_FORMAT2_STR)->valStr().c_str();
-  disreg(*gcl1->d(), *gcl2->d(), fmt1, fmt2);
+  const uint64_t expand2 = getParam(PARAM_EXPAND2_INT)->valInt();
+  disreg(*gcl1->d(), *gcl2->d(), fmt1, fmt2, expand2);
 }
 
 /*----------------------------------------------------------------------------*/
 
 #include "../../int/scriptenv.h"
 int main(int argc, char **argv) {
-  if (argc == 3) {
+  if (argc == 4) {
     const char* fnl1 = argv[1];
     const char* fnl2 = argv[2];
+    const uint64_t expand2 = atoll(argv[3]);
     StrList l1;
     StrList l2;
 
     l1.readList(fnl1);
     l2.readList(fnl2);
-    disreg(l1, l2, "cse", "...........cs");
+    disreg(l1, l2, "cse", "...........cs", expand2);
   } else {
     GcScriptEnv e;
     e.addCmd(new CmdLoadStrList);

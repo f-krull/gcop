@@ -17,7 +17,8 @@ load_strlist \
    file=${GCOPDIR}/testdata/gwascat/list.txt
 
 disreg list1=list_dnase fmt1=cse \
-       list2=list_gwas  fmt2=...........cs
+       list2=list_gwas  fmt2=...........cs \
+       expand2=25000
 " \
   | "$GCOPDIR"/bin/disreg > /tmp/log
 
