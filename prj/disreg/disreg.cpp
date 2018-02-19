@@ -5,9 +5,9 @@
 
 /*----------------------------------------------------------------------------*/
 
+/* cut before last "." */
 static std::string removeExtension(const std::string & filename) {
    std::string res = filename;
-   // cut before last "."
    size_t pos_p = filename.find_last_of('.');
    if (pos_p != filename.npos) {
       res = res.substr(0, pos_p);
@@ -17,9 +17,9 @@ static std::string removeExtension(const std::string & filename) {
 
 /*----------------------------------------------------------------------------*/
 
+/* cut at last "/" */
 static std::string removePath(const std::string & filename) {
    std::string res = filename;
-   // cut at last "/"
    size_t pos_p = filename.find_last_of('/');
    if (pos_p != filename.npos && (pos_p + 1) < res.size()) {
       res = res.substr((pos_p + 1), res.size() - (pos_p + 1));
@@ -59,7 +59,10 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
  /*
   * forbes = N * |A and B| / ( |A| * |B| )
   */
-  //assert(g1inf.gcords()->chrinfo() == g2inf.gcords()->chrinfo());
+#if 0
+  /* very expensive! should be checked higher up */
+  assert(g1inf.gcords()->chrinfo() == g2inf.gcords()->chrinfo());
+#endif
   const ChrInfo & chrinfo = g1inf.gcords()->chrinfo();
   uint64_t n_ab = 0; /* |A and B| */
   uint64_t n_a = 0; /* |A| */
@@ -178,7 +181,7 @@ public:
     addParam(GcCmdParam(PARAM_FORMAT1_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_FORMAT2_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_EXPAND2_INT, GcCmdParam::PARAM_INT, "0"));
-    addParam(GcCmdParam(PARAM_OUTPUT_STR, GcCmdParam::PARAM_STRING, "/tmp/disreg_mat.txt"));
+    addParam(GcCmdParam(PARAM_OUTPUT_STR,  GcCmdParam::PARAM_STRING, "/tmp/disreg_mat.txt"));
   }
   const char* name() const {
     return "disreg";
@@ -220,7 +223,6 @@ int main(int argc, char **argv) {
     const uint64_t expand2 = atoll(argv[3]);
     StrList l1;
     StrList l2;
-
     l1.readList(fnl1);
     l2.readList(fnl2);
     disreg(l1, l2, "cse", "...........cs", expand2, "/tmp/disreg_mat.txt");
