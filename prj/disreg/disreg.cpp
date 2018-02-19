@@ -197,10 +197,10 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
   */
   //assert(g1inf.gcords()->chrinfo() == g2inf.gcords()->chrinfo());
   const ChrInfo & chrinfo = g1inf.gcords()->chrinfo();
-  uint64_t n_ab = 0;
-  uint64_t n_a = 0;
-  uint64_t n_b = 0;
-  uint64_t n_c = 0;
+  uint64_t n_ab = 0; /* |A and B| */
+  uint64_t n_a = 0; /* |A| */
+  uint64_t n_b = 0; /* |B| */
+  uint64_t n_c = 0; /*  N */
   /* by chromosome */
   for (uint32_t i = 0; i < g1inf.gcords()->chrinfo().chrs().size(); i++) {
     ChrInfo::CType chr_curr = g1inf.gcords()->chrinfo().chrs()[i];
