@@ -95,8 +95,12 @@ void GcScriptEnv::runFile(FILE *f) {
   while (fgets(&buffer[len], sizeof(buffer) - len - 1, f) != NULL) {
     line++;
     len = strlen(buffer);
+    /* skip new-line chars at end of buffer */
+    while (len > 0 && (buffer[len] == '\n' || buffer[len] == '\0')) {
+      len--;
+    }
     /* do we see a line-continuation character? */
-    if (len == 0 || buffer[len-1] != line_cont_char) {
+    if (len == 0 || (buffer[len] != line_cont_char)) {
       /* no - execute line */
       runLine(buffer, line);
       /* reset buffer start */
