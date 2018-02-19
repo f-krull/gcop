@@ -1,13 +1,11 @@
-
-#include <vector>
-#include <string>
-#include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <assert.h>
+#include <stdint.h>
+#include "strlist.cpp"
+#include "gcinfocache.cpp"
 
 /*----------------------------------------------------------------------------*/
 
-std::string removeExtension(const std::string & filename) {
+static std::string removeExtension(const std::string & filename) {
    std::string res = filename;
    // cut before last "."
    size_t pos_p = filename.find_last_of('.');
@@ -19,7 +17,7 @@ std::string removeExtension(const std::string & filename) {
 
 /*----------------------------------------------------------------------------*/
 
-std::string removePath(const std::string & filename) {
+static std::string removePath(const std::string & filename) {
    std::string res = filename;
    // cut at last "/"
    size_t pos_p = filename.find_last_of('/');
@@ -30,140 +28,6 @@ std::string removePath(const std::string & filename) {
 }
 
 /*----------------------------------------------------------------------------*/
-
-class StrList {
-public:
-  void readList(const char * filename, char comment = '#') {
-    std::ifstream file;
-    std::string line;
-
-    file.open(filename);
-    if (!file) {
-      fprintf(stderr, "error - cannot open file %s\n", filename);
-      exit(1);
-    }
-    while (getline((file), line)) {
-       if ((line.length() > 0) && (line.at(0) != comment)) {
-         m_l.push_back(line);
-       }
-    }
-    file.close();
-  }
-
-  const std::vector<std::string> & get() const {
-    return m_l;
-  }
-private:
-  std::vector<std::string> m_l;
-};
-
-/*----------------------------------------------------------------------------*/
-
-#include <assert.h>
-#include <stdint.h>
-
-#include "../../data/gcords.h"
-#include "../../data/chrinfo.h"
-#include "../../data/intervaltree.h"
-
-/*----------------------------------------------------------------------------*/
-
-class LengthsSum {
-public:
-  LengthsSum(const std::vector<GCord> &g, ChrInfo::CType c) {
-    m_sum = 0;
-    for (uint32_t i = 0; i < g.size(); i++) {
-      m_sum += g[i].len();
-    }
-  }
-  uint64_t get() const {
-    return m_sum;
-  }
-private:
-  uint64_t m_sum;
-};
-
-/*----------------------------------------------------------------------------*/
-
-class GCordsChrInfo {
-public:
-  GCordsChrInfo(const GCords * gc, ChrInfo::CType c) : m_gc(gc), m_chr(c) {
-    m_it  = NULL;
-    m_len = NULL;
-    m_g = m_gc->getChr(m_chr);
-  }
-
-  ~GCordsChrInfo() {
-    delete m_len;
-    delete m_it;
-  }
-
-  const std::vector<GCord> & vgcords() const {
-    return m_g;
-  }
-
-  const LengthsSum * lengthssum() {
-    if (m_len == NULL) {
-      m_len = new LengthsSum(m_g, m_chr);
-    }
-    return m_len;
-  }
-
-  const IntervalTree<GCord> * it() {
-    if (m_it == NULL) {
-      m_it = new IntervalTree<GCord>(m_g);
-    }
-    return m_it;
-  }
-
-private:
-  IntervalTree<GCord> *m_it;
-  LengthsSum *m_len;
-  std::vector<GCord> m_g;
-  const GCords *m_gc;
-  const ChrInfo::CType m_chr;
-};
-
-/*----------------------------------------------------------------------------*/
-
-class GCordsInfoCache {
-public:
-  GCordsInfoCache(const GCords *gc) : m_gc(gc) {
-  }
-
-  ~GCordsInfoCache() {
-    std::map<ChrInfo::CType, GCordsChrInfo*>::iterator it;
-    for (it = m_ginf.begin(); it != m_ginf.end(); ++it) {
-      delete it->second;
-    }
-  }
-
-  GCordsInfoCache( const GCordsInfoCache & o);
-  const GCordsInfoCache & operator=(const GCordsInfoCache & o);
-
-  GCordsChrInfo * chr(ChrInfo::CType c) {
-    std::map<ChrInfo::CType, GCordsChrInfo*>::iterator it = m_ginf.find(c);
-    /* exists? */
-    if (it != m_ginf.end()) {
-      return it->second;
-    }
-    /* create */
-    GCordsChrInfo *gi = new GCordsChrInfo(m_gc, c);
-    m_ginf.insert(std::make_pair(c, gi));
-    return gi;
-  }
-
-  const GCords * gcords() const  {
-    return m_gc;
-  }
-
-private:
-  const GCords *m_gc;
-  std::map<ChrInfo::CType, GCordsChrInfo*> m_ginf;
-};
-
-/*----------------------------------------------------------------------------*/
-
 
 /* forbes: A and B */
 static uint64_t calcAvsB(const std::vector<GCord> &ac,
@@ -229,13 +93,13 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
 
 /*----------------------------------------------------------------------------*/
 
-static std::vector<std::vector<float>> disreg(const StrList &l1, const StrList &l2, const char *fmt1, const char *fmt2) {
+static std::vector<std::vector<float>> disreg(const StrList &l1,
+    const StrList &l2, const char *fmt1, const char *fmt2) {
   ChrInfoHg19 hg19;
   std::vector<std::vector<float>> mat;
   mat.resize(l1.get().size());
   for (uint32_t i = 0; i < l1.get().size(); i++) {
     mat[i].resize(l2.get().size(), 0.f);
-#if 1
     GCords g1;
     g1.read(l1.get()[i].c_str(), fmt1, 0, &hg19);
     GCordsInfoCache g1inf(&g1);
@@ -246,9 +110,9 @@ static std::vector<std::vector<float>> disreg(const StrList &l1, const StrList &
       GCordsInfoCache g2inf(&g2);
       mat[i][j] = forbes(g2inf, g1inf);
     }
-#endif
   }
 
+  /* write matrix */
   FILE *f = fopen("/tmp/mat.txt", "w");
   assert(f);
   /* header */
@@ -338,6 +202,7 @@ void CmdDisReg::executeChild(const char *, GcObjSpace *os) {
 }
 
 /*----------------------------------------------------------------------------*/
+
 #include "../../int/scriptenv.h"
 int main(int argc, char **argv) {
   if (argc == 3) {
