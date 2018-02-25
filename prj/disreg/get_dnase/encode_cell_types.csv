@@ -1,0 +1,357 @@
+cell↓1	Tier↓2	Lineage↓4	Tissue↓5	Karyotype	Sex	Label
+GM12878	1	mesoderm	blood	normal	F	GM12878
+H1-hESC	1	inner cell mass	embryonic stem cell	normal	M	H1-hESC
+K562	1	mesoderm	blood	cancer	F	K562
+A549	2	endoderm	epithelium	cancer	M	A549
+CD20+	2	mesoderm	blood	normal	F	B-cells CD20+
+CD20+_RO01778	2	mesoderm	blood	normal	F	B-cells CD20+ (RO01778)
+CD20+_RO01794	2	mesoderm	blood	normal	F	B cells CD20+ RO01794
+H1-neurons	2	ectoderm	neurons	normal	M	H1-neurons
+HeLa-S3	2	ectoderm	cervix	cancer	F	HeLa-S3
+HepG2	2	endoderm	liver	cancer	M	HepG2
+HUVEC	2	mesoderm	blood vessel	normal	U	HUVEC
+IMR90	2	endoderm	lung	normal	F	IMR90
+LHCN-M2	2	mesoderm	skeletal muscle myoblast	 	M	LHCN-M2
+MCF-7	2	ectoderm	breast	cancer	F	MCF-7
+Monocytes-CD14+	2	mesoderm	monocytes	normal	F	Monocytes CD14+
+Monocytes-CD14+_RO01746	2	mesoderm	monocytes	normal	F	Monocytes CD14+ RO01746
+Monocytes-CD14+_RO01826	2	mesoderm	monocytes	normal	F	Monocytes CD14+ RO01826
+SK-N-SH	2	ectoderm	brain	cancer	F	SK-N-SH
+8988T	3	endoderm	liver	cancer	F	8988T
+Adult_CD4_naive	3	mesoderm	blood	normal	B	T cells CD4+ naive adult
+Adult_CD4_Th0	3	mesoderm	blood	normal	B	T cells CD4+ Th0 adult
+Adult_CD4_Th1	3	mesoderm	blood	normal	B	T cells CD4+ Th1 adult
+AG04449	3	 	skin	normal	M	AG04449
+AG04450	3	endoderm	lung	normal	M	AG04450
+AG09309	3	 	skin	 	F	AG09309
+AG09319	3	 	gingival	normal	F	AG09319
+AG10803	3	 	skin	 	M	AG10803
+AoAF	3	mesoderm	blood vessel	normal	F	AoAF
+AoSMC	3	mesoderm	blood vessel	normal	U	AoSMC
+BC_Adipose_UHN00001	3	 	adipose tissue	normal	F	Adipose BC UHN00001
+BC_Adrenal_Gland_H12803N	3	ectoderm, mesoderm	adrenal gland	normal	F	Adrenal Gland BC H12803N
+BC_Bladder_01-11002	3	endoderm	urinary bladder	normal	F	Bladder BC 01-11002
+BC_Brain_H11058N	3	ectoderm	brain	normal	M	Brain BC H11058N
+BC_Breast_02-03015	3	ectoderm	breast	normal	F	Breast BC 02-03015
+BC_Colon_01-11002	3	endoderm	colon	normal	F	Colon BC 01-11002
+BC_Colon_H12817N	3	endoderm	colon	normal	M	Colon BC H12817N
+BC_Esophagus_01-11002	3	endoderm	esophagus	normal	F	Esophagus BC 01-11002
+BC_Esophagus_H12817N	3	endoderm	esophagus	normal	M	Esophagus BC H12817N
+BC_Jejunum_H12817N	3	endoderm	jejunum	normal	M	Jejunum BC H12817N
+BC_Kidney_01-11002	3	mesoderm	kidney	normal	F	Kidney BC 01-11002
+BC_Kidney_H12817N	3	mesoderm	kidney	normal	M	Kidney BC H12817N
+BC_Left_Ventricle_N41	3	mesoderm	left ventricle	normal	M	Left Ventricle BC N41
+BC_Leukocyte_UHN00204	3	mesoderm	blood	normal	M	Leukocyte BC UHN00204
+BC_Liver_01-11002	3	endoderm	liver	normal	F	Liver BC 01-11002
+BC_Lung_01-11002	3	endoderm	lung	normal	F	Lung BC 01-11002
+BC_Lung_H12817N	3	endoderm	lung	normal	M	Lung BC H12817N
+BC_Pancreas_H12817N	3	endoderm	pancreas	normal	M	Pancreas BC H12817N
+BC_Penis_H12817N	3	mesoderm	penis	normal	M	Penis BC H12817N
+BC_Pericardium_H12529N	3	mesoderm	pericardium	normal	F	Pericardium BC H12529N
+BC_Placenta_UHN00189	3	extraembryonic mesoderm, trophectoderm	placenta	normal	F	Placenta BC UHN00189
+BC_Prostate_Gland_H12817N	3	endoderm	prostate gland	normal	M	Prostate Gland BC H12817N
+BC_Rectum_N29	3	endoderm	rectum	normal	M	Rectum BC N29
+BC_Skeletal_Muscle_01-11002	3	mesoderm	skeletal muscle	normal	F	Skeletal Muscle BC 01-11002
+BC_Skeletal_Muscle_H12817N	3	mesoderm	skeletal muscle	normal	M	Skeletal Muscle BC H12817N
+BC_Skin_01-11002	3	ectoderm, mesoderm	skin	normal	F	Skin BC 01-11002
+BC_Small_Intestine_01-11002	3	endoderm	small intestine	normal	F	Small Intestine BC 01-11002
+BC_Spleen_H12817N	3	mesoderm	spleen	normal	M	Spleen BC H12817N
+BC_Stomach_01-11002	3	endoderm	stomach	normal	F	Stomach BC 01-11002
+BC_Stomach_H12817N	3	endoderm	stomach	normal	M	Stomach BC H12817N
+BC_Testis_N30	3	mesoderm	testis	normal	M	Testis BC N30
+BC_Uterus_BN0765	3	 	uterus	normal	F	Uterus BC BN0765
+BE2_C	3	ectoderm	brain	cancer	M	BE(2)-C
+BG02ES	3	inner cell mass	embryonic stem cell	normal	M	BG02ES
+BG02ES-EBD	3	inner cell mass	embryonic stem cell	normal	M	BG02ES-EBD
+BJ	3	 	skin	normal	M	BJ
+bone_marrow_HS27a	3	 	bone marrow	normal	M	Bone Marrow HS27a
+bone_marrow_HS5	3	 	bone marrow	normal	M	Bone Marrow HS27a
+bone_marrow_MSC	3	 	bone marrow	normal	M	Bone Marrow HS27a
+Breast_OC	3	 	breast	normal	F	Breast_OC
+Caco-2	3	endoderm	colon	cancer	M	Caco-2
+CD34+_Mobilized	3	 	blood	 	M	CD34+ Mobilized
+CD4+_Naive_Wb11970640	3	mesoderm	blood	normal	M	CD4+_Naive_Wb11970640
+CD4+_Naive_Wb78495824	3	mesoderm	blood	normal	F	CD4+_Naive_Wb78495824
+Cerebellum_OC	3	 	cerebellum	normal	M	Cerebellum_OC
+Cerebrum_frontal_OC	3	 	frontal cerebrum	normal	M	Cerebrum_frontal_OC
+Chorion	3	extraembryonic mesoderm, trophectoderm	fetal membrane	 	U	Chorion
+CLL	3	mesoderm	blood	cancer	F	CLL
+CMK	3	mesoderm	blood	cancer	M	CMK
+Colo829	3	 	skin	cancer	M	Colo829
+Colon_BC	3	endoderm	colon	normal	B	Colon BC
+Colon_OC	3	 	colon	normal	B	Colon OC
+Cord_CD4_naive	3	mesoderm	blood	normal	B	T cells CD4+ naive cord blood
+Cord_CD4_Th0	3	mesoderm	blood	normal	B	T cells CD4+ Th0 cord blood
+Cord_CD4_Th1	3	mesoderm	blood	normal	B	T cells CD4+ Th1 cord blood
+Decidua	3	decidua	cervix	 	F	Decidua
+Dnd41	3	mesoderm	blood	cancer	M	Dnd41
+ECC-1	3	endoderm	luminal epithelium	cancer	F	ECC-1
+Endometrium_OC	3	 	endometrium	normal	F	Endometrium OC
+Esophagus_BC	3	endoderm	esophagus	normal	B	Esophagus BC
+Fibrobl	3	 	skin	normal	F	Fibrobl
+Fibrobl_GM03348	3	 	skin	normal	M	Fibrobl_GM03348
+FibroP	3	 	skin	normal	U	FibroP
+FibroP_AG08395	3	 	skin fibroblast	 	F	FibroP_AG08395
+FibroP_AG08396	3	 	lung fibroblast	 	F	FibroP_AG08396
+FibroP_AG20443	3	 	skin fibroblast	 	M	FibroP_AG20443
+Frontal_cortex_OC	3	 	frontal cortex	normal	F	Frontal cortex OC
+GC_B_cell	3	 	tonsil	normal	U	GC_B_cell
+Gliobla	3	ectoderm	brain	cancer	U	Gliobla
+GM04503	3	 	skin	normal	F	GM04503
+GM04504	3	 	skin	normal	F	GM04504
+GM06990	3	mesoderm	blood	 	F	GM06990
+GM08714	3	mesoderm	blood	 	F	GM08714
+GM10248	3	mesoderm	blood	normal	M	GM10248
+GM10266	3	mesoderm	blood	affected	M	GM10266
+GM10847	3	mesoderm	blood	 	F	GM10847
+GM12801	3	mesoderm	blood	 	M	GM12801
+GM12812	3	mesoderm	blood	 	M	GM12812
+GM12813	3	mesoderm	blood	 	F	GM12813
+GM12864	3	mesoderm	blood	 	M	GM12864
+GM12865	3	mesoderm	blood	 	F	GM12865
+GM12866	3	mesoderm	blood	 	M	GM12866
+GM12867	3	mesoderm	blood	 	F	GM12867
+GM12868	3	mesoderm	blood	 	F	GM12868
+GM12869	3	mesoderm	blood	 	F	GM12869
+GM12870	3	mesoderm	blood	 	M	GM12870
+GM12871	3	mesoderm	blood	 	M	GM12871
+GM12872	3	mesoderm	blood	 	M	GM12872
+GM12873	3	mesoderm	blood	 	F	GM12873
+GM12874	3	mesoderm	blood	 	M	GM12874
+GM12875	3	mesoderm	blood	 	F	GM12875
+GM12878-XiMat	3	mesoderm	blood	normal	F	GM12878-XiMat
+GM12891	3	mesoderm	blood	 	M	GM12891
+GM12892	3	mesoderm	blood	 	F	GM12892
+GM13976	3	mesoderm	blood	normal	F	GM13976
+GM13977	3	mesoderm	blood	affected	F	GM13977
+GM15510	3	mesoderm	blood	 	U	GM15510
+GM18505	3	mesoderm	blood	 	F	GM18505
+GM18507	3	mesoderm	blood	 	M	GM18507
+GM18526	3	mesoderm	blood	 	F	GM18526
+GM18951	3	mesoderm	blood	 	F	GM18951
+GM19099	3	mesoderm	blood	 	F	GM19099
+GM19193	3	mesoderm	blood	 	F	GM19193
+GM19238	3	mesoderm	blood	 	F	GM19238
+GM19239	3	mesoderm	blood	 	M	GM19239
+GM19240	3	mesoderm	blood	 	F	GM19240
+GM20000	3	mesoderm	blood	affected	M	GM20000
+H0287	3	mesoderm	blood	normal	M	H0287
+H7-hESC	3	inner cell mass	 	 	U	H7-hESC
+H9ES	3	inner cell mass	embryonic stem cell	 	F	H9ES
+H9ES-AFP+	3	inner cell mass	embryonic stem cell	 	F	H9ES-AFP+
+H9ES-AFP-	3	inner cell mass	embryonic stem cell	 	F	H9ES-AFP-
+H9ES-CM	3	inner cell mass	embryonic stem cell	 	F	H9ES-CM
+H9ES-E	3	inner cell mass	embryonic stem cell	 	F	H9ES-E
+H9ES-EB	3	inner cell mass	embryonic stem cell	 	F	H9ES-EB
+H9ES-EBD	3	inner cell mass	embryonic stem cell	 	F	H9ES-EBD
+HA-h	3	ectoderm	brain hippocampus	normal	U	HA-h
+HA-sp	3	ectoderm	spinal cord	normal	U	HA-sp
+HAc	3	ectoderm	cerebellar	normal	U	HAc
+HAEpiC	3	 	epithelium	normal	U	HAEpiC
+HAL	3	endoderm	liver	 	U	HAL
+HAoAF	3	mesoderm	blood vessel	normal	B	HAoAF
+HAoAF_6090101.11	3	mesoderm	blood vessel	normal	M	HAoAF_6090101.11
+HAoAF_6111301.9	3	mesoderm	blood vessel	normal	F	HAoAF_6111301.9
+HAoEC	3	mesoderm	blood vessel	normal	B	HAoEC
+HAoEC_7071706.1	3	mesoderm	blood vessel	normal	F	HAoEC_7071706.1
+HAoEC_8061102.1	3	mesoderm	blood vessel	normal	M	HAoEC_8061102.1
+HBMEC	3	mesoderm	blood vessel	normal	U	HBMEC
+HBVP	3	mesoderm	blood vessel	normal	U	HBVP
+HBVSMC	3	mesoderm	blood vessel	normal	F	HBVSMC
+HCF	3	mesoderm	heart	normal	U	HCF
+HCFaa	3	mesoderm	heart	normal	F	HCFaa
+HCH	3	missing	cartilage	normal	M	HCH
+HCH_0011308.2P	3	missing	cartilage	normal	F	HCH_0011308.2P
+HCH_8100808.2	3	missing	cartilage	normal	M	HCH_8100808.2
+HCM	3	mesoderm	heart	normal	U	HCM
+HConF	3	ectoderm	eye	 	U	HConF
+HCPEpiC	3	ectoderm	epithelium	normal	U	HCPEpiC
+HCT-116	3	endoderm	colon	cancer	M	HCT-116
+Heart_OC	3	 	heart	normal	B	Heart_OC
+Heart_STL003	3	 	heart	normal	M	Heart_STL003
+HEEpiC	3	endoderm	epithelium	normal	U	HEEpiC
+HEK293	3	mesoderm	kidney	 	U	HEK293
+HEK293-T-REx	3	mesoderm	kidney	 	F	HEK293-T-REx
+HEK293T	3	mesoderm	kidney	 	F	HEK293T
+Hepatocytes	3	endoderm	liver	normal	B	Hepatocytes
+HFDPC	3	missing	skin	normal	F	HFDPC
+HFDPC_0100503.2	3	missing	skin	normal	F	HFDPC_0100503.2
+HFDPC_0102703.3	3	missing	skin	normal	F	HFDPC_0102703.3
+HFF	3	 	foreskin	normal	M	HFF
+HFF-Myc	3	fibroblast	foreskin	normal	M	HFF-Myc
+HFL11W	3	endoderm	liver	 	U	HFL11W
+HFL24W	3	endoderm	liver	 	U	HFL24W
+HGF	3	 	gingiva	normal	U	HGF
+HHSEC	3	endoderm	liver	 	U	HHSEC
+HIPEpiC	3	ectoderm	epithelium	normal	U	HIPEpiC
+HL-60	3	mesoderm	blood	cancer	F	HL-60
+HMEC	3	ectoderm	breast	normal	U	HMEC
+HMEpC	3	ectoderm	mammary gland	normal	F	HMEpC
+HMEpC_6022801.3	3	ectoderm	mammary gland	normal	F	HMEpC_6022801.3
+HMF	3	 	mammary	 	F	HMF
+hMNC-CB	3	missing	blood	normal	B	hMNC-CB
+hMNC-CB_8072802.6	3	missing	blood	normal	M	hMNC-CB_8072802.6
+hMNC-CB_9111701.6	3	missing	blood	normal	F	hMNC-CB_9111701.6
+hMNC-PB	3	missing	blood	normal	B	hMNC-PB
+hMNC-PB_0022330.9	3	missing	blood	normal	M	hMNC-PB_0022330.9
+hMNC-PB_0082430.9	3	missing	blood	normal	F	hMNC-PB_0082430.9
+hMSC-AT	3	missing	adipose	normal	F	hMSC-AT
+hMSC-AT_0102604.12	3	missing	adipose	normal	F	hMSC-AT_0102604.12
+hMSC-AT_9061601.12	3	missing	subcutaneous adipose tissue	normal	F	hMSC-AT_9061601.12
+hMSC-BM	3	missing	bone marrow	normal	B	hMSC-BM
+hMSC-BM_0050602.11	3	missing	bone marrow	normal	M	hMSC-BM_0050602.11
+hMSC-BM_0051105.11	3	missing	bone marrow	normal	F	hMSC-BM_0051105.11
+hMSC-UC	3	missing	umbilical cord	normal	B	hMSC-UC
+hMSC-UC_0052501.7	3	missing	umbilical cord	normal	M	hMSC-UC_0052501.7
+hMSC-UC_0081101.7	3	missing	umbilical cord	normal	F	hMSC-UC_0081101.7
+HMVEC-dAd	3	 	blood vessel	normal	F	HMVEC-dAd
+HMVEC-dBl-Ad	3	mesoderm	blood vessel	normal	F	HMVEC-dBl-Ad
+HMVEC-dBl-Neo	3	mesoderm	blood vessel	normal	M	HMVEC-dBl-Neo
+HMVEC-dLy-Ad	3	mesoderm	blood vessel	normal	F	HMVEC-dLy-Ad
+HMVEC-dLy-Neo	3	mesoderm	blood vessel	normal	M	HMVEC-dLy-Neo
+HMVEC-dNeo	3	mesoderm	blood vessel	normal	M	HMVEC-dNeo
+HMVEC-LBl	3	mesoderm	blood vessel	normal	F	HMVEC-LBl
+HMVEC-LLy	3	mesoderm	blood vessel	normal	F	HMVEC-LLy
+HNPCEpiC	3	 	epithelium	normal	U	HNPCEpiC
+HOB	3	missing	cancellous bone	normal	M	HOB
+HOB_0090202.1	3	missing	cancellous bone	normal	M	HOB_0090202.1
+HOB_0091301	3	missing	cancellous bone	normal	F	HOB_0091301
+HPAEC	3	mesoderm	blood vessel	normal	F	HPAEC
+HPAEpiC	3	 	epithelium	normal	U	HPAEpiC
+HPAF	3	mesoderm	blood vessel	normal	U	HPAF
+HPC-PL	3	missing	placenta	normal	B	HPC-PL
+HPC-PL_0032601.13	3	missing	placenta	normal	M	HPC-PL_0032601.13
+HPC-PL_0101504.13	3	missing	placenta	normal	F	HPC-PL_0101504.13
+HPDE6-E6E7	3	endoderm	pancreatic duct	normal	F	HPDE6-E6E7
+HPdLF	3	 	epithelium	normal	M	HPdLF
+HPF	3	 	lung	normal	U	HPF
+HPIEpC	3	missing	placenta	normal	B	HPIEpC
+HPIEpC_9012801.2	3	missing	placenta	normal	F	HPIEpC_9012801.2
+HPIEpC_9041503.2	3	missing	placenta	normal	M	HPIEpC_9041503.2
+HRCEpiC	3	mesoderm	epithelium	normal	U	HRCEpiC
+HRE	3	mesoderm	epithelium	normal	U	HRE
+HRGEC	3	mesoderm	kidney	normal	U	HRGEC
+HRPEpiC	3	ectoderm	epithelium	normal	U	HRPEpiC
+HSaVEC	3	mesoderm	blood vessel	normal	M	HSaVEC
+HSaVEC_0022202.16	3	mesoderm	blood vessel	normal	M	HSaVEC_0022202.16
+HSaVEC_9100101.15	3	mesoderm	blood vessel	normal	M	HSaVEC_9100101.15
+HSMM	3	mesoderm	muscle	normal	U	HSMM
+HSMM_emb	3	 	muscle	 	U	HSMM_emb
+HSMM_FSHD	3	 	muscle	 	U	HSMM_FSHD
+HSMMtube	3	mesoderm	muscle	normal	U	HSMMtube
+HSMMtube_emb	3	 	muscle	 	U	HSMMtube_emb
+HSMMtube_FSHD	3	 	muscle	 	U	HSMMtube_FSHD
+HT-1080	3	mesoderm	epithelium	cancer	M	HT-1080
+HTR8svn	3	ectoderm	blastula	normal	F	HTR8svn
+Huh-7	3	endoderm	liver	cancer	M	Huh-7
+Huh-7.5	3	endoderm	liver	cancer	M	Huh-7.5
+HVMF	3	 	connective	normal	U	HVMF
+HVMF_6091203.3	3	missing	placenta	normal	M	HVMF_6091203.3
+HVMF_6100401.3	3	missing	placenta	normal	F	HVMF_6100401.3
+HWP	3	missing	adipose	normal	B	HWP
+HWP_0092205	3	missing	subcutaneous adipose tissue	normal	M	HWP_0092205
+HWP_8120201.5	3	missing	subcutaneous adipose tissue	normal	F	HWP_8120201.5
+iPS	3	induced pluripotent stem cell derived from skin fibroblast	induced pluripotent stem cell	 	B	iPS
+iPS_CWRU1	3	 	induced pluripotent cell (iPS)	 	M	iPS_CWRU1
+iPS_hFib2_iPS4	3	missing	induced pluripotent cell (iPS)	normal	M	iPS_hFib2_iPS4
+iPS_hFib2_iPS5	3	missing	induced pluripotent cell (iPS)	normal	M	iPS_hFib2_iPS5
+iPS_NIHi11	3	 	induced pluripotent cell (iPS)	 	M	iPS_NIHi11
+iPS_NIHi7	3	 	induced pluripotent cell (iPS)	 	F	iPS_NIHi7
+Ishikawa	3	 	uterus	 	F	Ishikawa
+Jurkat	3	mesoderm	blood	cancer	M	Jurkat
+Kidney_BC	3	mesoderm	kidney	normal	B	Kidney BC
+Kidney_OC	3	 	kidney	normal	B	Kidney OC
+LHSR	3	endoderm	epithelium	normal	U	LHSR
+Liver_OC	3	 	liver	normal	M	Liver_OC
+Liver_STL004	3	 	liver	normal	F	Liver_STL004
+Liver_STL011	3	 	liver	normal	M	Liver_STL011
+LNCaP	3	endoderm	prostate	cancer	M	LNCaP
+Loucy	3	mesoderm	blood	cancer	F	Loucy
+Lung_BC	3	endoderm	lung	normal	B	Lung BC
+Lung_OC	3	 	Lung	normal	B	Lung_OC
+Lymphoblastoid_cell_line	3	mesoderm	blood	normal	B	Lymphoblastoid_cell_line
+M059J	3	ectoderm	brain	cancer	M	M059J
+MCF10A-Er-Src	3	ectoderm	breast	 	F	MCF10A-Er-Src
+MDA-MB-231	3	ectoderm	breast	cancer	F	MDA-MB-231
+Medullo	3	ectoderm	brain	cancer	U	Medullo
+Medullo_D341	3	 	brain	cancer	U	Medullo_D341
+Mel_2183	3	 	Melanoma cell line derived from melanoma metastasis	cancer	U	Mel_2183
+Melano	3	ectoderm	skin	normal	U	Melano
+MRT_A204	3	missing	muscle	cancer	F	MRT A204
+MRT_G401	3	missing	kidney	cancer	M	MRT G401
+MRT_TTC549	3	missing	liver	cancer	M	MRT TTC549
+Myometr	3	 	myometrium	normal	F	Myometr
+Naive_B_cell	3	 	tonsil	normal	U	Naive_B_cell
+NB4	3	mesoderm	blood	cancer	U	NB4
+NH-A	3	ectoderm	brain	normal	U	NH-A
+NHBE	3	endoderm	epithelium	normal	F	NHBE
+NHBE_RA	3	 	bronchial epithelium	normal	F	NHBE_RA
+NHDF	3	missing	skin	normal	F	NHDF
+NHDF-Ad	3	mesoderm	skin	normal	F	NHDF-Ad
+NHDF-neo	3	mesoderm	skin	normal	U	NHDF-neo
+NHDF_0060801.3	3	missing	skin	normal	F	NHDF_0060801.3
+NHDF_7071701.2	3	missing	skin	normal	F	NHDF_7071701.2
+NHEK	3	ectoderm	skin	normal	U	NHEK
+NHEM.f_M2	3	missing	skin	normal	M	NHEM.f M2
+NHEM.f_M2_5071302.2	3	missing	skin	normal	M	NHEM.f M2 (5071302.2)
+NHEM.f_M2_6022001	3	missing	skin	normal	M	NHEM.f M2 (6022001)
+NHEM_M2	3	missing	skin	normal	B	NHEM M2
+NHEM_M2_7011001.2	3	missing	skin	normal	M	NHEM M2 (7011001.2)
+NHEM_M2_7012303	3	missing	skin	normal	F	NHEM M2 (7012303)
+NHLF	3	endoderm	lung	normal	U	NHLF
+NT2-D1	3	inner cell mass	testis	cancer	M	NT2-D1
+Olf_neurosphere	3	 	Nasal biopsy	normal	U	Olfactory neurosphere
+Osteobl	3	mesoderm	bone	normal	U	Osteoblasts
+ovcar-3	3	mesoderm	ovary	cancer	F	ovcar-3
+PANC-1	3	endoderm	pancreas	cancer	M	PANC-1
+Pancreas_OC	3	 	pancreas	normal	M	Pancreas OC
+PanIsletD	3	endoderm	pancreas	 	B	PanIsletD
+PanIslets	3	endoderm	pancreas	normal	M	PanIslets
+PBDE	3	mesoderm	blood	 	M	PBDE
+PBDEFetal	3	mesoderm	liver	normal	U	PBDEFetal
+PBMC	3	mesoderm	blood	 	M	PBMC
+PFSK-1	3	ectoderm	brain	cancer	M	PFSK-1
+pHTE	3	endoderm	epithelium	 	U	pHTE
+Pons_OC	3	 	pons mid-brain	normal	M	Pons_OC
+PrEC	3	epithelial	prostate	normal	U	PrEC
+ProgFib	3	 	skin	 	M	ProgFib
+prostate	3	endoderm	prostate	 	M	Prostate
+Prostate_OC	3	 	prostate	normal	M	Prostate_OC
+Psoas_muscle_OC	3	 	psoas muscle	normal	B	Psoas_muscle_OC
+Raji	3	mesoderm	blood	cancer	M	Raji
+RCC_7860	3	 	kidney	cancer	M	RCC 7860
+RPMI-7951	3	ectoderm	skin	cancer	F	RPMI-7951
+RPTEC	3	 	epithelium	normal	U	RPTEC
+RWPE1	3	 	prostate	normal	M	RWPE1
+SAEC	3	endoderm	epithelium	normal	U	SAEC
+SH-SY5Y	3	ectoderm	brain	cancer	F	SH-SY5Y
+SK-N-MC	3	ectoderm	brain	cancer	F	SK-N-MC
+SK-N-SH_RA	3	ectoderm	brain	cancer	F	SK-N-SH (Retinoic Acid)
+Skeletal_Muscle_BC	3	mesoderm	skeletal muscle	normal	B	Skeletal Muscle BC
+SkMC	3	missing	muscle	normal	B	SkMC
+SKMC	3	mesoderm	muscle	normal	U	SkMC
+SkMC_8121902.17	3	missing	striated muscle	normal	M	SkMC_8121902.17
+SkMC_9011302	3	missing	striated muscle	normal	F	SkMC_9011302
+Small_intestine_OC	3	 	small intestine	normal	M	Small intestine OC
+Spleen_OC	3	 	spleen	normal	F	Spleen_OC
+Stellate	3	endoderm	liver	normal	F	Stellate
+Stomach_BC	3	endoderm	stomach	normal	B	Stomach BC
+T-47D	3	 	breast	cancer	F	T-47D
+T98G	3	ectoderm	brain	cancer	M	T98G
+T_cells_CD4+	3	mesoderm	blood	unknown	B	T cells CD4+
+TBEC	3	endoderm	epithelium	 	M	TBEC
+Th1	3	mesoderm	blood	 	U	Th1
+Th17	3	mesoderm	blood	normal	B	Th17
+Th1_Wb33676984	3	mesoderm	blood	normal donor is Asian, female 26 year old, primary pheresis of single normal subject	F	Th1_Wb33676984
+Th1_Wb54553204	3	mesoderm	blood	normal	M	Th1_Wb54553204
+Th2	3	mesoderm	blood	 	U	Th2
+Th2_Wb33676984	3	mesoderm	blood	normal	F	Th2_Wb33676984
+Th2_Wb54553204	3	mesoderm	blood	normal	M	Th2_Wb54553204
+Treg_Wb78495824	3	mesoderm	blood	normal donor is Causasian, female 35 year old, primary pheresis of single normal subject	F	Treg_Wb78495824
+Treg_Wb83319432	3	mesoderm	blood	normal	M	Treg_Wb83319432
+U2OS	3	mesoderm	bone	cancer	F	U2OS
+U87	3	ectoderm	brain	cancer	M	U87
+UCH-1	3	ectoderm	chordoma	cancer	M	UCH-1
+Urothelia	3	 	urothelium	normal	F	Urothelia
+WERI-Rb-1	3	ectoderm	eye	cancer	F	WERI-Rb-1
+WI-38	3	endoderm	embryonic lung	normal	F	WI-38
