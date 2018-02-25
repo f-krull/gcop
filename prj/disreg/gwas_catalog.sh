@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'exit' ERR
+
 declare -r SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 declare -r OUTDIR="$SCRIPTDIR"/../../../testdata/gwascat/
 
@@ -19,12 +21,14 @@ declare -ar TRAITS=( $( zcat $GWASCAT | tail -n +2 | cut -f 8 | sort | uniq | tr
 rm -f $OUTDIR/list.txt
 for i in ${!TRAITS[@]}; do
   trait="$(echo ${TRAITS[i]} | tr "_" " ")"
-  outfile=$OUTDIR/${TRAITS[i]}.txt.gz 
-  zcat $GWASCAT \
-    | tail -n +2 \
-    | awk -F $'\t' -v trait="$trait" '$8==trait && $12~/^[0-9]+$/ && $13~/^[0-9]+$/ { print $0 }' \
-    | gzip \
-    > $outfile
+  outfile="$( printf "$OUTDIR/%s.txt.gz" $(echo ${TRAITS[i]} | sed "s/[/-]//g") )"
+  if [ ! -e $outfile ]; then
+    zcat $GWASCAT \
+      | tail -n +2 \
+      | awk -F $'\t' -v trait="$trait" '$8==trait && $12~/^[0-9]+$/ && $13~/^[0-9]+$/ { print $0 }' \
+      | gzip \
+      > $outfile
+  fi
   if [ -s $outfile -a $(zcat $outfile | wc -l) != '0' ]; then
     echo $( readlink -f $outfile )  | tee -a $OUTDIR/list.txt
   fi
