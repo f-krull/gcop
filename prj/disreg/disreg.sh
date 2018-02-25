@@ -22,7 +22,9 @@ time echo "
 
   load_strtable \
      dst=tab_gwas \
-     file=${GCOPDIR}/testdata/gwascat/list.txt
+     file=${GCOPDIR}/testdata/gwascat/tab.txt \
+     maxlines=30
+
 
   disreg tab1=tab_dnase fmt1=cse \
          tab2=tab_gwas  fmt2=...........cs \
