@@ -1,31 +1,8 @@
-#include <assert.h>
-#include <stdint.h>
 #include "strlist.cpp"
 #include "gcinfocache.cpp"
-
-/*----------------------------------------------------------------------------*/
-
-/* cut before last "." */
-static std::string removeExtension(const std::string & filename) {
-   std::string res = filename;
-   size_t pos_p = filename.find_last_of('.');
-   if (pos_p != filename.npos) {
-      res = res.substr(0, pos_p);
-   }
-   return res;
-}
-
-/*----------------------------------------------------------------------------*/
-
-/* cut at last "/" */
-static std::string removePath(const std::string & filename) {
-   std::string res = filename;
-   size_t pos_p = filename.find_last_of('/');
-   if (pos_p != filename.npos && (pos_p + 1) < res.size()) {
-      res = res.substr((pos_p + 1), res.size() - (pos_p + 1));
-   }
-   return res;
-}
+#include <assert.h>
+#include <stdint.h>
+#include <regex>
 
 /*----------------------------------------------------------------------------*/
 
@@ -65,9 +42,9 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
 #endif
   const ChrInfo & chrinfo = g1inf.gcords()->chrinfo();
   uint64_t n_ab = 0; /* |A and B| */
-  uint64_t n_a = 0; /* |A| */
-  uint64_t n_b = 0; /* |B| */
-  uint64_t n_c = 0; /*  N */
+  uint64_t n_a = 0;  /* |A|       */
+  uint64_t n_b = 0;  /* |B|       */
+  uint64_t n_c = 0;  /*  N        */
   /* by chromosome */
   for (uint32_t i = 0; i < g1inf.gcords()->chrinfo().chrs().size(); i++) {
     ChrInfo::CType chr_curr = g1inf.gcords()->chrinfo().chrs()[i];
@@ -96,43 +73,116 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
 
 /*----------------------------------------------------------------------------*/
 
-static std::vector<std::vector<float>> disreg(const StrList &l1,
-    const StrList &l2, const char *fmt1, const char *fmt2, uint64_t expand2,
+void writeMat_cg(const char *fn, const std::vector<std::vector<float>> & mat,
+    const StrTable &l1, const StrTable &l2) {
+  class _TmpFunc {
+   public:
+     static std::string cleanFn(const std::string &fn) {
+       std::string res = fn;
+       res = std::regex_replace(res, std::regex(".*/"),   "");
+       res = std::regex_replace(res, std::regex(".gz$"),  "");
+       res = std::regex_replace(res, std::regex(".txt$"), "");
+       return res;
+     }
+   };
+
+  FILE *f = fopen(fn, "w");
+  assert(f);
+  /* header */
+  for (uint32_t j = 0; j < l1.nrows(); j++) {
+    fprintf(f, "\t(");
+    for (uint32_t k = 0; k < l1.ncols(); k++) {
+      fprintf(f, "%s'%s: %s'", k == 0 ? "" : ", ", l1.header()[k].c_str(), l1.body()[j][k].c_str());
+    }
+    fprintf(f, ")");
+  }
+  fprintf(f, "\n");
+  /* data */
+  for (uint32_t i = 0; i < l2.nrows(); i++) {
+    fprintf(f, "('name: %s')", _TmpFunc::cleanFn(l2.body()[i][0]).c_str());
+    for (uint32_t j = 0; j < l1.nrows(); j++) {
+      fprintf(f, "%s%f", "\t", mat[j][i]);
+    }
+    fprintf(f, "\n");
+  }
+  fclose(f);
+}
+
+/*----------------------------------------------------------------------------*/
+
+static std::vector<std::vector<float>> disreg(const StrTable &l1,
+    const StrTable &l2, const char *fmt1, const char *fmt2, uint64_t expand2,
     const char *outfn) {
+  assert(l1.ncols() >= 1);
+  assert(l2.ncols() >= 1);
   ChrInfoHg19 hg19;
   std::vector<std::vector<float>> mat;
-  mat.resize(l1.get().size());
-  for (uint32_t i = 0; i < l1.get().size(); i++) {
-    mat[i].resize(l2.get().size(), 0.f);
+  mat.resize(l1.nrows());
+  for (uint32_t i = 0; i < l1.nrows(); i++) {
+    mat[i].resize(l2.nrows(), 0.f);
     GCords g1;
-    g1.read(l1.get()[i].c_str(), fmt1, 0, &hg19);
+    g1.read(l1.body()[i][0].c_str(), fmt1, 0, &hg19);
     GCordsInfoCache g1inf(&g1);
-    for (uint32_t j = 0; j < l2.get().size(); j++) {
+    for (uint32_t j = 0; j < l2.nrows(); j++) {
       GCords g2;
-      g2.read(l2.get()[j].c_str(), fmt2, 0, &hg19);
+      g2.read(l2.body()[j][0].c_str(), fmt2, 0, &hg19);
       g2.expand(expand2);
       GCordsInfoCache g2inf(&g2);
       mat[i][j] = forbes(g2inf, g1inf);
     }
   }
 
+  class _TmpFunc {
+  public:
+    static std::string cleanFn(const std::string &fn) {
+      std::string res = fn;
+      res = std::regex_replace(res, std::regex(".*/"),   "");
+      res = std::regex_replace(res, std::regex(".gz$"),  "");
+      res = std::regex_replace(res, std::regex(".txt$"), "");
+      return res;
+    }
+  };
+
   /* write matrix */
-  FILE *f = fopen(outfn, "w");
-  assert(f);
-  /* header */
-  for (uint32_t j = 0; j < l2.get().size(); j++) {
-    fprintf(f, "\t%s", removePath(removeExtension(l2.get()[j])).c_str());
-  }
-  fprintf(f, "\n");
-  /* data */
-  for (uint32_t i = 0; i < mat.size(); i++) {
-    fprintf(f, "%s", removePath(removeExtension(l1.get()[i])).c_str());
-    for (uint32_t j = 0; j < mat[i].size(); j++) {
-      fprintf(f, "%s%f", "\t", mat[i][j]);
+  writeMat_cg(outfn, mat, l1, l2);
+#if 0
+  {
+    FILE *f = fopen(outfn, "w");
+    assert(f);
+    /* header */
+    for (uint32_t j = 0; j < l1.nrows(); j++) {
+      fprintf(f, "\t%s",_TmpFunc::cleanFn(l1.body()[j][0]).c_str());
     }
     fprintf(f, "\n");
+    /* data */
+    for (uint32_t i = 0; i < l2.nrows(); i++) {
+      fprintf(f, "%s", _TmpFunc::cleanFn(l2.body()[i][0]).c_str());
+      for (uint32_t j = 0; j < l1.nrows(); j++) {
+        fprintf(f, "%s%f", "\t", mat[j][i]);
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
   }
-  fclose(f);
+  {
+  FILE *f = fopen(outfn, "w");
+    assert(f);
+    /* header */
+    for (uint32_t j = 0; j < l2.get().size(); j++) {
+      fprintf(f, "\t%s", _TmpFunc::cleanFn(l2.get()[j]).c_str());
+    }
+    fprintf(f, "\n");
+    /* data */
+    for (uint32_t i = 0; i < mat.size(); i++) {
+      fprintf(f, "%s", _TmpFunc::cleanFn(l1.get()[i]).c_str());
+      for (uint32_t j = 0; j < mat[i].size(); j++) {
+        fprintf(f, "%s%f", "\t", mat[i][j]);
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
+  }
+#endif
   return mat;
 }
 
@@ -140,7 +190,8 @@ static std::vector<std::vector<float>> disreg(const StrList &l1,
 
 #include "../../int/objs_decl.h"
 
-OBJS_DECL_GCCLASS(StrList, StrList)
+OBJS_DECL_GCCLASS(StrList,  StrList)
+OBJS_DECL_GCCLASS(StrTable, StrTable)
 
 /*----------------------------------------------------------------------------*/
 
@@ -173,11 +224,45 @@ void CmdLoadStrList::executeChild(const char *, GcObjSpace *os) {
 
 /*----------------------------------------------------------------------------*/
 
+#include "../../int/command.h"
+#include "../../int/objspace.h"
+
+class CmdLoadStrTable : public GcCommand {
+public:
+  CmdLoadStrTable() {
+    addParam(GcCmdParam(PARAM_DST_STR,    GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_HEADER_INT, GcCmdParam::PARAM_INT,    "0"));
+  }
+  const char* name() const {
+    return "load_strtable";
+  }
+  static std::string PARAM_DST_STR;
+  static std::string PARAM_FILE_STR;
+  static std::string PARAM_HEADER_INT;
+protected:
+  void executeChild(const char *, GcObjSpace *os);
+};
+
+std::string CmdLoadStrTable::PARAM_DST_STR    = "dst";
+std::string CmdLoadStrTable::PARAM_FILE_STR   = "file";
+std::string CmdLoadStrTable::PARAM_HEADER_INT = "header";
+
+void CmdLoadStrTable::executeChild(const char *, GcObjSpace *os) {
+  GcObjStrTable *gcsl = new GcObjStrTable();
+  const char *filename = getParam(PARAM_FILE_STR)->valStr().c_str();
+  const bool  header   = getParam(PARAM_HEADER_INT)->valInt();
+  gcsl->d()->read(filename, header);
+  os->addObj(getParam(PARAM_DST_STR)->valStr(), gcsl);
+}
+
+/*----------------------------------------------------------------------------*/
+
 class CmdDisReg : public GcCommand {
 public:
   CmdDisReg() {
-    addParam(GcCmdParam(PARAM_LIST1_STR, GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_LIST2_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_TABLE1_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_TABLE2_STR, GcCmdParam::PARAM_STRING, ""));
     addParam(GcCmdParam(PARAM_FORMAT1_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_FORMAT2_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_EXPAND2_INT, GcCmdParam::PARAM_INT, "0"));
@@ -186,8 +271,8 @@ public:
   const char* name() const {
     return "disreg";
   }
-  static std::string PARAM_LIST1_STR;
-  static std::string PARAM_LIST2_STR;
+  static std::string PARAM_TABLE1_STR;
+  static std::string PARAM_TABLE2_STR;
   static std::string PARAM_FORMAT1_STR;
   static std::string PARAM_FORMAT2_STR;
   static std::string PARAM_EXPAND2_INT;
@@ -196,16 +281,16 @@ protected:
   void executeChild(const char *, GcObjSpace *os);
 };
 
-std::string CmdDisReg::PARAM_LIST1_STR  = "list1";
-std::string CmdDisReg::PARAM_LIST2_STR  = "list2";
+std::string CmdDisReg::PARAM_TABLE1_STR  = "tab1";
+std::string CmdDisReg::PARAM_TABLE2_STR  = "tab2";
 std::string CmdDisReg::PARAM_FORMAT1_STR  = "fmt1";
 std::string CmdDisReg::PARAM_FORMAT2_STR  = "fmt2";
 std::string CmdDisReg::PARAM_EXPAND2_INT  = "expand2";
 std::string CmdDisReg::PARAM_OUTPUT_STR   = "output";
 
 void CmdDisReg::executeChild(const char *, GcObjSpace *os) {
-  GcObjStrList *gcl1 = os->getObj<GcObjStrList>(getParam(PARAM_LIST1_STR)->valStr().c_str());
-  GcObjStrList *gcl2 = os->getObj<GcObjStrList>(getParam(PARAM_LIST2_STR)->valStr().c_str());
+  GcObjStrTable *gcl1 = os->getObj<GcObjStrTable>(getParam(PARAM_TABLE1_STR)->valStr().c_str());
+  GcObjStrTable *gcl2 = os->getObj<GcObjStrTable>(getParam(PARAM_TABLE2_STR)->valStr().c_str());
   const uint64_t expand2 = getParam(PARAM_EXPAND2_INT)->valInt();
   const char *fmt1 =  getParam(PARAM_FORMAT1_STR)->valStr().c_str();
   const char *fmt2 =  getParam(PARAM_FORMAT2_STR)->valStr().c_str();
@@ -221,14 +306,15 @@ int main(int argc, char **argv) {
     const char* fnl1 = argv[1];
     const char* fnl2 = argv[2];
     const uint64_t expand2 = atoll(argv[3]);
-    StrList l1;
-    StrList l2;
-    l1.readList(fnl1);
-    l2.readList(fnl2);
+    StrTable l1;
+    StrTable l2;
+    l1.read(fnl1, true);
+    l2.read(fnl2, true);
     disreg(l1, l2, "cse", "...........cs", expand2, "/tmp/disreg_mat.txt");
   } else {
     GcScriptEnv e;
     e.addCmd(new CmdLoadStrList);
+    e.addCmd(new CmdLoadStrTable);
     e.addCmd(new CmdDisReg);
     e.runFile(argc >= 2 ? argv[1] : NULL);
   }

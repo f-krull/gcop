@@ -14,16 +14,18 @@ make -C "$GCOPDIR" disreg
 # generate disreg matrix
 
 time echo "
-  load_strlist \
-     dst=list_dnase \
-     file=${GCOPDIR}/testdata/dnasepk_list.txt
+  load_strtable \
+     dst=tab_dnase \
+     file=${GCOPDIR}/testdata/dnase/list_dnase_pk_encode.txt \
+     header=1
+     
 
-  load_strlist \
-     dst=list_gwas \
+  load_strtable \
+     dst=tab_gwas \
      file=${GCOPDIR}/testdata/gwascat/list.txt
 
-  disreg list1=list_dnase fmt1=cse \
-         list2=list_gwas  fmt2=...........cs \
+  disreg tab1=tab_dnase fmt1=cse \
+         tab2=tab_gwas  fmt2=...........cs \
          expand2=25000 \
          output=/tmp/disreg_matrix.txt
 " \
