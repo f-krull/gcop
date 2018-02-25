@@ -3,28 +3,28 @@
 trap 'exit' ERR
 
 declare -r SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-declare -r OUTDIR="$SCRIPTDIR"/../../../testdata/dnase/
+declare -r OUTDIR="$SCRIPTDIR"/../../testdata/dnase/
 
 mkdir -p "$OUTDIR"
 mkdir -p "$OUTDIR"/tmp
 
 
-if [ ! -e $"$OUTDIR"/tmp/dnase_meta.txt ]; then
+if [ ! -e "$OUTDIR"/tmp/dnase_meta.txt ]; then
   wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeUwDnase/files.txt \
-    -O $"$OUTDIR"/tmp/dnase_meta.txt
+    -O "$OUTDIR"/tmp/dnase_meta.txt
 fi
 
-cat $"$OUTDIR"/tmp/dnase_meta.txt \
+cat "$OUTDIR"/tmp/dnase_meta.txt \
   | IFS=";" awk '{ if ($7 == "view=Peaks;") printf "%s\t%s\n", $1, $8;}' \
   | sed "s/cell=//" \
   | sed "s/;$//" \
-  > $"$OUTDIR"/tmp/filelist_dnase_peaks.txt  
+  > "$OUTDIR"/tmp/filelist_dnase_peaks.txt
 
-cat $"$OUTDIR"/tmp/dnase_meta.txt \
+cat "$OUTDIR"/tmp/dnase_meta.txt \
   | IFS=";" awk '{ if ($7 == "view=Hotspots;") printf "%s\t%s\n", $1, $8;}' \
   | sed "s/cell=//" \
   | sed "s/;$//" \
-  > $"$OUTDIR"/tmp/filelist_dnase_hotspots.txt  
+  > "$OUTDIR"/tmp/filelist_dnase_hotspots.txt
 
 
 get_data() {
@@ -64,9 +64,9 @@ get_tissue_table() {
 
   printf "%s\t%s\t%s\t%s\t%s\t%s\n" "path" "fncell" "cell" "tissue" "karyotype" "sex"
   while read fn cell; do 
-    tissue=$(cat $file_celltypes | grep "^$cell"$'\t' | awk '{print $4}')
-    karyotype=$(cat $file_celltypes | grep "^$cell"$'\t' | awk '{print $5}')
-    sex=$(cat $file_celltypes | grep "^$cell"$'\t' | awk '{print $6}')
+    tissue=$(cat $file_celltypes    | tr " " "_" | grep "^$cell"$'\t' | awk '{print $4}')
+    karyotype=$(cat $file_celltypes | tr " " "_" | grep "^$cell"$'\t' | awk '{print $5}')
+    sex=$(cat $file_celltypes       | tr " " "_" | grep "^$cell"$'\t' | awk '{print $6}')
     fncell=$fn
     fncell=${fncell%%.*}
     fncell=${fncell#wgEncodeUwDnase}
