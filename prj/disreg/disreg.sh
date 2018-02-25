@@ -37,6 +37,8 @@ time echo "
 
 # create heatmap
 
+exit 0
+
 time Rscript <(echo '
   t <- read.table("/tmp/disreg_matrix.txt", header=T, row.names=1)
   t <- as.matrix(t)

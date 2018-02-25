@@ -75,31 +75,24 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
 
 void writeMat_cg(const char *fn, const std::vector<std::vector<float>> & mat,
     const StrTable &l1, const StrTable &l2) {
-  class _TmpFunc {
-   public:
-     static std::string cleanFn(const std::string &fn) {
-       std::string res = fn;
-       res = std::regex_replace(res, std::regex(".*/"),   "");
-       res = std::regex_replace(res, std::regex(".gz$"),  "");
-       res = std::regex_replace(res, std::regex(".txt$"), "");
-       return res;
-     }
-   };
-
   FILE *f = fopen(fn, "w");
   assert(f);
   /* header */
   for (uint32_t j = 0; j < l1.nrows(); j++) {
     fprintf(f, "\t(");
-    for (uint32_t k = 0; k < l1.ncols(); k++) {
-      fprintf(f, "%s'%s: %s'", k == 0 ? "" : ", ", l1.header()[k].c_str(), l1.body()[j][k].c_str());
+    for (uint32_t k = 1; k < l1.ncols(); k++) {
+      fprintf(f, "%s'%s: %s'", k == 1 ? "" : ", ", l1.header()[k].c_str(), l1.body()[j][k].c_str());
     }
     fprintf(f, ")");
   }
   fprintf(f, "\n");
   /* data */
   for (uint32_t i = 0; i < l2.nrows(); i++) {
-    fprintf(f, "('name: %s')", _TmpFunc::cleanFn(l2.body()[i][0]).c_str());
+    fprintf(f, "(");
+    for (uint32_t k = 1; k < l2.ncols(); k++) {
+      fprintf(f, "%s'%s: %s'", k == 1 ? "" : ", ", l2.header()[k].c_str(), l2.body()[i][k].c_str());
+    }
+    fprintf(f, ")");
     for (uint32_t j = 0; j < l1.nrows(); j++) {
       fprintf(f, "%s%f", "\t", mat[j][i]);
     }
