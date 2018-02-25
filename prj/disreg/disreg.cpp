@@ -230,9 +230,10 @@ void CmdLoadStrList::executeChild(const char *, GcObjSpace *os) {
 class CmdLoadStrTable : public GcCommand {
 public:
   CmdLoadStrTable() {
-    addParam(GcCmdParam(PARAM_DST_STR,    GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_FILE_STR,   GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_HEADER_INT, GcCmdParam::PARAM_INT,    "0"));
+    addParam(GcCmdParam(PARAM_DST_STR,      GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FILE_STR,     GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_HEADER_INT,   GcCmdParam::PARAM_INT,    "0"));
+    addParam(GcCmdParam(PARAM_MAXLINES_INT, GcCmdParam::PARAM_INT,    "0"));
   }
   const char* name() const {
     return "load_strtable";
@@ -240,19 +241,22 @@ public:
   static std::string PARAM_DST_STR;
   static std::string PARAM_FILE_STR;
   static std::string PARAM_HEADER_INT;
+  static std::string PARAM_MAXLINES_INT;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
 
-std::string CmdLoadStrTable::PARAM_DST_STR    = "dst";
-std::string CmdLoadStrTable::PARAM_FILE_STR   = "file";
-std::string CmdLoadStrTable::PARAM_HEADER_INT = "header";
+std::string CmdLoadStrTable::PARAM_DST_STR      = "dst";
+std::string CmdLoadStrTable::PARAM_FILE_STR     = "file";
+std::string CmdLoadStrTable::PARAM_HEADER_INT   = "header";
+std::string CmdLoadStrTable::PARAM_MAXLINES_INT = "maxlines";
 
 void CmdLoadStrTable::executeChild(const char *, GcObjSpace *os) {
   GcObjStrTable *gcsl = new GcObjStrTable();
-  const char *filename = getParam(PARAM_FILE_STR)->valStr().c_str();
-  const bool  header   = getParam(PARAM_HEADER_INT)->valInt();
-  gcsl->d()->read(filename, header);
+  const char     *filename = getParam(PARAM_FILE_STR)->valStr().c_str();
+  const bool      header   = getParam(PARAM_HEADER_INT)->valInt();
+  const uint32_t  maxlines = getParam(PARAM_MAXLINES_INT)->valInt();
+  gcsl->d()->read(filename, header, maxlines);
   os->addObj(getParam(PARAM_DST_STR)->valStr(), gcsl);
 }
 

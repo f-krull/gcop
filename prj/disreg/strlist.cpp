@@ -39,7 +39,7 @@ private:
 
 class StrTable {
 public:
-  void read(const char * filename, bool header = false, char sep = '\t') {
+  void read(const char * filename, bool header = false, uint32_t maxlines = 0, char sep = '\t') {
     char buffer[1024];
     FILE *f = fopen(filename, "r");
     assert(f);
@@ -55,8 +55,10 @@ public:
       }
     }
     rewind(f);
-    uint32_t line = 1;
+    maxlines += (maxlines && header) ? 1 : 0; /* do not count any header */
+    uint32_t line = 0;
     while (fgets(buffer, sizeof(buffer) - 1, f) != NULL) {
+      line++;
       std::vector<std::string> row;
       char *s = buffer;
       char *e = s;
@@ -71,7 +73,7 @@ public:
         s = e;
       }
       if (row.size() != ncol) {
-        fprintf(stderr, "error: %s,line %u has %lu elements - expected %u\n",
+        fprintf(stderr, "error: %s, line %u has %lu elements - expected %u\n",
             filename, line, row.size(), ncol);
         exit(1);
       }
@@ -80,7 +82,9 @@ public:
       } else {
         m_b.push_back(row);
       }
-      line++;
+      if (maxlines && line >= maxlines) {
+        break;
+      }
     }
     fclose(f);
     printf("nrows:%u ncols:%u\n", nrows(), ncols());
