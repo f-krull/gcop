@@ -2,7 +2,6 @@ SRCS := data/chrinfo.cpp \
         data/fieldformat.cpp \
         data/fieldtypes.cpp \
         data/gcords.cpp \
-        data/ldinfo.cpp \
         data/tabfield.cpp \
         int/cmd_base.cpp \
         int/cmdparam.cpp \
@@ -40,5 +39,8 @@ clean:
 	$(RM) */*.o *.o
 	$(RM) libgcop.a
 
-test:
-	$(CXX) -DDEBUG -g2 -Wall data/intervaltree_test.cpp -o bin/intervaltree_test
+test: libgcop.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall data/intervaltree_test.cpp -o bin/intervaltree_test
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall test/flatten_test.cpp -L. -lgcop -lz -o test/flatten_test
+
+.PHONY: test
