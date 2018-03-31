@@ -47,7 +47,7 @@ typename IntervalTree<T>::ItNode* IntervalTree<T>::ItNode::build_tree(const std:
 template<typename T>
 bool IntervalTree<T>::IndexedInterval::findSmallerPoints(
     const std::vector<IndexedInterval> &bs, uint64_t b,
-    std::vector<uint32_t> *res) {
+    std::set<uint32_t> *res) {
   bool ret = false;
   typename std::vector<IndexedInterval>::const_iterator it;
   for (it = bs.begin(); it != bs.end(); ++it) {
@@ -58,7 +58,7 @@ bool IntervalTree<T>::IndexedInterval::findSmallerPoints(
     ret = true;
     if (res) {
       /* mark result */
-      (*res).push_back(it->srcIdx);
+      (*res).insert(it->srcIdx);
     }
   }
   return ret;
@@ -70,7 +70,7 @@ bool IntervalTree<T>::IndexedInterval::findSmallerPoints(
 template<typename T>
 bool IntervalTree<T>::IndexedInterval::findGreaterPoints(
     const std::vector<IndexedInterval> &es, uint64_t b,
-    std::vector<uint32_t> *res) {
+    std::set<uint32_t> *res) {
   bool ret = false;
   typename std::vector<IndexedInterval>::const_reverse_iterator it;
   for (it = es.rbegin(); it != es.rend(); ++it) {
@@ -87,7 +87,7 @@ bool IntervalTree<T>::IndexedInterval::findGreaterPoints(
     ret = true;
     if (res) {
       /* mark result */
-      (*res).push_back(it->srcIdx);
+      (*res).insert(it->srcIdx);
     }
   }
   return ret;
@@ -98,7 +98,7 @@ bool IntervalTree<T>::IndexedInterval::findGreaterPoints(
 template<typename T>
 bool IntervalTree<T>::IndexedInterval::findRightOv(
     const std::vector<IndexedInterval> &bs, T i,
-    std::vector<uint32_t> *res) {
+    std::set<uint32_t> *res) {
   /*
    * query i:  s---------e
    *      bs:   s------------e
@@ -114,7 +114,7 @@ bool IntervalTree<T>::IndexedInterval::findRightOv(
   typename std::vector<IndexedInterval>::const_iterator end =
       std::upper_bound(bs.begin(), bs.end(), i.e > 0 ? i.e - 1 : 0, IndexedInterval::CmpStart());
   for (; res != NULL && beg != end; ++beg) {
-    res->push_back(beg->srcIdx);
+    res->insert(beg->srcIdx);
   }
   return beg != end;
 }
@@ -187,7 +187,7 @@ bool IntervalTree<T>::ItNode::overlaps(uint64_t p) const {
 /*----------------------------------------------------------------------------*/
 
 template <typename T>
-bool IntervalTree<T>::ItNode::getOverlaps(uint64_t p, std::vector<uint32_t> *res, uint32_t depth) const {
+bool IntervalTree<T>::ItNode::getOverlaps(uint64_t p, std::set<uint32_t> *res, uint32_t depth) const {
   bool ret = false;
   DEBUG_OUT("%*s (%lu)\n", depth, "", m_center);
   /* point is outside of node */
@@ -283,29 +283,21 @@ void IntervalTree<T>::print() const {
 template <typename T>
 bool IntervalTree<T>::overlapsInterval(const T &i, std::vector<uint32_t> *res) const {
   bool ret = false;
-  if (res) {
-    res->clear();
-  }
+  std::set<uint32_t> rs;
   if (m_root != NULL) {
-    ret = m_root->getOverlaps(i.s, res, 0) || ret;
+    ret = m_root->getOverlaps(i.s, res ? &rs : NULL, 0) || ret;
   }
   /* skip this step, if result list isn't required overlap already found */
   if (!res) {
-    ret = ret || IndexedInterval::findRightOv(m_bs, i, res);
+    ret = ret || IndexedInterval::findRightOv(m_bs, i, res ? &rs : NULL);
   } else {
-    ret = IndexedInterval::findRightOv(m_bs, i, res) || ret;
+    ret = IndexedInterval::findRightOv(m_bs, i, res ? &rs : NULL) || ret;
   }
   //IndexedInterval::findLeftOv(m_bs, i, &res);
+  if (res) {
+    res->assign(rs.begin(), rs.end());
+  }
   return ret;
-}
-
-/*----------------------------------------------------------------------------*/
-
-
-template <typename T>
-bool IntervalTree<T>::overlapsInterval_(const T &i, std::vector<char> *res) const {
-  assert(false && "broken function");
-  return false;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -314,6 +306,7 @@ bool IntervalTree<T>::overlapsPoint(uint64_t p, std::vector<uint32_t> *res) cons
   T t;
   t.s = p;
   t.e = p+1;
+
   const bool ret = overlapsInterval(t, res);
 #ifdef DEBUG
   //assert(ret == overlaps(p));
