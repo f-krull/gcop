@@ -21,8 +21,10 @@ public:
   ChrInfo & operator=(const ChrInfo &o);
   bool operator==(const ChrInfo &o) const;
 
+  uint32_t numchrs() const;
   void read(const char *fn);
   uint64_t chrlen(CType t) const;
+  uint64_t len() const;
   CType str2type(const char *str) const;       /* str with or without "chr" pfx */
   CType str2typeStrict(const char *str) const; /* str with "chr" prefix */
   const std::vector<CType> & chrs() const;

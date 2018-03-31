@@ -23,25 +23,25 @@ GCord::GCord(std::vector<FieldType> fts) :
 
 /*----------------------------------------------------------------------------*/
 
-std::vector<GCord> GCords::getChr(ChrInfo::CType ct) const {
-  std::vector<GCord> cseg; //TODO: optimize
-  /* TODO: optimize */
-  for (uint32_t i = 0; i < m_d.size(); i++) {
-    if (m_d[i].chr == ct) {
-      cseg.push_back(m_d[i]);
-    }
-  }
-  return cseg;
+const std::vector<GCord> & GCords::getChr(ChrInfo::CType ct) const {
+  return m_d[ct];
 }
 
 /*----------------------------------------------------------------------------*/
 
 class ChrConv : public TokenReader::IConv {
 public:
-  ChrConv(const ChrInfo *ci) : m_t(ChrInfo::CTYPE_UNDEFINED), m_ci(ci) {};
+  ChrConv(const ChrInfo *ci, bool allowUndefChr) :
+      m_t(ChrInfo::CTYPE_UNDEFINED), m_ci(ci), m_allowUndefined(allowUndefChr) {
+  }
   virtual ~ChrConv() {};
   virtual void operator()(const char* s) {
     m_t = m_ci->str2type(s);
+    if (!m_allowUndefined && m_t == m_ci->CTYPE_UNDEFINED) {
+      fprintf(stderr, "error: chromosome \'%s\' not defined\n", s);
+      m_ci->print();
+      exit(1);
+    }
   }
   ChrInfo::CType get() const {
     return m_t;
@@ -49,6 +49,7 @@ public:
 private:
   ChrInfo::CType m_t;
   const ChrInfo *m_ci;
+  const bool m_allowUndefined;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -129,7 +130,8 @@ std::string field2str(const FieldValue &f) {
 
 
 #include "../util/file.h"
-bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const ChrInfo *chrinf) {
+bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const ChrInfo *chrinf, bool allowUndefChr) {
+  m_ci = *chrinf;
   const char delim = '\t';
   /* check format */
   const FieldFormat ffmt(fmt);
@@ -139,27 +141,25 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const Ch
 #endif
   ffmt.printFields();
 
+  m_d.resize(chrinf->numchrs());
+
   File f;
   if (!f.open(filename, "r", File::FILETYPE_AUTO)) {
     fprintf(stderr, "error: cannot open file %s\n", filename);
     exit(1);
   }
-  ChrConv cc(chrinf);
+  ChrConv cc(chrinf, allowUndefChr);
   const uint32_t bufsize = 1024*64*8;
   char *buffer = new char[bufsize];
 
   uint64_t lineno = 0;
+  uint64_t num_ignored = 0;
   while (f.gets(buffer, bufsize-1) != NULL) {
     lineno++;
     if (lineno <= skip) {
       continue;
     }
-#if __cplusplus >= 201103L
-    m_d.emplace_back(ffmt.types());
-#else
-    m_d.push_back(GCord(ffmt.types()));
-#endif
-    GCord &r = m_d.back();
+    GCord r(ffmt.types());
     {
       /* change line end to delimiter to simplify parsing */
       assert(buffer[strlen(buffer)-1] == '\n');
@@ -174,10 +174,14 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const Ch
     if (!has_end) {
       r.e = r.s + 1;
     }
+    if (r.chr == m_ci.CTYPE_UNDEFINED) {
+      num_ignored++;
+      continue;
+    }
+    m_d[r.chr].push_back(r);
   }
   f.close();
-  printf("read %lu genomic coordinate%s\n", m_d.size(), m_d.size() > 1 ? "s" : "");
-#if 1
+#if 0
   {
     /* print header */
     printf("%s\t%s\t%s", "chr", "bps", "bpe");
@@ -195,37 +199,39 @@ bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const Ch
       printf("\n");
     }
   }
+#else
 #endif
   delete [] buffer;
-  m_ci = *chrinf;
+  rebuild();
+  printf("read %lu genomic coordinate%s from %s\n", numgc(), numgc() > 1 ? "s" : "", filename);
+  if (num_ignored) {
+    printf("warning - ignoring %lu coordinates on undefined chromosomes\n", num_ignored);
+  }
+  const uint32_t num = 10;
+  write(stdout, std::min(m_d.size(), (size_t)num));
   return true;
 }
 
 /*----------------------------------------------------------------------------*/
 
-void GCords::intersect(const GCords* gca, const GCords* gcb, GCords* gci) {
-  assert(gci != NULL);
-  gci->clear();
-  std::vector<char> annot(gca->cdata().size(), 0);
-  ChrInfo::CType chr_curr = ChrInfo::CTYPE_UNDEFINED;
-  IntervalTree<GCord> *gcb_curr = NULL;
-  for (uint32_t i = 0; i < gca->cdata().size(); i++) {
-    if (chr_curr != gca->cdata()[i].chr) {
-      chr_curr = gca->cdata()[i].chr;
-      delete gcb_curr;
-      gcb_curr = new IntervalTree<GCord>(gcb->getChr(chr_curr));
-      printf("%s (%u)", gca->chrinfo().ctype2str(chr_curr), gcb_curr->numNodes());
-    }
-    std::vector<char> hasOverLap;
-    annot[i] = gcb_curr->overlapsInterval_(gca->cdata()[i]);
-    if (i % 10000 == 0) {
-      printf(".");
-      fflush(stdout);
+bool GCords::write(FILE *f, uint64_t maxlines) const {
+  const char sep = '\t';
+  uint64_t n = 0;
+  for (auto chr_it = begin(); chr_it != end(); ++chr_it) {
+    for (auto gc_it = chr_it->begin(); gc_it != chr_it->end(); ++gc_it) {
+      if (maxlines != 0 && n >= maxlines) {
+        break;
+      }
+      const GCord &g = *gc_it;
+      printf("%s%c%lu%c%lu", m_ci.ctype2str(g.chr), sep, g.s, sep, g.e);
+      for (uint32_t j = 0; j < ncols(); j++) {
+        printf("\t%s", field2str(g.d(j)).c_str());
+      }
+      printf("\n");
+      n++;
     }
   }
-  delete gcb_curr;
-  printf("\n");
-  return;
+  return true;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -322,10 +328,65 @@ void GCords::expand(uint64_t len) {
   if (!len) {
     return;
   }
-  for (uint32_t i = 0; i < data().size(); i++) {
-    GCord &g = data()[i];
-    const uint64_t chrlen = chrinfo().chrlen(g.chr);
-    g.s = (g.s > len) ? g.s - len : 0;
-    g.e = std::min(chrlen, g.e + len);
+  for (auto chr_it = begin(); chr_it != end(); ++chr_it) {
+    for (auto gc_it = chr_it->begin(); gc_it != chr_it->end(); ++gc_it) {
+      GCord &g = *gc_it;
+      const uint64_t chrlen = chrinfo().chrlen(g.chr);
+      g.s = (g.s > len) ? g.s - len : 0;
+      g.e = std::min(chrlen, g.e + len);
+    }
   }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void GCords::flatten() {
+  /* for each chromosome */
+  for (auto chr_it = begin(); chr_it != end(); ++chr_it) {
+    std::vector<GCord> gcs_new;
+    std::vector<char> merged(chr_it->size(), false);
+    const std::vector<GCord> &gcs = *chr_it;
+    /* for each unmerged gc */
+    for (uint32_t i = 0; i < gcs.size(); i++) {
+      if (merged[i] == true) {
+        continue;
+      }
+      GCord gm = gcs[i];
+      /* is next start inside merged? */
+      for (uint32_t j = i+1; j < gcs.size(); j++) {
+        /* no - abort */
+        if (gcs[j].s >= gm.e) {
+          break;
+        }
+        /* yes - merge too */
+        gm.e = std::max(gm.e, gcs[j].e);
+        merged[j] = true;
+      }
+      /* add merged */
+      gcs_new.push_back(gm);
+    }
+    /* update chr */
+    chr_it->swap(gcs_new);
+  }
+  rebuild();
+}
+
+/*----------------------------------------------------------------------------*/
+
+
+void GCords::rebuild() {
+  for (auto it = begin(); it != end(); ++it) {
+    /* sort by starts */
+    std::sort(it->begin(), it->end());
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t GCords::numgc() const {
+  uint64_t sum = 0;
+  for (auto it = begin(); it != end(); ++it) {
+    sum += it->size();
+  }
+  return sum;
 }

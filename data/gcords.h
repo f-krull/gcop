@@ -5,6 +5,7 @@
 #include "interval.h"
 #include "chrinfo.h"
 #include "tabfield.h"
+#include <stdio.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -29,22 +30,31 @@ class GCordsPriv;
 
 class GCords {
 public:
+  GCords() : m_ncols(0) {}
   virtual ~GCords() {};
-  bool read(const char *filename, const char *format, uint32_t skip, const ChrInfo *ci);
+  bool read(const char *filename, const char *format, uint32_t skip, const ChrInfo *ci, bool allowUndefChr);
+  bool write(FILE *f, uint64_t maxlines = 0) const;
   void clear() {m_d.resize(0);}
-  uint32_t ncols() const { return m_d.empty() ? 0 : m_d.back().nCols(); }
-  const std::vector<GCord> & cdata() const {return m_d;}
-  std::vector<GCord> & data() {return m_d;}
-  std::vector<GCord> getChr(ChrInfo::CType) const;
+  uint32_t ncols() const { return m_ncols; }
+  const std::vector<GCord> & getChr(ChrInfo::CType) const;
   void expand(uint64_t len);
+  void flatten();
+  typedef std::vector<GCord> Chr;
+  std::vector<Chr>::iterator begin() {return m_d.begin();}
+  std::vector<Chr>::const_iterator begin() const {return m_d.begin();}
+  std::vector<Chr>::iterator end() {return m_d.end();}
+  std::vector<Chr>::const_iterator end() const {return m_d.end();}
 
-  static void intersect(const GCords* gca, const GCords* gcb, GCords* gci);
   static void forbes(const GCords* gca, const GCords* gcb);
   const ChrInfo & chrinfo() const {return m_ci;}
+  uint64_t numgc() const;
+
 
 protected:
-  std::vector<GCord> m_d;
+  std::vector<Chr> m_d;
+  void rebuild();
   ChrInfo m_ci;
+  uint32_t m_ncols;
 };
 
 

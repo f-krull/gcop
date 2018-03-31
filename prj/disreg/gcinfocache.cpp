@@ -2,11 +2,10 @@
 #include "../../data/chrinfo.h"
 #include "../../data/intervaltree.h"
 
-/*----------------------------------------------------------------------------*/
 
-class LengthsSum {
+class LengthsSumChr {
 public:
-  LengthsSum(const std::vector<GCord> &g, ChrInfo::CType c) {
+  LengthsSumChr(const std::vector<GCord> &g, ChrInfo::CType c) {
     m_sum = 0;
     for (uint32_t i = 0; i < g.size(); i++) {
       m_sum += g[i].len();
@@ -34,13 +33,9 @@ public:
     delete m_it;
   }
 
-  const std::vector<GCord> & vgcords() const {
-    return m_g;
-  }
-
-  const LengthsSum * lengthssum() {
+  const LengthsSumChr * lengthssum() {
     if (m_len == NULL) {
-      m_len = new LengthsSum(m_g, m_chr);
+      m_len = new LengthsSumChr(m_g, m_chr);
     }
     return m_len;
   }
@@ -54,7 +49,7 @@ public:
 
 private:
   IntervalTree<GCord> *m_it;
-  LengthsSum *m_len;
+  LengthsSumChr *m_len;
   std::vector<GCord> m_g;
   const GCords *m_gc;
   const ChrInfo::CType m_chr;
@@ -62,17 +57,17 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
+class LengthsSum;
+
+/*----------------------------------------------------------------------------*/
+
 class GCordsInfoCache {
 public:
   GCordsInfoCache(const GCords *gc) : m_gc(gc) {
+    m_len = NULL;
   }
 
-  ~GCordsInfoCache() {
-    std::map<ChrInfo::CType, GCordsChrInfo*>::iterator it;
-    for (it = m_ginf.begin(); it != m_ginf.end(); ++it) {
-      delete it->second;
-    }
-  }
+  ~GCordsInfoCache();
 
   GCordsInfoCache( const GCordsInfoCache & o);
   const GCordsInfoCache & operator=(const GCordsInfoCache & o);
@@ -93,7 +88,42 @@ public:
     return m_gc;
   }
 
+
+  const LengthsSum *len();
+
 private:
   const GCords *m_gc;
+  LengthsSum *m_len;
   std::map<ChrInfo::CType, GCordsChrInfo*> m_ginf;
 };
+
+class LengthsSum {
+public:
+  LengthsSum(GCordsInfoCache &gic) {
+    m_sum = 0;
+    for (uint32_t i = 0; i < gic.gcords()->chrinfo().chrs().size(); i++) {
+      m_sum += gic.chr(i)->lengthssum()->get();
+    }
+  }
+  uint64_t get() const {
+    return m_sum;
+  }
+private:
+  uint64_t m_sum;
+};
+
+GCordsInfoCache::~GCordsInfoCache() {
+  std::map<ChrInfo::CType, GCordsChrInfo*>::iterator it;
+  for (it = m_ginf.begin(); it != m_ginf.end(); ++it) {
+    delete it->second;
+  }
+  delete m_len;
+}
+
+const LengthsSum *GCordsInfoCache::len() {
+  if (m_len == NULL) {
+    m_len = new LengthsSum(*this);
+  }
+  return m_len;
+}
+

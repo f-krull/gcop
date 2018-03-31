@@ -12,12 +12,15 @@
 
 class ChrInfoPriv {
 public:
+  ChrInfoPriv() : len(0) {}
   typedef std::map<ChrInfo::CType, uint64_t>    MapLengths;
   typedef std::map<std::string, ChrInfo::CType> MapStr2type;
   MapLengths lenghts;
   MapStr2type str2type;
   std::vector<std::string> strs;
   std::vector<ChrInfo::CType> cts;
+  uint64_t len;
+
 };
 
 /*----------------------------------------------------------------------------*/
@@ -86,6 +89,7 @@ void ChrInfo::addEntry(const char *chrIdStr, uint64_t chrLen) {
   m->lenghts.insert(std::make_pair(currChrId, chrLen));
   m->str2type.insert(std::make_pair(chrIdStr, currChrId));
   m->cts.push_back(currChrId);
+  m->len += chrLen;
 #if 0
   /* skip "chr" in "chrX.." */
   assert(chrIdStr != NULL);
@@ -120,6 +124,12 @@ uint64_t ChrInfo::chrlen(CType t) const {
 
 /*----------------------------------------------------------------------------*/
 
+uint64_t ChrInfo::len() const {
+  return m->len;
+}
+
+/*----------------------------------------------------------------------------*/
+
 const char * ChrInfo::ctype2str(CType t) const {
   return m->strs[t].c_str();
 }
@@ -146,11 +156,34 @@ ChrInfo::CType ChrInfo::str2type(const char *str) const {
 ChrInfo::CType ChrInfo::str2typeStrict(const char *str) const {
   const ChrInfoPriv::MapStr2type::const_iterator it = m->str2type.find(str);
   if (it == m->str2type.end()) {
-    fprintf(stderr, "error: chromosome \'%s\' not defined\n", str);
-    print();
-    exit(1);
+    return CTYPE_UNDEFINED;
   }
   return it->second;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool ChrInfo::operator==(const ChrInfo &b) const {
+  bool ret = true;
+  for (uint32_t i = 0; ret && i < m->strs.size(); i++) {
+    std::string a_s = m->strs[i];
+    CType       a_t = str2type(a_s.c_str());
+    ret = ret && a_t == b.str2type(a_s.c_str());
+    ret = ret && chrlen(a_t) == b.chrlen(a_t);
+  }
+  return ret;
+}
+
+/*----------------------------------------------------------------------------*/
+
+const std::vector<ChrInfo::CType> & ChrInfo::chrs() const {
+  return m->cts;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint32_t ChrInfo::numchrs() const {
+  return m->lenghts.size();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -181,23 +214,4 @@ ChrInfoHg19::ChrInfoHg19() : ChrInfo() {
   addEntry("chr22", 51304566);
   addEntry("chrX",  155270560);
   addEntry("chrY",  59373566);
-}
-
-/*----------------------------------------------------------------------------*/
-
-bool ChrInfo::operator==(const ChrInfo &b) const {
-  bool ret = true;
-  for (uint32_t i = 0; ret && i < m->strs.size(); i++) {
-    std::string a_s = m->strs[i];
-    CType       a_t = str2type(a_s.c_str());
-    ret = ret && a_t == b.str2type(a_s.c_str());
-    ret = ret && chrlen(a_t) == b.chrlen(a_t);
-  }
-  return ret;
-}
-
-/*----------------------------------------------------------------------------*/
-
-const std::vector<ChrInfo::CType> & ChrInfo::chrs() const {
-  return m->cts;
 }

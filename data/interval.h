@@ -59,6 +59,17 @@ public:
     const uint64_t e = std::min(a.e, b.e);
     return e > s ? (e - s) : 0;
   }
+
+  bool merge(const Interval &o) {
+    //TODO: can be optimized a bit
+    if (numOverlap(*this, o) == 0) {
+        return false;
+    }
+    s = std::min(s, o.s);
+    e = std::max(e, o.e);
+    return true;
+  }
+
 };
 
 

@@ -6,7 +6,7 @@
 #include <assert.h>
 
 /*----------------------------------------------------------------------------*/
-
+#if 0
 class CmdLoadLdInfo : public GcCommand {
 public:
   CmdLoadLdInfo() {
@@ -102,7 +102,7 @@ void CmdLdTest::executeChild(const char *, GcObjSpace *os) {
   GcObjGCords  *snps = os->getObj<GcObjGCords>(srcsnps);
   ldi->d()->test(snps->d());
 }
-
+#endif
 /*----------------------------------------------------------------------------*/
 #include "objs_base.h"
 class CmdLoadGCords : public GcCommand {
@@ -141,45 +141,9 @@ void CmdLoadGCords::executeChild(const char *, GcObjSpace *os) {
   gcs->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str(),
                     getParam(PARAM_FORMAT_STR)->valStr().c_str(),
                     getParam(PARAM_SKIP_INT)->valInt(),
-                    gchr->d());
+                    gchr->d(), true);
   os->addObj(getParam(PARAM_DST_STR)->valStr(), gcs);
 }
-
-/*----------------------------------------------------------------------------*/
-
-class CmdIntersectGc : public GcCommand {
-public:
-  CmdIntersectGc() {
-    addParam(GcCmdParam(PARAM_DST_STR,  GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_SRCA_STR, GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_SRCB_STR, GcCmdParam::PARAM_STRING, ""));
-  }
-  const char* name() const {
-    return "intersect";
-  }
-  static std::string PARAM_DST_STR;
-  static std::string PARAM_SRCA_STR;
-  static std::string PARAM_SRCB_STR;
-protected:
-  void executeChild(const char *, GcObjSpace *os);
-};
-
-std::string CmdIntersectGc::PARAM_DST_STR   = "dst";
-std::string CmdIntersectGc::PARAM_SRCA_STR = "srca";
-std::string CmdIntersectGc::PARAM_SRCB_STR = "srcb";
-
-#include <stdio.h>
-#include "../data/gcords.h"
-void CmdIntersectGc::executeChild(const char *, GcObjSpace *os) {
-  const char *srca = getParam(PARAM_SRCA_STR)->valStr().c_str();
-  const char *srcb = getParam(PARAM_SRCB_STR)->valStr().c_str();
-  GcObjGCords *gca = os->getObj<GcObjGCords>(srca);
-  GcObjGCords *gcb = os->getObj<GcObjGCords>(srcb);
-  GcObjGCords *gci = new GcObjGCords();
-  GCords::intersect(gca->d(), gcb->d(), gci->d());
-  os->addObj(getParam(PARAM_DST_STR)->valStr(), gci);
-}
-
 
 /*----------------------------------------------------------------------------*/
 
@@ -205,7 +169,7 @@ void CmdGCordsInfo::executeChild(const char *, GcObjSpace *os) {
   const char *src = getParam(PARAM_SRC_STR)->valStr().c_str();
   GcObjGCords *snps = os->getObj<GcObjGCords>(src);
   const GCords *g = snps->d();
-  printf("%s: number of genomic coordinates %lu\n", src, g->cdata().size());
+  printf("%s: number of genomic coordinates %lu\n", src, g->numgc());
 }
 
 /*----------------------------------------------------------------------------*/
@@ -270,11 +234,12 @@ void CmdForbes::executeChild(const char *, GcObjSpace *os) {
 
 void cmd_base_add(ICmdSink *cs) {
   cs->addCmd(new CmdGCordsInfo);
+#if 0
   cs->addCmd(new CmdLoadLdInfo);
   cs->addCmd(new CmdLdGet);
   cs->addCmd(new CmdLdTest);
+#endif
   cs->addCmd(new CmdLoadGCords);
-  cs->addCmd(new CmdIntersectGc);
   cs->addCmd(new CmdLoadChrInfo);
   cs->addCmd(new CmdForbes);
 }

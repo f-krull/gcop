@@ -31,8 +31,8 @@ static uint64_t calcAvsB(const std::vector<GCord> &ac,
 }
 
 /*----------------------------------------------------------------------------*/
-
-static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
+#if 0
+static double forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
  /*
   * forbes = N * |A and B| / ( |A| * |B| )
   */
@@ -49,8 +49,8 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
   for (uint32_t i = 0; i < g1inf.gcords()->chrinfo().chrs().size(); i++) {
     ChrInfo::CType chr_curr = g1inf.gcords()->chrinfo().chrs()[i];
     printf("%s\n", g1inf.gcords()->chrinfo().ctype2str(chr_curr));
-    const std::vector<GCord> &ac = g1inf.chr(chr_curr)->vgcords();
-    const std::vector<GCord> &bc = g2inf.chr(chr_curr)->vgcords();
+    const std::vector<GCord> &ac = g1inf.gcords()->getChr(chr_curr);
+    const std::vector<GCord> &bc = g2inf.gcords()->getChr(chr_curr);
     n_c += chrinfo.chrlen(chr_curr);
     if (ac.empty() && bc.empty()) {
       continue;
@@ -64,16 +64,16 @@ static float forbes(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
   printf("a: %lu\n", n_a);
   printf("b: %lu\n", n_b);
 
-  float num = n_c * n_ab;
-  float den = n_a * n_b;
-  float ret = den > 0 ? num/den : 0;
+  double num = n_c * n_ab;
+  double den = n_a * n_b;
+  double ret = den > 0 ? num/den : 0;
   printf("forbes: %f\n", ret);
   return ret;
 }
-
+#endif
 /*----------------------------------------------------------------------------*/
 
-void writeMat_cg(const char *fn, const std::vector<std::vector<float>> & mat,
+void writeMat_cg(const char *fn, const std::vector<std::vector<double>> & mat,
     const StrTable &l1, const StrTable &l2) {
   FILE *f = fopen(fn, "w");
   assert(f);
@@ -94,7 +94,7 @@ void writeMat_cg(const char *fn, const std::vector<std::vector<float>> & mat,
     }
     fprintf(f, ")");
     for (uint32_t j = 0; j < l1.nrows(); j++) {
-      fprintf(f, "%s%f", "\t", mat[j][i]);
+      fprintf(f, "%s%lf", "\t", mat[j][i]);
     }
     fprintf(f, "\n");
   }
@@ -103,80 +103,169 @@ void writeMat_cg(const char *fn, const std::vector<std::vector<float>> & mat,
 
 /*----------------------------------------------------------------------------*/
 
-static std::vector<std::vector<float>> disreg(const StrTable &l1,
+void writeMat_txt(const char *fn, const std::vector<std::vector<double>> & mat,
+    const StrTable &l1, const StrTable &l2) {
+  FILE *f = fopen(fn, "w");
+  assert(f);
+  /* header */
+  for (uint32_t j = 0; j < l1.nrows(); j++) {
+    for (uint32_t k = 1; k < std::min(l1.ncols(), 2u); k++) {
+      fprintf(f, "%s%s", (j == 0 ? "" : "\t"), l1.body()[j][k].c_str());
+    }
+  }
+  fprintf(f, "\n");
+  /* data */
+  for (uint32_t i = 0; i < l2.nrows(); i++) {
+    for (uint32_t k = 1; k < std::min(l2.ncols(), 2u); k++) {
+      fprintf(f, "%s%s", "", l2.body()[i][k].c_str());
+    }
+    for (uint32_t j = 0; j < l1.nrows(); j++) {
+      fprintf(f, "%s%lf", "\t", mat[j][i]);
+    }
+    fprintf(f, "\n");
+  }
+  fclose(f);
+}
+
+/*----------------------------------------------------------------------------*/
+#if 0
+static std::vector<std::vector<double>> disreg(const StrTable &l1,
     const StrTable &l2, const char *fmt1, const char *fmt2, uint64_t expand2,
     const char *outfn) {
   assert(l1.ncols() >= 1);
   assert(l2.ncols() >= 1);
   ChrInfoHg19 hg19;
-  std::vector<std::vector<float>> mat;
+  std::vector<std::vector<double>> mat;
   mat.resize(l1.nrows());
   for (uint32_t i = 0; i < l1.nrows(); i++) {
     mat[i].resize(l2.nrows(), 0.f);
     GCords g1;
     g1.read(l1.body()[i][0].c_str(), fmt1, 0, &hg19);
+    g1.flatten();
     GCordsInfoCache g1inf(&g1);
     for (uint32_t j = 0; j < l2.nrows(); j++) {
       GCords g2;
       g2.read(l2.body()[j][0].c_str(), fmt2, 0, &hg19);
       g2.expand(expand2);
+      g2.flatten();
       GCordsInfoCache g2inf(&g2);
       mat[i][j] = forbes(g2inf, g1inf);
     }
   }
-
-  class _TmpFunc {
-  public:
-    static std::string cleanFn(const std::string &fn) {
-      std::string res = fn;
-      res = std::regex_replace(res, std::regex(".*/"),   "");
-      res = std::regex_replace(res, std::regex(".gz$"),  "");
-      res = std::regex_replace(res, std::regex(".txt$"), "");
-      return res;
-    }
-  };
-
   /* write matrix */
   writeMat_cg(outfn, mat, l1, l2);
-#if 0
-  {
-    FILE *f = fopen(outfn, "w");
-    assert(f);
-    /* header */
-    for (uint32_t j = 0; j < l1.nrows(); j++) {
-      fprintf(f, "\t%s",_TmpFunc::cleanFn(l1.body()[j][0]).c_str());
+  return mat;
+}
+#endif
+
+static uint64_t numOverlap(GCordsInfoCache & g1inf, GCordsInfoCache & g2inf) {
+  uint64_t sum = 0;
+  for (uint32_t i = 0; i < g1inf.gcords()->chrinfo().chrs().size(); i++) {
+    ChrInfo::CType chr_curr = g1inf.gcords()->chrinfo().chrs()[i];
+    const std::vector<GCord> &ac = g1inf.gcords()->getChr(chr_curr);
+    const std::vector<GCord> &bc = g2inf.gcords()->getChr(chr_curr);
+    if (ac.empty() && bc.empty()) {
+      continue;
     }
-    fprintf(f, "\n");
-    /* data */
-    for (uint32_t i = 0; i < l2.nrows(); i++) {
-      fprintf(f, "%s", _TmpFunc::cleanFn(l2.body()[i][0]).c_str());
-      for (uint32_t j = 0; j < l1.nrows(); j++) {
-        fprintf(f, "%s%f", "\t", mat[j][i]);
-      }
-      fprintf(f, "\n");
-    }
-    fclose(f);
+    const IntervalTree<GCord> &bit = *g2inf.chr(chr_curr)->it();
+    sum += calcAvsB(ac, bc, bit);
   }
-  {
-  FILE *f = fopen(outfn, "w");
-    assert(f);
-    /* header */
-    for (uint32_t j = 0; j < l2.get().size(); j++) {
-      fprintf(f, "\t%s", _TmpFunc::cleanFn(l2.get()[j]).c_str());
+  return sum;
+}
+#include <numeric>
+#include <math.h>
+static std::vector<std::vector<double>> disreg(const StrTable &l1,
+    const StrTable &l2, const char *fmt1, const char *fmt2, uint64_t expand2,
+    const char *outfn) {
+  assert(l1.ncols() >= 1);
+  assert(l2.ncols() >= 1);
+  ChrInfoHg19 hg19;
+
+  const StrTable &inp_s_tab = l1;
+  const StrTable &inp_p_tab = l2;
+  const uint32_t s_m = inp_s_tab.nrows();
+  const uint32_t p_n = inp_p_tab.nrows();
+
+  std::vector<std::vector<double>>      o_mat(s_m);
+  std::vector<std::vector<double>>      e_mat(s_m);
+  std::vector<double>                 s_N_vec(s_m, 0.f);
+  std::vector<double>                 p_M_vec(p_n, 0.f);
+  //std::vector<double>              p_N_UP_vec(p_n, 0.f);
+
+  /* compute O_ij */
+  for (uint32_t j = 0; j < s_m; j++) {
+    o_mat[j].resize(inp_p_tab.nrows(), 0.f);
+    GCords s_g;
+    s_g.read(inp_s_tab.body()[j][0].c_str(), fmt1, 0, &hg19, true);
+    s_g.flatten();
+    GCordsInfoCache s_ginf(&s_g);
+    for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
+      GCords p_g;
+      p_g.read(inp_p_tab.body()[i][0].c_str(), fmt2, 0, &hg19, true);
+      p_g.expand(expand2);
+      p_g.flatten();
+      GCordsInfoCache p_ginf(&p_g);
+      //e_mat[j][i] = p_ginf.len()->get() * s_ginf.leqn()->get() / p_ginf.gcords()->chrinfo().len();
+      o_mat[j][i] = numOverlap(p_ginf, s_ginf);
     }
-    fprintf(f, "\n");
-    /* data */
-    for (uint32_t i = 0; i < mat.size(); i++) {
-      fprintf(f, "%s", _TmpFunc::cleanFn(l1.get()[i]).c_str());
-      for (uint32_t j = 0; j < mat[i].size(); j++) {
-        fprintf(f, "%s%f", "\t", mat[i][j]);
-      }
-      fprintf(f, "\n");
+  }
+  /* compute N_1 .. N_m */
+  s_N_vec.resize(s_m, 0);
+  for (uint32_t j = 0; j < s_m; j++) {
+    s_N_vec[j] = 0;
+    for (uint32_t i = 0; i < p_n; i++) {
+      s_N_vec[j] += o_mat[j][i];
     }
-    fclose(f);
+  }
+
+  /* compute M_1 .. M_m */
+  p_M_vec.resize(p_n, 0);
+  for (uint32_t i = 0; i < s_m; i++) {
+    p_M_vec[i] = 0;
+    for (uint32_t j = 0; j < s_m; j++) {
+      p_M_vec[i] += o_mat[j][i];
+    }
+  }
+
+#if 0
+  /* compute N_UP_1 .. N_UP_n */
+  p_N_UP_vec.resize(0, p_n);
+  for (uint32_t i = 0; i < p_n; i++) {
+    p_N_UP_vec[i] = 0;
+    for (uint32_t j = 0; j < s_m; j++) {
+      p_N_UP_vec[i] += o_mat[j][i];
+    }
   }
 #endif
-  return mat;
+
+  //const double p_N_UP = std::accumulate(p_N_UP_vec.begin(), p_N_UP_vec.end(), 0.);
+  const double sp_N  = std::accumulate(s_N_vec.begin(),     s_N_vec.end(),    0.);
+
+
+  /* compute E_ij */
+  for (uint32_t j = 0; j < s_m; j++) {
+    e_mat[j].resize(inp_p_tab.nrows(), 0.);
+    for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
+      e_mat[j][i] =  s_N_vec[j] * p_M_vec[i] / sp_N;
+    }
+  }
+  std::vector<std::vector<double>> z_mat(s_m); /**  z-scores
+                                                * (O_ij - E_ij) /
+                                                * (E_ij * (1-E_ij/N_j))^0.5
+                                                */
+  for (uint32_t j = 0; j < s_m; j++) {
+    z_mat[j].resize(inp_p_tab.nrows(), 0.f);
+    for (uint32_t i = 0; i < p_n; i++) {
+      const double num = o_mat[j][i] - e_mat[j][i];
+      const double den = sqrt(e_mat[j][i] * (1 - e_mat[j][i]/s_N_vec[i]));
+      //const double num = e_mat[j][i];
+      //const double den = 1.f;
+      z_mat[j][i] = (den != 0) ? num / den : 0.f;
+    }
+  }
+  /* write matrix */
+  writeMat_txt(outfn, z_mat, inp_s_tab, inp_p_tab);
+  return z_mat;
 }
 
 /*----------------------------------------------------------------------------*/

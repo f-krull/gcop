@@ -18,7 +18,7 @@ cat > /tmp/pscript << EOF
 from clustergrammer import Network
 net = Network()
 net.load_file('/tmp/input_mat')
-net.normalize(axis='row', norm_type='zscore', keep_orig=True)
+#net.normalize(axis='row', norm_type='zscore', keep_orig=True)
 net.cluster()
 net.write_json_to_file('viz', '/tmp/mult_view.json')
 EOF
