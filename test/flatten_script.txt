@@ -1,0 +1,2 @@
+# load data
+load_gcords dst=g file=flatten_data.txt format=cse skip=1

@@ -1,0 +1,9 @@
+# should have no overlaps
+chr1	2	10
+chr1	10	11
+chr1	11	15
+chr1	20	25
+chr3	2	10
+chr3	10	11
+chr3	11	15
+chr3	20	25 
