@@ -39,6 +39,7 @@ public:
   const std::vector<GCord> & getChr(ChrInfo::CType) const;
   void expand(uint64_t len);
   void flatten();
+  void toPoints();
   typedef std::vector<GCord> Chr;
   std::vector<Chr>::iterator begin() {return m_d.begin();}
   std::vector<Chr>::const_iterator begin() const {return m_d.begin();}

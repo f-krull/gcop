@@ -373,6 +373,21 @@ void GCords::flatten() {
 
 /*----------------------------------------------------------------------------*/
 
+void GCords::toPoints() {
+  /* for each chromosome */
+  for (auto chr_it = begin(); chr_it != end(); ++chr_it) {
+    std::vector<GCord> &gcs = *chr_it;
+    /* for each gc */
+    for (uint32_t i = 0; i < gcs.size(); i++) {
+      const uint64_t mid = (gcs[i].e + gcs[i].s) / 2;
+      gcs[i].s = mid;
+      gcs[i].e = mid + 1;
+    }
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
 
 void GCords::rebuild() {
   for (auto it = begin(); it != end(); ++it) {
