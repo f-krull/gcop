@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+   </head>
+   <body>
+      <img id="stat">
+      <table>
+        <tr>
+          <td>
+            <img id="xlab">
+          </td>
+          <td style="border: 1px solid gray;">
+            <img id="tiny">
+          </td>
+          </td>
+          <td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid gray;">
+            <img id="main">
+          </td>
+          <td>
+            <img id="ylab">
+          </td>
+          <td>
+            <p id="info" style="padding-left: 30px;</p>
+          </td>
+        </tr>
+      </table>
+      <div id = "sse">
+         <a href = "javascript:Start()">Start</a>
+      </div>
+      <script type = "text/javascript">
+        // helper functions
+        function assert(condition, message) {
+            if (!condition) {
+                throw message || "Assertion failed";
+            }
+        }
+
+        function MVMsgPrefix() {
+          this.MAT_HEIGHT = "MAT_HEIGHT";
+          this.MAT_WIDTH  = "MAT_WIDTH";
+        };
+
+        function MatViewWs() {
+          this._ws = null;
+        }
+        MatViewWs.prototype.send = function(msg) {
+          if (this._ws == null) {
+            return;
+          }
+          this._ws.send(msg)
+        }
+        MatViewWs.prototype.connect = function() {
+          // already connected?
+          if (this._ws != null) {
+            return;
+          }
+          if ("WebSocket" in window) {
+               this._ws = new WebSocket("ws://localhost:11381");
+               this._ws.onopen = function() {
+                  // Web Socket is connected, send data using send()
+                  this.send("SET MAIN_WID " + 800);
+                  this.send("SET MAIN_HEI " + 600);
+                  this.send("SET XLAB_HEI " + 150);
+                  this.send("SET YLAB_WID " + 150);
+                  this.send("SET LABTXT_HEI " + 13);
+                  //alert("Message is sent...");
+               };
+               this._ws.onmessage = function (evt) { 
+                  var received_msg = evt.data;
+                  var dst_len = 4;
+                  var dst = received_msg.substring(0, dst_len);
+                  if (dst == "info") {
+                    document.getElementById(dst).innerHTML = received_msg.slice(dst_len);
+                  } else {
+                    document.getElementById(dst).src = received_msg.slice(dst_len);
+                  }
+               };
+               this._ws.onclose = function() { 
+                  // websocket is closed.
+                  alert("Connection is closed...");
+                  this._ws = null; 
+               };
+            } else {
+               alert("WebSocket NOT supported by your Browser!");
+            }
+        }
+
+        mvWs = new MatViewWs();
+
+        document.getElementById("main").addEventListener("wheel", function(evt){
+          if (evt.deltaY > 0) {
+            mvWs.send("ZOOMIN " + evt.offsetX + " " + evt.offsetY);
+          } else if (evt.deltaY < 0) {
+            mvWs.send("ZOOMOUT " + evt.offsetX + " " + evt.offsetY);
+          }
+        });
+
+        document.getElementById("main").addEventListener("mousedown", function(evt){
+          mvWs.send("CLICK " + evt.offsetX + " " + evt.offsetY);
+        });
+
+        function Start() {
+          mvWs.connect()
+        }
+      </script>
+   </body>
+</html>
