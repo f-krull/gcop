@@ -17,3 +17,14 @@ make 3rdparty
 make
 ```
 
+## TODO: 
+* drag
+* selection info (via tooltip?)
+* selection highlight
+* clustering
+* normalization
+* minimap navigation
+* ...
+* (fix ServerTcp dtor / ownership of service obj)
+* (httpfileservice client request for GET)
+* (httpfileservice send Content-Length)
