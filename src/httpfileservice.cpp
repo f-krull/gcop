@@ -24,7 +24,8 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
   buf.addf(""); /* null-term str */
   char *inget = (char*)buf.data();
   char *inurl = gettoken(inget, ' ');
-  gettoken(inurl, ' ');
+  char *inrem = gettoken(inurl, ' ');
+  gettoken(inrem, '\r');
   if (strcmp(HTTP_CMD_GET, inget) != 0) {
     m_log.err("client %u - expected %s, received (%s)", clientId, HTTP_CMD_GET, inget);
     return;
@@ -51,7 +52,7 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
   memcpy(url, urls, urle-urls);
   url[urle-urls] = '\0';
 #endif
-  //m_log.dbg("HttpReceiver: client %u url %s", clientId, url);
+  m_log.dbg("client %u -> request %s %s %s ...", clientId, inget, inurl, inrem);
   http_get(clientId, inurl);
 }
 
@@ -69,19 +70,19 @@ void HttpFileService::registerFile(const char *path, const char *url, const char
 void HttpFileService::http_get(uint32_t clientId, const char* url) {
   std::map<std::string, RegFile>::const_iterator it = m_rfiles.find(url);
   if (it == m_rfiles.end()) {
-    m_log.dbg("HttpReceiver: client %u url: %s", clientId, url);
+    m_log.dbg("client %u requested invalid file (%s)", clientId, url);
     write(clientId, "HTTP/1.1 400\r\n");
     write(clientId, "\r\n");
     return;
   }
-  m_log.dbg("HttpReceiver: client %u file '%s' found", clientId, url);
   FILE *fin = fopen(it->second.path.c_str(), "rb");
   if (fin == NULL) {
-    m_log.err("HttpReceiver: opening file %s", it->second.path.c_str());
+    m_log.err("client %u - error opening file %s", it->second.path.c_str());
     write(clientId, "HTTP/1.1 400\r\n");
     write(clientId, "\r\n");
     return;
   }
+  m_log.dbg("client %u <- sending file '%s'", clientId, url);
   write(clientId, "HTTP/1.1 200 OK\r\n");
   write(clientId, "Content-Type: %s\r\n", it->second.mimetype.c_str());
   write(clientId, "Cache-Control: no-cache\r\n");
