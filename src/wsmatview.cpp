@@ -417,8 +417,8 @@ WsMatView::WsMatView(WsService* s, uint32_t clientId) :
   m = new WsMatViewPriv;
   m->sendUpdate = true;
   m->mat = new HmMat();
-  m->mat->read("data/disreg_matrix_half.txt");
-  //m->mat->read("data/disreg_matrix.txt");
+  //m->mat->read("data/disreg_matrix_half.txt");
+  m->mat->read("data/disreg_matrix.txt");
 //  m->mat->orderByNameY();
 //  m->mat->orderByNameX();
   m->mat->orderBySlClusterY();
@@ -436,10 +436,14 @@ WsMatView::~WsMatView() {
 
 /*----------------------------------------------------------------------------*/
 
-#define CMD_PFX_SET     "SET "
-#define CMD_PFX_ZOOMIN  "ZOOMIN "
-#define CMD_PFX_ZOOMOUT "ZOOMOUT "
-#define CMD_PFX_CLICK   "CLICK "
+#define CMD_PFX_SET          "SET "
+#define CMD_PFX_ZOOMIN       "ZOOMIN "
+#define CMD_PFX_ZOOMOUT      "ZOOMOUT "
+#define CMD_PFX_CLICK        "CLICK "
+#define CMD_PFX_OCLUSSLX "OCLUSSLX"
+#define CMD_PFX_OCLUSSLY "OCLUSSLY"
+#define CMD_PFX_ONAMEX   "ONAMEX"
+#define CMD_PFX_ONAMEY   "ONAMEY"
 
 /*----------------------------------------------------------------------------*/
 /* null-terminate token + point to \0 if nothing is found */
@@ -508,6 +512,38 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
      sendStatus('w');
      return;
    }
+  if (strncmp(msg, CMD_PFX_ONAMEX, strlen(CMD_PFX_ONAMEX)) == 0) {
+     m_log.dbg("CMD %s", CMD_PFX_ONAMEX);
+     m->mat->orderByNameX();
+     m->imgUnscaled.update(m->mat);
+     m->sendUpdate = true;
+     sendStatus('w');
+     return;
+  }
+  if (strncmp(msg, CMD_PFX_ONAMEY, strlen(CMD_PFX_ONAMEY)) == 0) {
+     m_log.dbg("CMD %s", CMD_PFX_ONAMEY);
+     m->mat->orderByNameY();
+     m->imgUnscaled.update(m->mat);
+     m->sendUpdate = true;
+     sendStatus('w');
+     return;
+   }
+  if (strncmp(msg, CMD_PFX_OCLUSSLX, strlen(CMD_PFX_OCLUSSLX)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_OCLUSSLX);
+    m->mat->orderBySlClusterX();
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_OCLUSSLY, strlen(CMD_PFX_OCLUSSLY)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_OCLUSSLY);
+    m->mat->orderBySlClusterY();
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
 //  m_log.dbg("-> msg_size:%u", len);
   //Buffer msg(1024*1024);
 #if 0

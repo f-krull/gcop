@@ -12,8 +12,12 @@
           <td style="border: 1px solid gray;">
             <img id="tiny">
           </td>
+          <td style="padding-left: 30px;">
+            <input type="button" id="onamex" value="X alphabetical"><br>
+            <input type="button" id="oclusx" value="X cluster"><br>
+            <input type="button" id="onamey" value="Y alphabetical"><br>
+            <input type="button" id="oclusy" value="Y cluster"><br>
           </td>
-          <td>
         </tr>
         <tr>
           <td style="border: 1px solid gray;">
@@ -22,8 +26,8 @@
           <td>
             <img id="ylab">
           </td>
-          <td>
-            <p id="info" style="padding-left: 30px;</p>
+          <td style="padding-left: 30px;">
+            <p id="info"></p>
           </td>
         </tr>
       </table>
@@ -96,6 +100,19 @@
           } else if (evt.deltaY < 0) {
             mvWs.send("ZOOMOUT " + evt.offsetX + " " + evt.offsetY);
           }
+        });
+
+        document.getElementById("oclusx").addEventListener("click", function(evt){
+          mvWs.send("OCLUSSLX");
+        });
+        document.getElementById("oclusy").addEventListener("click", function(evt){
+          mvWs.send("OCLUSSLY");
+        });
+        document.getElementById("onamey").addEventListener("click", function(evt){
+          mvWs.send("ONAMEY");
+        });
+        document.getElementById("onamex").addEventListener("click", function(evt){
+          mvWs.send("ONAMEX");
         });
 
         document.getElementById("main").addEventListener("mousedown", function(evt){
