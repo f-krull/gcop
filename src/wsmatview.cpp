@@ -505,11 +505,14 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
      char *arg1 = gettoken(msg,  ' ');
      char *arg2 = gettoken(arg1, ' ');
      m_log.dbg("CMD %s%s %s", CMD_PFX_CLICK, arg1, arg2);
-     /* calc x and y */
-//     m->cfg.setInt(CFG_POSX_INT, m->imgMain.calcClippedPosX(atoi(arg1)));
-//     m->cfg.setInt(CFG_POSY_INT, m->imgMain.calcClippedPosY(atoi(arg2)));
-     m->sendUpdate = true;
-     sendStatus('w');
+     uint32_t x = m->imgMain.calcClippedPosX(atoi(arg1));
+     uint32_t y = m->imgMain.calcClippedPosY(atoi(arg2));
+     BufferDyn out(1024);
+     out.addf("info");
+     out.addf("%d: %s<br>", x,  m->mat->xlab(x));
+     out.addf("%d: %s<br>", y,  m->mat->ylab(y));
+     out.addf("z-score: %f<br>",m->mat->get(y,x));
+     m_srv->sendData(id(), out.cdata(), out.len());
      return;
    }
   if (strncmp(msg, CMD_PFX_ONAMEX, strlen(CMD_PFX_ONAMEX)) == 0) {

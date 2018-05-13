@@ -23,10 +23,10 @@ make
 
 ## TODO: 
 * drag
-* selection info (via tooltip?)
 * selection highlight
 * normalization
 * minimap navigation
+* multi selection + tooltip
 * ...
 * (fix ServerTcp dtor / ownership of service obj)
 * (httpfileservice client request for GET)
