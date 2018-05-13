@@ -20,12 +20,17 @@ public:
   float maxVal() const;
   float minVal() const;
   void transpose();
+  void orderByNameX();
+  void orderByNameY();
+  void orderBySlClusterY();
+  void orderBySlClusterX();
 private:
   std::vector<std::vector<float>> m_d;
   std::vector<std::string> m_xlab;
   std::vector<std::string> m_ylab;
   bool check() const;
   void reset();
+  void applyOrderY(const std::vector<uint32_t> &o);
 };
 
 #endif /* HMMAT_H_ */

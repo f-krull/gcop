@@ -12,7 +12,10 @@ SRCS=main.cpp \
 	buffer.cpp \
 	debuglog.cpp \
 	wsmatview.cpp \
-	hmmat.cpp
+	hmmat.cpp \
+	distmatrix.cpp \
+	dendrogram.cpp
+
 
 3RDPARTY=3rdparty
 SRCS:=$(addprefix src/, $(SRCS))

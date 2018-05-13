@@ -1,7 +1,11 @@
 #include "hmmat.h"
 #include "buffer.h"
+#include "distmatrix.cpp"
+#include "clusterersl.h"
 #include <stdio.h>
 #include <float.h>
+#include <numeric>
+#include <algorithm>
 
 /*----------------------------------------------------------------------------*/
 
@@ -192,3 +196,76 @@ const char* HmMat::xlab(uint32_t j) const {
 const char* HmMat::ylab(uint32_t i) const {
   return m_ylab[i].c_str();
 }
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::applyOrderY(const std::vector<uint32_t> &order) {
+  std::vector<std::string> ylab_new;
+  for (uint32_t i = 0; i < nrow(); i++) {
+    ylab_new.push_back(m_ylab[order[i]]);
+  }
+  m_ylab = ylab_new;
+  std::vector<std::vector<float>> d_new;
+  for (uint32_t i = 0; i < nrow(); i++) {
+    d_new.push_back(m_d[order[i]]);
+  }
+  m_d = d_new;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::orderByNameY() {
+  std::vector<uint32_t> order(nrow());
+  std::iota(order.begin(), order.end(), 0);
+  std::vector<std::string> &ylin = m_ylab;
+  sort(order.begin(), order.end(),
+      [&ylin](uint32_t i1, uint32_t i2) {return ylin[i1] < ylin[i2];});
+  applyOrderY(order);
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::orderByNameX() {
+  transpose(); /* hehe.. */
+  orderByNameY();
+  transpose();
+}
+
+/*----------------------------------------------------------------------------*/
+
+typedef std::vector<float> HmmRow;
+
+class HmmRowDistEuclidean {
+public:
+  float operator()(const HmmRow &r1, const HmmRow &r2) const {
+    float sumsq = 0.f;
+#define POW2(x) ((x)*(x))
+    for (uint32_t j = 0; j < r1.size(); j++) {
+      sumsq += POW2(r1[j] - r2[j]);
+    }
+#undef POW2
+    return sqrtf(sumsq);
+  }
+private:
+};
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::orderBySlClusterY() {
+  DistanceMatrix<float> *dm = DistanceMatrixFactory<float>::getFilled(&m_d,
+      HmmRowDistEuclidean());
+  std::vector<std::vector<uint32_t> > clusters;
+  std::vector<uint32_t> order = ClustererSl<float>::clusterAll(dm);
+  delete dm;
+  assert(order.size() == nrow());
+  applyOrderY(order);
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::orderBySlClusterX() {
+  transpose();
+  orderBySlClusterY();
+  transpose();
+}
+

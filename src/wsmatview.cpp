@@ -149,7 +149,7 @@ public:
         const uint8_t colZero[] = { 0xf8, 0xf8, 0xf8 };
         const uint8_t *col0 = colZero;
         const uint8_t *col1 = v < 0 ? colMin : colMax;
-        const float colScale = (amax !=0) ? (powf(fabs(v) / amax, 0.55)) : 0;
+        const float colScale = (amax !=0) ? (powf(fabs(v) / amax, 0.35)) : 0;
         assert(colScale <= 1);
         assert(colScale >= 0);
         m_img(j, i, 0) = (col0[0] * (1-colScale) + col1[0] * colScale);
@@ -417,9 +417,13 @@ WsMatView::WsMatView(WsService* s, uint32_t clientId) :
   m = new WsMatViewPriv;
   m->sendUpdate = true;
   m->mat = new HmMat();
-  //m->mat->read("data/disreg_matrix_half.txt");
+  m->mat->read("data/disreg_matrix_half.txt");
+  //m->mat->read("data/disreg_matrix.txt");
+//  m->mat->orderByNameY();
+//  m->mat->orderByNameX();
+  m->mat->orderBySlClusterY();
+  m->mat->orderBySlClusterX();
   //m->mat->transpose();
-  m->mat->read("data/disreg_matrix.txt");
   m->imgUnscaled.update(m->mat);
 }
 

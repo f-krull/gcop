@@ -21,7 +21,6 @@ make
 * drag
 * selection info (via tooltip?)
 * selection highlight
-* clustering
 * normalization
 * minimap navigation
 * ...
