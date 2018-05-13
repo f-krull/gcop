@@ -1,4 +1,5 @@
 #include "httpfileservice.h"
+#include "buffer.h"
 #include <assert.h>
 #include <string.h>
 
@@ -9,10 +10,30 @@ HttpFileService::HttpFileService() : m_log("HttpFileServer") {
 
 /*----------------------------------------------------------------------------*/
 
-void HttpFileService::newData(uint32_t clientId, const uint8_t* data, uint32_t len) {
-  assert(len > 0 && len < 1e6);
+#define HTTP_CMD_GET "GET"
 
-  //TODO: check ^GET
+/*----------------------------------------------------------------------------*/
+
+#include "helper.h"
+void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len) {
+  if (_len == 0 || _len > 1e6) {
+    m_log.err("client %u - received invalid size (%u bytes)", clientId, _len);
+    return;
+  }
+  BufferDyn buf(_data, _len);
+  buf.addf(""); /* null-term str */
+  char *inget = (char*)buf.data();
+  char *inurl = gettoken(inget, ' ');
+  gettoken(inurl, ' ');
+  if (strcmp(HTTP_CMD_GET, inget) != 0) {
+    m_log.err("client %u - expected %s, received (%s)", clientId, HTTP_CMD_GET, inget);
+    return;
+  }
+  if (inurl[0] == '\0') {
+    m_log.err("client %u - didn't send url", HTTP_CMD_GET);
+    return;
+  }
+#if 0
   //m_log.dbg("HttpReceiver: client %u:\n%s", clientId, data);
   const char *urls = strchr((char*)data, ' ');
   if (urls == NULL || urls - (char*)data > (int32_t)len) {
@@ -29,9 +50,9 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* data, uint32_t l
   char* url = new char[urle-urls+1];
   memcpy(url, urls, urle-urls);
   url[urle-urls] = '\0';
+#endif
   //m_log.dbg("HttpReceiver: client %u url %s", clientId, url);
-  http_get(clientId, url);
-  delete [] url;
+  http_get(clientId, inurl);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -63,12 +84,11 @@ void HttpFileService::http_get(uint32_t clientId, const char* url) {
   }
   write(clientId, "HTTP/1.1 200 OK\r\n");
   write(clientId, "Content-Type: %s\r\n", it->second.mimetype.c_str());
-  //TODO: Content-Length: 4100
   write(clientId, "Cache-Control: no-cache\r\n");
-  write(clientId, "\r\n");
+  write(clientId, "\r\n"); //TODO: Content-Length: 4100
   {
     /* read file and send to client */
-    uint8_t buf[1024];
+    uint8_t buf[16*1024];
     while (true) {
       const size_t len = fread(buf, 1, sizeof(buf), fin);
       if (len == 0) {

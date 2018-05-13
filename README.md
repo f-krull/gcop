@@ -29,5 +29,4 @@ make
 * multi selection + tooltip
 * ...
 * (fix ServerTcp dtor / ownership of service obj)
-* (httpfileservice client request for GET)
 * (httpfileservice send Content-Length)

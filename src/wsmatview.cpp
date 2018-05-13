@@ -4,6 +4,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "helper.h"
+
 /*----------------------------------------------------------------------------*/
 
 #define JPEG_QUALITY 90
@@ -446,17 +448,6 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_OCLUSSLY "OCLUSSLY"
 #define CMD_PFX_ONAMEX   "ONAMEX"
 #define CMD_PFX_ONAMEY   "ONAMEY"
-
-/*----------------------------------------------------------------------------*/
-/* null-terminate token + point to \0 if nothing is found */
-char *gettoken(char *s, char d) {
-  char *end = strchrnul(s, d);
-  if (end[0] == d) {
-    end[0] = '\0';
-    end++;
-  }
-  return end;
-}
 
 /*----------------------------------------------------------------------------*/
 
