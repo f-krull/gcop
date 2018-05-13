@@ -1,13 +1,17 @@
 # hmview
 Server based interactive heatmap visualization
 
+## Requirements
+* c++11
+* libjpeg
+
 ## Get source code
 ```
 git clone https://github.com/precimed/hmview
 cd hmview
 ```
 
-## Download dependencies:
+## Install dependencies:
 ```
 make 3rdparty
 ```
