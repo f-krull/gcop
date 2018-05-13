@@ -8,6 +8,8 @@
 
 #define JPEG_QUALITY 90
 
+/*----------------------------------------------------------------------------*/
+
 #define CFG_MAIN_WID_INT   "MAIN_WID"
 #define CFG_MAIN_HEI_INT   "MAIN_HEI"
 #define CFG_YLAB_WID_INT   "YLAB_WID"
@@ -547,13 +549,6 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     sendStatus('w');
     return;
   }
-//  m_log.dbg("-> msg_size:%u", len);
-  //Buffer msg(1024*1024);
-#if 0
-  for (uint32_t i = 0; i < 0x1FFFF; i++) {
-    msg.addf("%c", '0'+(i%10));
-  }
-#endif
 }
 
 /*----------------------------------------------------------------------------*/

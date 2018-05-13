@@ -270,15 +270,20 @@ void DeNode::getNodeIds(std::vector<int32_t> &nodeIds) const {
 /*----------------------------------------------------------------------------*/
 
 void DeNode::getGlobalLeafIds(std::vector<uint32_t> &leafIds) const {
-  if (this->isLeaf() == false) {
-    m_l->getGlobalLeafIds(leafIds);
-    m_r->getGlobalLeafIds(leafIds);
+  if (!m_isLeaf) {
+    /* show small distances first */
+    if (m_l->m_dist < m_r->m_dist) {
+      m_l->getGlobalLeafIds(leafIds);
+      m_r->getGlobalLeafIds(leafIds);
+    } else {
+      m_r->getGlobalLeafIds(leafIds);
+      m_l->getGlobalLeafIds(leafIds);
+    }
+    return;
   }
-  if (m_isLeaf) {
-    const int32_t globalId = abs(m_id) - 1;
-    assert(globalId >= 0);
-    leafIds.push_back(globalId);
-  }
+  const int32_t globalId = abs(m_id) - 1;
+  assert(globalId >= 0);
+  leafIds.push_back(globalId);
 }
 
 /*----------------------------------------------------------------------------*/
