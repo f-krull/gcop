@@ -62,7 +62,7 @@
             return;
           }
           if ("WebSocket" in window) {
-               this._ws = new WebSocket("ws://localhost:11381");
+               this._ws = new WebSocket("ws://" + window.location.hostname + ":11381");
                this._ws.onopen = function() {
                  var scale = 1.0
                  this.send("SET MAIN_WID "   + 800 * scale);
