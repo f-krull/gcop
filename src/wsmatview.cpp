@@ -204,14 +204,14 @@ public:
     m_dispMatY1 = 0;
     m_nPxW = 0;
     m_nPxH = 0;
+    m_posX = 0;
+    m_posY = 0;
   }
   void update(const ImgUnscaled &us, const WsMatViewCfg &cfg) {
     m_imgUs = us.img();
     const uint32_t dwid = cfg.getInt(CFG_MAIN_WID_INT);
     const uint32_t dhei = cfg.getInt(CFG_MAIN_HEI_INT);
     const uint32_t zoom = cfg.getInt(CFG_ZOOM_INT);
-    /* calc num pixel being shown */
-
     /* determine pixel-size if we wanted to fit everything */
     const float pw = float(dwid) / m_imgUs.width();
     const float ph = float(dhei) / m_imgUs.height();
@@ -228,10 +228,8 @@ public:
       m_nPxH = nph;
     }
     /* calc offsets */
-    const int32_t posx = cfg.getInt(CFG_POSX_INT);
-    const int32_t posy = cfg.getInt(CFG_POSY_INT);
-    int32_t x0 = posx - m_nPxW/2;
-    int32_t y0 = posy - m_nPxH/2;
+    int32_t x0 = m_posX - m_nPxW/2;
+    int32_t y0 = m_posY - m_nPxH/2;
     x0 = x0 < m_imgUs.width()  ? x0 : m_imgUs.width();
     y0 = y0 < m_imgUs.height() ? y0 : m_imgUs.height();
     x0 = x0+m_nPxW-1 < m_imgUs.width()  ? x0 : m_imgUs.width() -m_nPxW;
@@ -256,6 +254,60 @@ public:
     encode();
   }
 
+  void zoomin(int32_t x, int32_t y, WsMatViewCfg *cfg) {
+    const int32_t z = cfg->getInt(CFG_ZOOM_INT);
+    cfg->setInt(CFG_ZOOM_INT, z + 1);
+    /* calc x and y */
+    m_posX = (calcClippedPosX(x) + calcClippedPosX(cfg->getInt(CFG_MAIN_WID_INT)/2)/2);
+    m_posY = (calcClippedPosY(y) + calcClippedPosY(cfg->getInt(CFG_MAIN_HEI_INT)/2)/2);
+    m_posX = calcClippedPosX(x);
+    m_posY = calcClippedPosY(y);
+#if 0
+    const int32_t posx = cfg.getInt(CFG_POSX_INT);
+    const int32_t posy = cfg.getInt(CFG_POSY_INT);
+    m_posX = (posx + calcClippedPosX(dwid/2))/2; /* TODO: set these in a zoomin(x,y) function */
+    m_posY = (posy + calcClippedPosY(dhei/2))/2;
+#endif
+  }
+
+  void zoomout(int32_t x, int32_t y, WsMatViewCfg *cfg) {
+    const int32_t z = cfg->getInt(CFG_ZOOM_INT);
+    cfg->setInt(CFG_ZOOM_INT, z > 0 ? z - 1 : z);
+    m_posX = calcClippedPosX(cfg->getInt(CFG_MAIN_WID_INT)/2);
+    m_posY = calcClippedPosY(cfg->getInt(CFG_MAIN_HEI_INT)/2);
+  }
+
+  void drag(int32_t x, int32_t y) {
+    printf("prev mxy: %d,%d\n", m_posX, m_posY);
+    m_posX = calcClippedPosX(x);
+    m_posY = calcClippedPosY(y);
+    printf("    inxy: %d,%d\n", x, y);
+    printf("   cinxy: %d,%d\n", calcClippedPosX(x), calcClippedPosY(y));
+    printf("new  mxy: %d,%d\n", m_posX, m_posY);
+  }
+
+  void move(const char* direction) {
+    const float dscale = 0.1;
+    const int32_t deltaX = int32_t(m_nPxW * dscale) > 1 ? (m_nPxW * dscale) : 1;
+    const int32_t deltaY = int32_t(m_nPxH * dscale) > 1 ? (m_nPxH * dscale) : 1;
+    switch (direction[0]) {
+      case 'U':
+        m_posY = clipPosY(m_posY - deltaY);
+        break;
+      case 'D':
+        m_posY = clipPosY(m_posY + deltaY);
+        break;
+      case 'L':
+        m_posX = clipPosX(m_posX - deltaX);
+        break;
+      case 'R':
+        m_posX = clipPosX(m_posX + deltaX);
+        break;
+      default:
+        break;
+    }
+  }
+
   int32_t calcPosX(int32_t x) const {
     return (x - m_dispMatX0) / m_pxW + m_dispStartX;
   }
@@ -264,18 +316,22 @@ public:
     return (y - m_dispMatY0) / m_pxH + m_dispStartY;
   }
 
-  int32_t calcClippedPosX(int32_t x) const {
-    int32_t posx = calcPosX(x);
+  int32_t clipPosX(int32_t posx) const {
     posx = posx > 0 ? posx : 0;
-    posx = posx < m_imgUs.width() ? posx : (m_imgUs.width()-1);
-    return posx;
+    return posx < m_imgUs.width() ? posx : (m_imgUs.width()-1);
+  }
+
+  int32_t clipPosY(int32_t posy) const {
+    posy = posy > 0 ? posy : 0;
+    return posy < m_imgUs.height() ? posy : (m_imgUs.height()-1);
+  }
+
+  int32_t calcClippedPosX(int32_t x) const {
+    return clipPosX(calcPosX(x));
   }
 
   int32_t calcClippedPosY(int32_t y) const {
-    int32_t posy = calcPosY(y);
-    posy = posy > 0 ? posy : 0;
-    posy = posy < m_imgUs.height() ? posy : (m_imgUs.height()-1);
-    return posy;
+    return clipPosY(calcPosY(y));
   }
 
   int32_t numPxH() const {return m_nPxH;}
@@ -303,6 +359,8 @@ protected:
   int32_t  m_nPxH;
   float    m_pxW;
   float    m_pxH;
+  int32_t m_posX;
+  int32_t m_posY;
 };
 
 
@@ -444,6 +502,8 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ZOOMIN       "ZOOMIN "
 #define CMD_PFX_ZOOMOUT      "ZOOMOUT "
 #define CMD_PFX_CLICK        "CLICK "
+#define CMD_PFX_DRAG         "DRAG "
+#define CMD_PFX_MOVE         "MOVE "
 #define CMD_PFX_OCLUSSLX "OCLUSSLX"
 #define CMD_PFX_OCLUSSLY "OCLUSSLY"
 #define CMD_PFX_ONAMEX   "ONAMEX"
@@ -472,11 +532,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     char *arg1 = gettoken(msg,  ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_ZOOMIN, arg1, arg2);
-    const int32_t z = m->cfg.getInt(CFG_ZOOM_INT);
-    m->cfg.setInt(CFG_ZOOM_INT, z + 1);
-    /* calc x and y */
-    m->cfg.setInt(CFG_POSX_INT, m->imgMain.calcClippedPosX(atoi(arg1)));
-    m->cfg.setInt(CFG_POSY_INT, m->imgMain.calcClippedPosY(atoi(arg2)));
+    m->imgMain.zoomin(atoi(arg1), atoi(arg2), &m->cfg);
     m->sendUpdate = true;
     sendStatus('w');
     return;
@@ -485,11 +541,16 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     char *arg1 = gettoken(msg,  ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_ZOOMOUT, arg1, arg2);
-    const int32_t z = m->cfg.getInt(CFG_ZOOM_INT);
-    m->cfg.setInt(CFG_ZOOM_INT, z > 0 ? z - 1 : z);
-    /* calc x and y */
-    m->cfg.setInt(CFG_POSX_INT, m->imgMain.calcClippedPosX(atoi(arg1)));
-    m->cfg.setInt(CFG_POSY_INT, m->imgMain.calcClippedPosY(atoi(arg2)));
+    m->imgMain.zoomout(atoi(arg1), atoi(arg2), &m->cfg);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_DRAG, strlen(CMD_PFX_DRAG)) == 0) {
+    char *arg1 = gettoken(msg,  ' ');
+    char *arg2 = gettoken(arg1, ' ');
+    m_log.dbg("CMD %s%s %s", CMD_PFX_DRAG, arg1, arg2);
+    m->imgMain.drag(atoi(arg1), atoi(arg2));
     m->sendUpdate = true;
     sendStatus('w');
     return;
@@ -536,6 +597,15 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     m_log.dbg("CMD %s", CMD_PFX_OCLUSSLY);
     m->mat->orderBySlClusterY();
     m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_MOVE, strlen(CMD_PFX_MOVE)) == 0) {
+    char *arg1 = gettoken(msg,  ' ');
+    gettoken(arg1, ' '); /* null term */
+    m_log.dbg("CMD %s%s", CMD_PFX_MOVE, arg1);
+    m->imgMain.move(arg1);
     m->sendUpdate = true;
     sendStatus('w');
     return;
