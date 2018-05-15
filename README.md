@@ -24,6 +24,7 @@ make
 ## TODO: 
 * drag
 * selection highlight
+* draw xy dendrograms
 * normalization
 * minimap navigation
 * multi selection + tooltip
