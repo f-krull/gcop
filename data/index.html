@@ -6,25 +6,25 @@
     <title>HmView</title>
   </head>
   <body>
-    <img id="stat">
     <table>
-      <tr>
-        <td>
+      <tr class="rowxlab">
+        <td class="colxlab">
           <img id="xlab">
         </td>
-        <td style="border: 1px solid gray;">
+        <td class="coltiny">
           <img id="tiny">
         </td>
-        <td style="padding-left: 30px;">
+        <td class="colstat">
+          <img id="stat"><br>
           <input type="button" id="onamex" value="X alphabetical"><br>
           <input type="button" id="oclusx" value="X cluster"><br>
           <input type="button" id="onamey" value="Y alphabetical"><br>
           <input type="button" id="oclusy" value="Y cluster"><br>
         </td>
       </tr>
-      <tr>
+      <tr class="rowmain">
         <td style="border: 1px solid gray;">
-          <img id="main" style="position:relative; clip: rect(0px,60px,200px,0px);">
+          <img id="main" style="position:relative;">
         </td>
         <td>
           <img id="ylab">
@@ -34,9 +34,6 @@
         </td>
       </tr>
     </table>
-    <div id = "sse">
-        <a href = "javascript:Start()">Start</a>
-    </div>
     <script type="text/javascript" src="hmview.js"></script>
   </body>
 </html>

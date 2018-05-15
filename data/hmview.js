@@ -27,32 +27,27 @@ MatViewWs.prototype.connect = function() {
     return;
   }
   if ("WebSocket" in window) {
-        this._ws = new WebSocket("ws://" + window.location.hostname + ":11381");
-        this._ws.onopen = function() {
-          var scale = 1.0
-          this.send("SET MAIN_WID "   + 800 * scale);
-          this.send("SET MAIN_HEI "   + 600 * scale);
-          this.send("SET XLAB_HEI "   + 150 * scale);
-          this.send("SET YLAB_WID "   + 150 * scale);
-          this.send("SET LABTXT_HEI " + 13  * scale);
-        };
-        this._ws.onmessage = function (evt) { 
-          var received_msg = evt.data;
-          var dst_len = 4;
-          var dst = received_msg.substring(0, dst_len);
-          if (dst == "info") {
-            document.getElementById(dst).innerHTML = received_msg.slice(dst_len);
-          } else {
-            document.getElementById(dst).src = received_msg.slice(dst_len);
-          }
-        };
-        this._ws.onclose = function() { 
-          // websocket is closed.
-          alert("Connection is closed...");
-          this._ws = null; 
-        };
+    this._ws = new WebSocket("ws://" + window.location.hostname + ":11381");
+    this._ws.onopen = function() {
+      requestSize();
+    };
+    this._ws.onmessage = function (evt) {
+      var received_msg = evt.data;
+      var dst_len = 4;
+      var dst = received_msg.substring(0, dst_len);
+      if (dst == "info") {
+        document.getElementById(dst).innerHTML = received_msg.slice(dst_len);
+      } else {
+        document.getElementById(dst).src = received_msg.slice(dst_len);
+      }
+    };
+    this._ws.onclose = function() {
+      // websocket is closed.
+      alert("Connection is closed...");
+      this._ws = null;
+    };
     } else {
-        alert("WebSocket NOT supported by your Browser!");
+      alert("WebSocket not supported by your browser!");
     }
 }
 
@@ -93,6 +88,22 @@ DragInfo.prototype.stop = function() {
   this._dragging = false;
   this._target.style.left="0px"
   this._target.style.top="0px"
+}
+
+function requestSize() {
+  var main_wid = document.querySelector('td.colxlab').offsetWidth;
+  var main_hei = document.querySelector('tr.rowmain').offsetHeight;
+  var xlab_hei = document.querySelector('tr.rowxlab').offsetHeight;
+  var ylab_wid = document.querySelector('td.colstat').offsetWidth;
+  mvWs.send("SET MAIN_WID "   + main_wid);
+  mvWs.send("SET MAIN_HEI "   + main_hei);
+  mvWs.send("SET XLAB_HEI "   + xlab_hei);
+  mvWs.send("SET YLAB_WID "   + ylab_wid);
+  mvWs.send("SET LABTXT_HEI " + 13);
+  console.log("main_wid " + main_wid);
+  console.log("main_hei " + main_hei);
+  console.log("xlab_hei " + xlab_hei);
+  console.log("ylab_wid " + ylab_wid);
 }
 
 //------------------------------------------------------------------------------
@@ -162,6 +173,12 @@ document.onkeydown = function(e){
   return true;
 }
 
+window.addEventListener('resize', function(event){
+  requestSize();
+});
+
 function Start() {
-  mvWs.connect()
+  mvWs.connect();
+  //alert(document.querySelector('td.xlab').offsetWidth)
 }
+Start()
