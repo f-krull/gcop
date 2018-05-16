@@ -4,45 +4,25 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include <map>
 
 /*----------------------------------------------------------------------------*/
 
-class DendrogramNode {
-public:
-  DendrogramNode(int32_t id);
-  bool isRoot() const;
-  bool isLeaf() const;
-  int32_t id() const;
-  static DendrogramNode * merge(int32_t id, DendrogramNode *l, DendrogramNode *r, float dist);
-  static std::vector<uint32_t> geGlobalLeafIds(const DendrogramNode *root);
-
-private:
-  DendrogramNode *m_p;
-  DendrogramNode *m_l;
-  DendrogramNode *m_r;
-  float m_dist;
-  float m_minDist;
-  bool m_isLeaf;
-  int32_t m_id;
-  uint32_t m_depth;
-
-  DendrogramNode(int32_t id, DendrogramNode *l, DendrogramNode *r, float dist);
-  void getGlobalLeafIds(std::vector<uint32_t> &leafIds) const;
-};
+class DeNode;
 
 /*----------------------------------------------------------------------------*/
 
 class Dendrogram {
 public:
-  Dendrogram(uint32_t n);
+  Dendrogram(uint32_t n, const std::vector<std::string> *nodeLables = NULL);
   ~Dendrogram();
   bool pair(uint32_t i, uint32_t j, float dist);
+  std::vector<std::vector<uint32_t> > getClusters() const;
   std::vector<uint32_t> getOrder() const;
 
 private:
+  std::vector<std::string> m_nodeLables;
   std::vector<uint32_t> m_dict;
-  std::vector<DendrogramNode*> m_nodes;
+  std::vector<DeNode*> m_nodes;
   uint32_t m_n;
   uint32_t m_numPairs;
 };

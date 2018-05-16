@@ -21,8 +21,7 @@ int main(int argc, char **argv) {
 
   HttpFileService hfs;
   hfs.registerFile("data/index.html", "/index.html", MIME_TEXT_HTML);
-  hfs.registerFile("data/hmview.css", "/hmview.css", MIME_TEXT_CSS);
-  hfs.registerFile("data/hmview.js",  "/hmview.js",  MIME_TEXT_JAVASCRIPT);
+  hfs.registerFile("data/test.png",   "/test.png",   MIME_IMAGE_PNG);
   s.addReader(&hfs);
 
 
