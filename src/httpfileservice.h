@@ -8,8 +8,12 @@
 //TODO: move this to public enum in HttpFileServer
 #define MIME_TEXT_PLAIN        "text/plain"
 #define MIME_TEXT_HTML         "text/html"
-#define MIME_IMAGE_PNG         "image/png"
+#define MIME_TEXT_CSS          "text/css"
+#define MIME_TEXT_JAVASCRIPT   "text/javascript"
 #define MIME_TEXT_EVENTSTREAM  "text/event-stream"
+#define MIME_IMAGE_PNG         "image/png"
+
+/*----------------------------------------------------------------------------*/
 
 class HttpFileService: public IServerDataSink {
 public:
