@@ -24,7 +24,7 @@ OBJS =$(subst .cpp,.o,$(SRCS))
 
 all: $(EXE)
 
-$(EXE): $(3RDPARTY) $(OBJS)
+$(EXE): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(EXE) $(OBJS) $(LDLIBS)
  
 clean:
@@ -35,9 +35,7 @@ distclean: clean
 	$(RM) *~ src/.depend
 	$(MAKE) -C $(3RDPARTY) distclean
 
-depend: src/.depend
-
-src/.depend: $(SRCS)
+src/.depend: $(SRCS) | $(3RDPARTY)
 	$(RM) src/.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>src/.depend;
 
