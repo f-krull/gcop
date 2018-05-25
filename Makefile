@@ -24,7 +24,7 @@ OBJS =$(subst .cpp,.o,$(SRCS))
 
 all: $(EXE)
 
-$(EXE): $(OBJS)
+$(EXE): $(3RDPARTY) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(EXE) $(OBJS) $(LDLIBS)
  
 clean:

@@ -1,7 +1,7 @@
 TINYSHA1=TinySHA1.hpp
 CIMG=CImg.h
 LIBJPEGSRC=jpegsrc.v9c.tar.gz
-LIBJPEGDIR=$(PWD)/libjpeg/
+LIBJPEGDIR=$(CURDIR)/libjpeg/
 LIBJPEG=$(LIBJPEGDIR)/lib/libjpeg.a
 
 all: $(TINYSHA1) $(CIMG) $(LIBJPEG)
@@ -22,7 +22,9 @@ $(LIBJPEG): $(LIBJPEGSRC)
 		&& ./configure --prefix=$(LIBJPEGDIR) --disable-shared && $(MAKE) && $(MAKE) install
 
 clean:
+	$(RM) -r $(LIBJPEGDIR)
 
 distclean:
 	$(RM) $(TINYSHA1) $(CIMG) 
-	$(RM) -r $(LIBJPEGDIR)
+	$(RM) $(LIBJPEGSRC)
+	$(RM) -r jpeg-9c
