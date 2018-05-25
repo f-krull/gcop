@@ -36,7 +36,7 @@ public:
 
 /*----------------------------------------------------------------------------*/
 
-class WsService : public IServerDataSink {
+class WsService : public ISocketService {
 public:
   WsService(IWsServiceClientFractory *f) : m_dhfac(f), m_log("WsService") {}
   virtual ~WsService();

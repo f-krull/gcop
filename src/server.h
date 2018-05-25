@@ -10,10 +10,10 @@
 /*----------------------------------------------------------------------------*/
 class Server;
 
-class IServerDataSink {
+class ISocketService {
 public:
-  IServerDataSink() : m_srv(NULL) {}
-  virtual ~IServerDataSink() {}
+  ISocketService() : m_srv(NULL) {}
+  virtual ~ISocketService() {}
   virtual void setSource(Server *s) {m_srv = s;}
   virtual void newData(uint32_t clientId, const uint8_t* data, uint32_t len) = 0;
   virtual void disconnect(uint32_t clientId) {}
@@ -34,12 +34,12 @@ public:
 
   virtual void integrate() = 0;
 
-  void addReader(IServerDataSink *r) {
-    m_reader.insert(r);
+  void addReader(ISocketService *r) {
+    m_services.insert(r);
     r->setSource(this);
   }
 protected:
-  std::set<IServerDataSink*> m_reader;
+  std::set<ISocketService*> m_services;
 };
 
 /*----------------------------------------------------------------------------*/

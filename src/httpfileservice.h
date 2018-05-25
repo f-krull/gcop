@@ -15,7 +15,7 @@
 
 /*----------------------------------------------------------------------------*/
 
-class HttpFileService: public IServerDataSink {
+class HttpFileService: public ISocketService {
 public:
   HttpFileService();
   virtual ~HttpFileService() {};

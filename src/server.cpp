@@ -9,14 +9,14 @@
 
 /*----------------------------------------------------------------------------*/
 
-void IServerDataSink::write(uint32_t clientId, const uint8_t* data, uint32_t len) {
+void ISocketService::write(uint32_t clientId, const uint8_t* data, uint32_t len) {
   /* if buffer is full */
   m_srv->write(clientId, data, len);
 }
 
 /*----------------------------------------------------------------------------*/
 
-void IServerDataSink::write(uint32_t clientId, const char *fmt, ...) {
+void ISocketService::write(uint32_t clientId, const char *fmt, ...) {
   char buffer[1024];
   va_list args;
   va_start(args, fmt);
@@ -115,10 +115,9 @@ void ServerTcp::integrate() {
         int32_t dsize = recvfrom(cl->second->fd, buffer, sizeof(buffer), 0, NULL, NULL);
         /* patch */
         if (dsize > 0) {
-          buffer[std::min((int32_t) sizeof(buffer) - 1, dsize)] = '\0';
-          //m_log.dbg("client %u (%s) : received %d bytes", cl->second->id, cl->second->addr.c_str(), dsize);
-          std::set<IServerDataSink*>::iterator sr;
-          for (sr = m_reader.begin(); sr != m_reader.end(); sr++) {
+          buffer[std::min((int32_t) sizeof(buffer) - 1, dsize)] = '\0'; //TODO: remove me
+          std::set<ISocketService*>::iterator sr;
+          for (sr = m_services.begin(); sr != m_services.end(); sr++) {
             (*sr)->newData(cl->second->id, buffer, dsize);
           }
         }
@@ -127,8 +126,8 @@ void ServerTcp::integrate() {
           ::close(cl->second->fd);
           cl->second->fd = SOCK_DISCONNECTED;
           handleDiscon = true;
-          std::set<IServerDataSink*>::iterator sr;
-          for (sr = m_reader.begin(); sr != m_reader.end(); sr++) {
+          std::set<ISocketService*>::iterator sr;
+          for (sr = m_services.begin(); sr != m_services.end(); sr++) {
             (*sr)->disconnect(cl->second->id);
           }
         }
@@ -188,8 +187,8 @@ void ServerTcp::close() {
   for (cl = m_clients.begin(); cl != m_clients.end(); ++cl) {
     ::close(cl->second->fd);
     cl->second->fd = SOCK_DISCONNECTED;
-    std::set<IServerDataSink*>::iterator sr;
-    for (sr = m_reader.begin(); sr != m_reader.end(); sr++) {
+    std::set<ISocketService*>::iterator sr;
+    for (sr = m_services.begin(); sr != m_services.end(); sr++) {
       (*sr)->disconnect(cl->second->id);
     }
   }
