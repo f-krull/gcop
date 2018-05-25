@@ -64,12 +64,13 @@ function DragInfo() {
   this._deltaY = 0;
 }
 DragInfo.prototype.start = function(x, y, t) {
+  console.log("start")
   this._startX = x;
   this._startY = y;
   this._dragging = true;
   this._target = t;
-  this._coordX = 0;
-  this._coordY = 0;
+  this._coordX = x;
+  this._coordY = y;
   this._deltaX = 0;
   this._deltaY = 0;
 }
@@ -77,17 +78,16 @@ DragInfo.prototype.move = function(x, y) {
   if (!dragInf._dragging) {
     return;
   }
-  this._deltaX = dragInf._coordX+x-dragInf._startX;
-  this._deltaY = dragInf._coordY+y-dragInf._startY;
-  this._target.style.left = this._deltaX+'px';
-  this._target.style.top  = this._deltaY+'px';
+  this._coordX = x;
+  this._coordY = y;
 }
-DragInfo.prototype.stop = function() {
+DragInfo.prototype.stop = function(x, y) {
+  console.log("stop")
+  this._dragging = false;
+  this._deltaX = this._coordX - this._startX;
+  this._deltaY = this._coordY - this._startY;
   this._startX = -1;
   this._startY = -1;
-  this._dragging = false;
-  this._target.style.left="0px"
-  this._target.style.top="0px"
 }
 
 function requestSize() {
@@ -142,15 +142,13 @@ document.getElementById('main').ondragstart = function(evt){
   return false;
 };
 document.getElementById('main').onmousemove = function(evt){
-  //dragInf.move(evt.clientX, evt.clientY);
+  dragInf.move(evt.clientX, evt.clientY);
   return false;
 };
-document.getElementById('main').onmouseup = function(evt){
+document.onmouseup = function(evt){
   if (dragInf._dragging) {
     dragInf.stop();
-    mvWs.send("DRAG " + dragInf._deltaX + " " + dragInf._deltaY);
-  } else {
-    mvWs.send("CLICK " + evt.offsetX + " " + evt.offsetY);
+    mvWs.send("PAN " + dragInf._deltaX + " " + dragInf._deltaY);
   }
   return false;
 };

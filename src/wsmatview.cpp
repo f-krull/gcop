@@ -277,13 +277,8 @@ public:
     m_cellY = clippedPx2CellY(cfg->getInt(CFG_MAIN_HEI_INT)/2);
   }
 
-  void drag(int32_t x, int32_t y) {
-    printf("prev mxy: %d,%d\n", m_cellX, m_cellY);
-    m_cellX = clippedPx2CellX(x);
-    m_cellY = clippedPx2CellY(y);
-    printf("    inxy: %d,%d\n", x, y);
-    printf("   cinxy: %d,%d\n", clippedPx2CellX(x), clippedPx2CellY(y));
-    printf("new  mxy: %d,%d\n", m_cellX, m_cellY);
+  void pan(int32_t dPxX, int32_t dPxY) {
+    move(round(-1*double(dPxX)/m_pxW), round(-1*double(dPxY)/m_pxH));
   }
 
   void move(const char* direction) {
@@ -372,8 +367,8 @@ protected:
   int32_t  m_dispMatY1;
   int32_t  m_nCellW;
   int32_t  m_nCellH;
-  float    m_pxW;
-  float    m_pxH;
+  float    m_pxW; /* cell width in px */
+  float    m_pxH; /* cell height in px */
   int32_t m_cellX;
   int32_t m_cellY;
 };
@@ -517,7 +512,7 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ZOOMIN       "ZOOMIN "
 #define CMD_PFX_ZOOMOUT      "ZOOMOUT "
 #define CMD_PFX_CLICK        "CLICK "
-#define CMD_PFX_DRAG         "DRAG "
+#define CMD_PFX_PAN          "PAN "
 #define CMD_PFX_MOVE         "MOVE "
 #define CMD_PFX_OCLUSSLX "OCLUSSLX"
 #define CMD_PFX_OCLUSSLY "OCLUSSLY"
@@ -563,11 +558,11 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     sendStatus('w');
     return;
   }
-  if (strncmp(msg, CMD_PFX_DRAG, strlen(CMD_PFX_DRAG)) == 0) {
+  if (strncmp(msg, CMD_PFX_PAN, strlen(CMD_PFX_PAN)) == 0) {
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
-    m_log.dbg("CMD %s%s %s", CMD_PFX_DRAG, arg1, arg2);
-    m->imgMain.drag(atoi(arg1), atoi(arg2));
+    m_log.dbg("CMD %s%s %s", CMD_PFX_PAN, arg1, arg2);
+    m->imgMain.pan(atoi(arg1), atoi(arg2));
     m->sendUpdate = true;
     sendStatus('w');
     return;
