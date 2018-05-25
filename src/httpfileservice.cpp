@@ -14,6 +14,15 @@ HttpFileService::HttpFileService() : m_log("HttpFileServer") {
 
 /*----------------------------------------------------------------------------*/
 
+const char* HttpFileService::MimeTypeStr[] = {
+#define  ENUM_GET_STR(name, str) str,
+        ENUM_MIMETYPE(ENUM_GET_STR)
+        "undefined"
+#undef ENUM_GET_NAME
+};
+
+/*----------------------------------------------------------------------------*/
+
 #include "helper.h"
 void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len) {
   if (_len == 0 || _len > 1e6) {
@@ -58,9 +67,9 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
 
 /*----------------------------------------------------------------------------*/
 
-void HttpFileService::registerFile(const char *path, const char *url, const char *mimetype) {
+void HttpFileService::registerFile(const char *path, const char *url, MimeType mt) {
   RegFile r;
-  r.mimetype = mimetype;
+  r.mimetype = mt;
   r.path     = path;
   m_rfiles[url] = r;
 }
@@ -84,7 +93,7 @@ void HttpFileService::http_get(uint32_t clientId, const char* url) {
   }
   m_log.dbg("client %u <- sending file '%s'", clientId, url);
   write(clientId, "HTTP/1.1 200 OK\r\n");
-  write(clientId, "Content-Type: %s\r\n", it->second.mimetype.c_str());
+  write(clientId, "Content-Type: %s\r\n", MimeTypeStr[it->second.mimetype]);
   write(clientId, "Cache-Control: no-cache\r\n");
   write(clientId, "\r\n"); //TODO: Content-Length: 4100
   {
