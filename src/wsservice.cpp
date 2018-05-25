@@ -239,7 +239,7 @@ void WsService::newData(uint32_t clientId, const uint8_t* data, uint32_t len) {
         msg = (const char*)msgb.cdata();
 
 
-        m_log.dbg("client %u -> pkt_size:%u,payload_size:%u%s%s", clientId, len, ws_header.payload_len, msg ? " " : "", msg ? msg : "");
+        m_log.dbg("client %u -> %02x%02x pkt_size:%u,payload_size:%u%s%s", clientId, data[0], data[1], len, ws_header.payload_len, msg ? " " : "", msg ? msg : "");
         cl->newData(msgb.cdata(), msgb.len());
         /* update pointer to remaining data */
         data +=  packet_len;

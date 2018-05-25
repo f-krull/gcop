@@ -39,6 +39,10 @@ MatViewWs.prototype.connect = function() {
         document.getElementById(dst).innerHTML = received_msg.slice(dst_len);
       } else {
         document.getElementById(dst).src = received_msg.slice(dst_len);
+        g_imgmain.style.left = 0 + 'px';
+        g_imgmain.style.top  = 0 + 'px';
+        g_imgxlab.style.left = 0 + 'px';
+        g_imgylab.style.top  = 0 + 'px';
       }
     };
     this._ws.onclose = function() {
@@ -64,7 +68,6 @@ function DragInfo() {
   this._deltaY = 0;
 }
 DragInfo.prototype.start = function(x, y, t) {
-  console.log("start")
   this._startX = x;
   this._startY = y;
   this._dragging = true;
@@ -80,9 +83,12 @@ DragInfo.prototype.move = function(x, y) {
   }
   this._coordX = x;
   this._coordY = y;
+  g_imgmain.style.left = (this._coordX - this._startX) + 'px';
+  g_imgmain.style.top  = (this._coordY - this._startY) + 'px';
+  g_imgxlab.style.left = (this._coordX - this._startX) + 'px';
+  g_imgylab.style.top  = (this._coordY - this._startY) + 'px';
 }
 DragInfo.prototype.stop = function(x, y) {
-  console.log("stop")
   this._dragging = false;
   this._deltaX = this._coordX - this._startX;
   this._deltaY = this._coordY - this._startY;
@@ -104,12 +110,18 @@ function requestSize() {
   console.log("main_hei " + main_hei);
   console.log("xlab_hei " + xlab_hei);
   console.log("ylab_wid " + ylab_wid);
+  g_imgmain = document.getElementById("main");
+  g_imgxlab = document.getElementById("xlab");
+  g_imgylab = document.getElementById("ylab");
 }
 
 //------------------------------------------------------------------------------
 
 mvWs = new MatViewWs();
 dragInf = new DragInfo();
+var g_imgmain = null;
+var g_imgxlab = null;
+var g_imgylab = null;
 
 document.getElementById("main").addEventListener("wheel", function(evt){
   if (evt.deltaY > 0) {

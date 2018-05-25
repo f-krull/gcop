@@ -25,3 +25,11 @@ tr.rowxlab {
 tr.rowmain {
   height: 85%;
 }
+
+td {
+  overflow: hidden;
+}
+
+td > img {
+  position: relative;
+}
