@@ -43,6 +43,7 @@ protected:
 };
 
 /*----------------------------------------------------------------------------*/
+#include "buffer.h"
 #include <string>
 #include <map>
 
@@ -82,6 +83,7 @@ private:
   };
   std::map<uint32_t, Client*> m_clients;
   uint32_t m_lastClientId;
+  uint8_t *m_rxbuf;
   void handleDisconnected();
 };
 

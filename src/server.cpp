@@ -7,6 +7,8 @@
 
 #define SOCK_DISCONNECTED -1
 
+#define RX_BUF_LEN 4096
+
 /*----------------------------------------------------------------------------*/
 
 void ISocketService::write(uint32_t clientId, const uint8_t* data, uint32_t len) {
@@ -32,12 +34,14 @@ ServerTcp::ServerTcp(const ServerTcpConfig &cfg) {
   m_server = SOCK_DISCONNECTED;
   m_lastClientId = 0;
   m_log.setPrefix("ServerTcp%u", m_config.port);
+  m_rxbuf = new uint8_t[RX_BUF_LEN];
 }
 
 /*----------------------------------------------------------------------------*/
 
 ServerTcp::~ServerTcp() {
   close();
+  delete [] m_rxbuf;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -111,12 +115,11 @@ void ServerTcp::integrate() {
       /* client sockets */
       if (FD_ISSET(cl->second->fd, &fds)) {
         /* handle data on this connection */
-        uint8_t buffer[1024];
-        int32_t dsize = recvfrom(cl->second->fd, buffer, sizeof(buffer), 0, NULL, NULL);
+        int32_t dsize = recvfrom(cl->second->fd, m_rxbuf, RX_BUF_LEN, 0, NULL, NULL);
         if (dsize > 0) {
           std::set<ISocketService*>::iterator sr;
           for (sr = m_services.begin(); sr != m_services.end(); sr++) {
-            (*sr)->newData(cl->second->id, buffer, dsize);
+            (*sr)->newData(cl->second->id, m_rxbuf, dsize);
           }
         }
         /* disconnected */
