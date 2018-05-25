@@ -292,19 +292,34 @@ public:
     const int32_t deltaY = int32_t(m_nCellH * dscale) > 1 ? (m_nCellH * dscale) : 1;
     switch (direction[0]) {
       case 'U':
-        m_cellY = clipCellY(std::min(m_cellY, m_imgUs.height() - m_nCellH / 2) - deltaY);
+        move(0, deltaY*-1);
         break;
       case 'D':
-        m_cellY = clipCellY(std::max(m_cellY, m_nCellH / 2) + deltaY);
+        move(0, deltaY);
         break;
       case 'L':
-        m_cellX = clipCellX(std::min(m_cellX, m_imgUs.width() - m_nCellW / 2) - deltaX);
+        move(deltaX*-1, 0);
         break;
       case 'R':
-        m_cellX = clipCellX(std::max(m_cellX, m_nCellW / 2) + deltaX);
+        move(deltaX, 0);
         break;
       default:
         break;
+    }
+  }
+
+  void move(int32_t cellDeltaX, int32_t cellDeltaY) {
+    {
+      int32_t cellX_new = m_cellX + cellDeltaX;
+      cellX_new = std::max(cellX_new, m_nCellW / 2);
+      cellX_new = std::min(cellX_new, m_imgUs.width() - m_nCellW / 2);
+      m_cellX = clipCellX(cellX_new);
+    }
+    {
+      int32_t cellY_new = m_cellY + cellDeltaY;
+      cellY_new = std::max(cellY_new, m_nCellH / 2);
+      cellY_new = std::min(cellY_new, m_imgUs.height() - m_nCellH / 2);
+      m_cellY = clipCellY(cellY_new);
     }
   }
 
