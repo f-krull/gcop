@@ -24,6 +24,8 @@ public:
   void orderByNameY();
   void orderBySlClusterY();
   void orderBySlClusterX();
+  void orderRandomX();
+  void orderRandomY();
 private:
   std::vector<std::vector<float>> m_d;
   std::vector<std::string> m_xlab;

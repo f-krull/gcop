@@ -523,6 +523,8 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_OCLUSSLY "OCLUSSLY"
 #define CMD_PFX_ONAMEX   "ONAMEX"
 #define CMD_PFX_ONAMEY   "ONAMEY"
+#define CMD_PFX_ORANDX   "ORANDX"
+#define CMD_PFX_ORANDY   "ORANDY"
 
 /*----------------------------------------------------------------------------*/
 
@@ -535,7 +537,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   msgbuf.addf("\0");
   char *msg = (char*)msgbuf.data();
   if (strncmp(msg, CMD_PFX_SET, strlen(CMD_PFX_SET)) == 0) {
-    char *arg1 = gettoken(msg,  ' ');
+    char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_SET, arg1, arg2);
     m->cfg.set(arg1, arg2); /* points to null char in worst case */
@@ -544,7 +546,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     return;
   }
   if (strncmp(msg, CMD_PFX_ZOOMIN, strlen(CMD_PFX_ZOOMIN)) == 0) {
-    char *arg1 = gettoken(msg,  ' ');
+    char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_ZOOMIN, arg1, arg2);
     m->imgMain.zoomin(atoi(arg1), atoi(arg2), &m->cfg);
@@ -553,7 +555,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     return;
   }
   if (strncmp(msg, CMD_PFX_ZOOMOUT, strlen(CMD_PFX_ZOOMOUT)) == 0) {
-    char *arg1 = gettoken(msg,  ' ');
+    char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_ZOOMOUT, arg1, arg2);
     m->imgMain.zoomout(atoi(arg1), atoi(arg2), &m->cfg);
@@ -562,7 +564,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     return;
   }
   if (strncmp(msg, CMD_PFX_DRAG, strlen(CMD_PFX_DRAG)) == 0) {
-    char *arg1 = gettoken(msg,  ' ');
+    char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_DRAG, arg1, arg2);
     m->imgMain.drag(atoi(arg1), atoi(arg2));
@@ -571,35 +573,51 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     return;
   }
   if (strncmp(msg, CMD_PFX_CLICK, strlen(CMD_PFX_CLICK)) == 0) {
-     char *arg1 = gettoken(msg,  ' ');
-     char *arg2 = gettoken(arg1, ' ');
-     m_log.dbg("CMD %s%s %s", CMD_PFX_CLICK, arg1, arg2);
-     uint32_t x = m->imgMain.clippedPx2CellX(atoi(arg1));
-     uint32_t y = m->imgMain.clippedPx2CellY(atoi(arg2));
-     BufferDyn out(1024);
-     out.addf("info");
-     out.addf("%d: %s<br>", x,  m->mat->xlab(x));
-     out.addf("%d: %s<br>", y,  m->mat->ylab(y));
-     out.addf("z-score: %f<br>",m->mat->get(y,x));
-     m_srv->sendData(id(), out.cdata(), out.len());
-     return;
-   }
+    char *arg1 = gettoken(msg, ' ');
+    char *arg2 = gettoken(arg1, ' ');
+    m_log.dbg("CMD %s%s %s", CMD_PFX_CLICK, arg1, arg2);
+    uint32_t x = m->imgMain.clippedPx2CellX(atoi(arg1));
+    uint32_t y = m->imgMain.clippedPx2CellY(atoi(arg2));
+    BufferDyn out(1024);
+    out.addf("info");
+    out.addf("%d: %s<br>", x, m->mat->xlab(x));
+    out.addf("%d: %s<br>", y, m->mat->ylab(y));
+    out.addf("z-score: %f<br>", m->mat->get(y, x));
+    m_srv->sendData(id(), out.cdata(), out.len());
+    return;
+  }
   if (strncmp(msg, CMD_PFX_ONAMEX, strlen(CMD_PFX_ONAMEX)) == 0) {
-     m_log.dbg("CMD %s", CMD_PFX_ONAMEX);
-     m->mat->orderByNameX();
-     m->imgUnscaled.update(m->mat);
-     m->sendUpdate = true;
-     sendStatus('w');
-     return;
+    m_log.dbg("CMD %s", CMD_PFX_ONAMEX);
+    m->mat->orderByNameX();
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
   }
   if (strncmp(msg, CMD_PFX_ONAMEY, strlen(CMD_PFX_ONAMEY)) == 0) {
-     m_log.dbg("CMD %s", CMD_PFX_ONAMEY);
-     m->mat->orderByNameY();
-     m->imgUnscaled.update(m->mat);
-     m->sendUpdate = true;
-     sendStatus('w');
-     return;
-   }
+    m_log.dbg("CMD %s", CMD_PFX_ONAMEY);
+    m->mat->orderByNameY();
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_ORANDX, strlen(CMD_PFX_ORANDX)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_ORANDX);
+    m->mat->orderRandomX();
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_ORANDY, strlen(CMD_PFX_ORANDY)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_ORANDY);
+    m->mat->orderRandomY();
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
   if (strncmp(msg, CMD_PFX_OCLUSSLX, strlen(CMD_PFX_OCLUSSLX)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_OCLUSSLX);
     m->mat->orderBySlClusterX();
@@ -617,7 +635,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     return;
   }
   if (strncmp(msg, CMD_PFX_MOVE, strlen(CMD_PFX_MOVE)) == 0) {
-    char *arg1 = gettoken(msg,  ' ');
+    char *arg1 = gettoken(msg, ' ');
     gettoken(arg1, ' '); /* null term */
     m_log.dbg("CMD %s%s", CMD_PFX_MOVE, arg1);
     m->imgMain.move(arg1);

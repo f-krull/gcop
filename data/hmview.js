@@ -130,6 +130,12 @@ document.getElementById("onamey").addEventListener("click", function(evt){
 document.getElementById("onamex").addEventListener("click", function(evt){
   mvWs.send("ONAMEX");
 });
+document.getElementById("orandy").addEventListener("click", function(evt){
+  mvWs.send("ORANDY");
+});
+document.getElementById("orandx").addEventListener("click", function(evt){
+  mvWs.send("ORANDX");
+});
 document.getElementById('main').ondragstart = function(evt){
   mvWs.send("TEST " + evt.clientX + " " + evt.clientY);
   dragInf.start(evt.clientX, evt.clientY, evt.target ? evt.target : evt.srcElement);

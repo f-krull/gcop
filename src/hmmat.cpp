@@ -268,4 +268,20 @@ void HmMat::orderBySlClusterX() {
   orderBySlClusterY();
   transpose();
 }
+/*----------------------------------------------------------------------------*/
 
+void HmMat::orderRandomY() {
+  std::vector<uint32_t> order(nrow());
+  std::iota(order.begin(), order.end(), 0);
+  auto rnde = std::default_random_engine {};
+  std::shuffle(std::begin(order), std::end(order), rnde);
+  applyOrderY(order);
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::orderRandomX() {
+  transpose();
+  orderRandomY();
+  transpose();
+}
