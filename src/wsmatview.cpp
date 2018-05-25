@@ -113,21 +113,21 @@ protected:
     m_jpgb64.toBase64();
     return true;
   }
-  static void fixAspRatio(cimg::CImg<unsigned char> & img, uint32_t w, uint32_t h) { /* add canvas to match asp ratio*/
+
+  /* add canvas to match asp ratio*/
+  static void fixAspRatio(cimg::CImg<unsigned char> & img, uint32_t w, uint32_t h) {
     const float a_new = float(w) / h;
     const int32_t wNew = img.height() * a_new;
     const int32_t hNew = img.width()  / a_new;
     if (wNew > img.width()) {
       /* add w */
       int32_t borderW = (wNew - img.width()) / 2;
-      //int32_t borderE = wNew - img.width() - borderW;
       auto inew = cimg::CImg<unsigned char>(wNew, img.height(), 1, 3, 0xff);
       inew.draw_image(borderW, 0, 0, 0, img);
       img = inew;
     } else if (hNew > img.height()) {
       /* add h */
       int32_t borderN = (hNew - img.height()) / 2;
-      //int32_t borderS = hNew - img.height() - borderN;
       auto inew = cimg::CImg<unsigned char>(img.width(), hNew, 1, 3, 0xff);
       inew.draw_image(0, borderN, 0, 0, img);
       img = inew;
@@ -202,10 +202,10 @@ public:
     m_dispMatY0 = 0;
     m_dispMatX1 = 0;
     m_dispMatY1 = 0;
-    m_nPxW = 0;
-    m_nPxH = 0;
-    m_posX = 0;
-    m_posY = 0;
+    m_nCellW = 0;
+    m_nCellH = 0;
+    m_cellX = 0;
+    m_cellY = 0;
   }
   void update(const ImgUnscaled &us, const WsMatViewCfg &cfg) {
     m_imgUs = us.img();
@@ -224,20 +224,20 @@ public:
       int32_t npw = dwid / pz_new;
       npw = npw < m_imgUs.width()  ? npw : m_imgUs.width(); /* min */
       nph = nph < m_imgUs.height() ? nph : m_imgUs.height();
-      m_nPxW = npw;
-      m_nPxH = nph;
+      m_nCellW = npw;
+      m_nCellH = nph;
     }
     /* calc offsets */
-    int32_t x0 = m_posX - m_nPxW/2;
-    int32_t y0 = m_posY - m_nPxH/2;
+    int32_t x0 = m_cellX - m_nCellW/2;
+    int32_t y0 = m_cellY - m_nCellH/2;
     x0 = x0 < m_imgUs.width()  ? x0 : m_imgUs.width();
     y0 = y0 < m_imgUs.height() ? y0 : m_imgUs.height();
-    x0 = x0+m_nPxW-1 < m_imgUs.width()  ? x0 : m_imgUs.width() -m_nPxW;
-    y0 = y0+m_nPxH-1 < m_imgUs.height() ? y0 : m_imgUs.height()-m_nPxH;
+    x0 = x0+m_nCellW-1 < m_imgUs.width()  ? x0 : m_imgUs.width() -m_nCellW;
+    y0 = y0+m_nCellH-1 < m_imgUs.height() ? y0 : m_imgUs.height()-m_nCellH;
     x0 = x0 > 0 ? x0 : 0;
     y0 = y0 > 0 ? y0 : 0;
     /* crop image */
-    m_imgUSCrop = m_imgUs.get_crop(x0, y0, x0+m_nPxW-1, y0+m_nPxH-1); //TODO: check if negative
+    m_imgUSCrop = m_imgUs.get_crop(x0, y0, x0+m_nCellW-1, y0+m_nCellH-1); //TODO: check if negative
     /* add borders */
     m_imgUSCropAsp = m_imgUSCrop;
     fixAspRatio(m_imgUSCropAsp, dwid, dhei);
@@ -247,8 +247,8 @@ public:
     m_dispMatY0 = (m_imgUSCropAsp.height() - m_imgUSCrop.height()) / 2 * pz_new;
     m_dispMatX1 = m_img.width()  - m_dispMatX0;
     m_dispMatY1 = m_img.height() - m_dispMatY0;
-    m_pxW         = float(m_img.width()  - m_dispMatX0 * 2) / m_nPxW;
-    m_pxH         = float(m_img.height() - m_dispMatY0 * 2) / m_nPxH;
+    m_pxW         = float(m_img.width()  - m_dispMatX0 * 2) / m_nCellW;
+    m_pxH         = float(m_img.height() - m_dispMatY0 * 2) / m_nCellH;
     m_dispStartX  = x0;
     m_dispStartY  = y0;
     encode();
@@ -258,84 +258,84 @@ public:
     const int32_t z = cfg->getInt(CFG_ZOOM_INT);
     cfg->setInt(CFG_ZOOM_INT, z + 1);
     /* calc x and y */
-    m_posX = (calcClippedPosX(x) + calcClippedPosX(cfg->getInt(CFG_MAIN_WID_INT)/2)/2);
-    m_posY = (calcClippedPosY(y) + calcClippedPosY(cfg->getInt(CFG_MAIN_HEI_INT)/2)/2);
-    m_posX = calcClippedPosX(x);
-    m_posY = calcClippedPosY(y);
+    m_cellX = (clippedPx2CellX(x) + clippedPx2CellX(cfg->getInt(CFG_MAIN_WID_INT)/2)/2);
+    m_cellY = (clippedPx2CellY(y) + clippedPx2CellY(cfg->getInt(CFG_MAIN_HEI_INT)/2)/2);
+    m_cellX = clippedPx2CellX(x);
+    m_cellY = clippedPx2CellY(y);
 #if 0
     const int32_t posx = cfg.getInt(CFG_POSX_INT);
     const int32_t posy = cfg.getInt(CFG_POSY_INT);
-    m_posX = (posx + calcClippedPosX(dwid/2))/2; /* TODO: set these in a zoomin(x,y) function */
-    m_posY = (posy + calcClippedPosY(dhei/2))/2;
+    m_cellX = (posx + calcClippedPosX(dwid/2))/2; /* TODO: set these in a zoomin(x,y) function */
+    m_cellY = (posy + calcClippedPosY(dhei/2))/2;
 #endif
   }
 
   void zoomout(int32_t x, int32_t y, WsMatViewCfg *cfg) {
     const int32_t z = cfg->getInt(CFG_ZOOM_INT);
     cfg->setInt(CFG_ZOOM_INT, z > 0 ? z - 1 : z);
-    m_posX = calcClippedPosX(cfg->getInt(CFG_MAIN_WID_INT)/2);
-    m_posY = calcClippedPosY(cfg->getInt(CFG_MAIN_HEI_INT)/2);
+    m_cellX = clippedPx2CellX(cfg->getInt(CFG_MAIN_WID_INT)/2);
+    m_cellY = clippedPx2CellY(cfg->getInt(CFG_MAIN_HEI_INT)/2);
   }
 
   void drag(int32_t x, int32_t y) {
-    printf("prev mxy: %d,%d\n", m_posX, m_posY);
-    m_posX = calcClippedPosX(x);
-    m_posY = calcClippedPosY(y);
+    printf("prev mxy: %d,%d\n", m_cellX, m_cellY);
+    m_cellX = clippedPx2CellX(x);
+    m_cellY = clippedPx2CellY(y);
     printf("    inxy: %d,%d\n", x, y);
-    printf("   cinxy: %d,%d\n", calcClippedPosX(x), calcClippedPosY(y));
-    printf("new  mxy: %d,%d\n", m_posX, m_posY);
+    printf("   cinxy: %d,%d\n", clippedPx2CellX(x), clippedPx2CellY(y));
+    printf("new  mxy: %d,%d\n", m_cellX, m_cellY);
   }
 
   void move(const char* direction) {
     const float dscale = 0.1;
-    const int32_t deltaX = int32_t(m_nPxW * dscale) > 1 ? (m_nPxW * dscale) : 1;
-    const int32_t deltaY = int32_t(m_nPxH * dscale) > 1 ? (m_nPxH * dscale) : 1;
+    const int32_t deltaX = int32_t(m_nCellW * dscale) > 1 ? (m_nCellW * dscale) : 1;
+    const int32_t deltaY = int32_t(m_nCellH * dscale) > 1 ? (m_nCellH * dscale) : 1;
     switch (direction[0]) {
       case 'U':
-        m_posY = clipPosY(m_posY - deltaY);
+        m_cellY = clipCellY(std::min(m_cellY, m_imgUs.height() - m_nCellH / 2) - deltaY);
         break;
       case 'D':
-        m_posY = clipPosY(m_posY + deltaY);
+        m_cellY = clipCellY(std::max(m_cellY, m_nCellH / 2) + deltaY);
         break;
       case 'L':
-        m_posX = clipPosX(m_posX - deltaX);
+        m_cellX = clipCellX(std::min(m_cellX, m_imgUs.width() - m_nCellW / 2) - deltaX);
         break;
       case 'R':
-        m_posX = clipPosX(m_posX + deltaX);
+        m_cellX = clipCellX(std::max(m_cellX, m_nCellW / 2) + deltaX);
         break;
       default:
         break;
     }
   }
 
-  int32_t calcPosX(int32_t x) const {
+  int32_t px2cellX(int32_t x) const {
     return (x - m_dispMatX0) / m_pxW + m_dispStartX;
   }
 
-  int32_t calcPosY(int32_t y) const {
+  int32_t px2CellY(int32_t y) const {
     return (y - m_dispMatY0) / m_pxH + m_dispStartY;
   }
 
-  int32_t clipPosX(int32_t posx) const {
+  int32_t clipCellX(int32_t posx) const {
     posx = posx > 0 ? posx : 0;
     return posx < m_imgUs.width() ? posx : (m_imgUs.width()-1);
   }
 
-  int32_t clipPosY(int32_t posy) const {
+  int32_t clipCellY(int32_t posy) const {
     posy = posy > 0 ? posy : 0;
     return posy < m_imgUs.height() ? posy : (m_imgUs.height()-1);
   }
 
-  int32_t calcClippedPosX(int32_t x) const {
-    return clipPosX(calcPosX(x));
+  int32_t clippedPx2CellX(int32_t x) const {
+    return clipCellX(px2cellX(x));
   }
 
-  int32_t calcClippedPosY(int32_t y) const {
-    return clipPosY(calcPosY(y));
+  int32_t clippedPx2CellY(int32_t y) const {
+    return clipCellY(px2CellY(y));
   }
 
-  int32_t numPxH() const {return m_nPxH;}
-  int32_t numPxW() const {return m_nPxW;}
+  int32_t numPxH() const {return m_nCellH;}
+  int32_t numPxW() const {return m_nCellW;}
   int32_t dispStartX() const {return m_dispStartX;}
   int32_t dispStartY() const {return m_dispStartY;}
   int32_t dispMatX0() const {return m_dispMatX0;}
@@ -355,12 +355,12 @@ protected:
   int32_t  m_dispMatY0;
   int32_t  m_dispMatX1; /* bottom-right corner of matrix, already outside */
   int32_t  m_dispMatY1;
-  int32_t  m_nPxW;
-  int32_t  m_nPxH;
+  int32_t  m_nCellW;
+  int32_t  m_nCellH;
   float    m_pxW;
   float    m_pxH;
-  int32_t m_posX;
-  int32_t m_posY;
+  int32_t m_cellX;
+  int32_t m_cellY;
 };
 
 
@@ -559,8 +559,8 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
      char *arg1 = gettoken(msg,  ' ');
      char *arg2 = gettoken(arg1, ' ');
      m_log.dbg("CMD %s%s %s", CMD_PFX_CLICK, arg1, arg2);
-     uint32_t x = m->imgMain.calcClippedPosX(atoi(arg1));
-     uint32_t y = m->imgMain.calcClippedPosY(atoi(arg2));
+     uint32_t x = m->imgMain.clippedPx2CellX(atoi(arg1));
+     uint32_t y = m->imgMain.clippedPx2CellY(atoi(arg2));
      BufferDyn out(1024);
      out.addf("info");
      out.addf("%d: %s<br>", x,  m->mat->xlab(x));

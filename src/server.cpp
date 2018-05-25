@@ -12,7 +12,6 @@
 /*----------------------------------------------------------------------------*/
 
 void ISocketService::write(uint32_t clientId, const uint8_t* data, uint32_t len) {
-  /* if buffer is full */
   m_srv->write(clientId, data, len);
 }
 

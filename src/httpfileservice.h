@@ -13,7 +13,6 @@
     select_fun(MIMETYPE_TEXT_EVENTSTREAM, "text/event-stream") \
     select_fun(MIMETYPE_IMAGE_PNG       , "image/png"        )
 
-/*----------------------------------------------------------------------------*/
 
 class HttpFileService: public ISocketService {
 public:
