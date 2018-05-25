@@ -113,9 +113,7 @@ void ServerTcp::integrate() {
         /* handle data on this connection */
         uint8_t buffer[1024];
         int32_t dsize = recvfrom(cl->second->fd, buffer, sizeof(buffer), 0, NULL, NULL);
-        /* patch */
         if (dsize > 0) {
-          buffer[std::min((int32_t) sizeof(buffer) - 1, dsize)] = '\0'; //TODO: remove me
           std::set<ISocketService*>::iterator sr;
           for (sr = m_services.begin(); sr != m_services.end(); sr++) {
             (*sr)->newData(cl->second->id, buffer, dsize);
