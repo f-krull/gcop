@@ -16,6 +16,8 @@
 #define CFG_MAIN_HEI_INT   "MAIN_HEI"
 #define CFG_YLAB_WID_INT   "YLAB_WID"
 #define CFG_XLAB_HEI_INT   "XLAB_HEI"
+#define CFG_YDEN_WID_INT   "YDEN_WID"
+#define CFG_XDEN_HEI_INT   "XDEN_HEI"
 #define CFG_ZOOM_INT       "ZOOM"
 #define CFG_POSX_INT       "POSX"
 #define CFG_POSY_INT       "POSY"
@@ -28,6 +30,8 @@ public:
     defineInt(CFG_XLAB_HEI_INT, "50",  0, 4096);
     defineInt(CFG_MAIN_HEI_INT, "200", 0, 4096);
     defineInt(CFG_MAIN_WID_INT, "300", 0, 4096);
+    defineInt(CFG_XDEN_HEI_INT, "40",  0, 4096);
+    defineInt(CFG_YDEN_WID_INT, "40",  0, 4096);
     defineInt(CFG_ZOOM_INT, "0", 0, 4096);
     defineInt(CFG_POSY_INT, "0", 0, 4096);
     defineInt(CFG_POSX_INT, "0", 0, 4096);
@@ -465,6 +469,60 @@ public:
 
 /*----------------------------------------------------------------------------*/
 
+#define DEN_MIN_DIST 6
+
+#include "dendrogram.h"
+
+class ImgYden : public ImgBase {
+public:
+  void update(const ImgMain &main, const HmMat *hmm, const WsMatViewCfg &cfg) {
+    unsigned char blvl = 0xFF;
+    const uint32_t dw = cfg.getInt(CFG_YDEN_WID_INT);
+    const uint32_t dh = cfg.getInt(CFG_MAIN_HEI_INT);
+    m_img = cimg::CImg<unsigned char>(dw, dh, 1, 3, blvl);
+    while (true) { /* dummy */
+      const Dendrogram *dend = hmm->getDendY();
+      if (!dend) {
+        break;
+      }
+      int32_t i0 = main.dispStartY();
+      int32_t i1 = main.dispStartY() + main.numPxH();
+
+      assert(main.dispMatY0() >= 0);
+      assert(main.dispMatY1() >= 0);
+      std::vector<const DgNode*> roots = dend->getRoots(i0, i1);
+      printf("%lu nodes %d %d\n", roots.size(), i0, i1);
+      for (uint32_t i = 0; i < roots.size(); i++) {
+        drawNode(NULL, roots[i], main, 0);
+      }
+      break;
+    }
+    encode();
+  }
+private:
+  void drawNode(const DgNode* parent, const DgNode *node, const ImgMain &main, int32_t x0) {
+    if (!node) {
+      return;
+    }
+
+    const unsigned char fgCol[] = {0x00, 0x00, 0x00};
+    const int32_t axBgn = main.dispMatY0();
+    const int32_t axEnd = main.dispMatY1();
+    float pxHei = float(axEnd - axBgn) / main.numPxH();
+    int32_t y0 = pxHei * node->hPos() * main.numPxH() - axBgn + (pxHei / 2);
+    int32_t x1 = (m_img.width()-1) * (1 - node->distRel());
+    m_img.draw_line(x0, y0, x1, y0, fgCol, 1.f);
+    if (parent) {
+      int32_t y1 = pxHei * parent->hPos() * main.numPxH() - axBgn + (pxHei / 2);
+      m_img.draw_line(x0, y0, x0, y1, fgCol, 1.f);
+    }
+    drawNode(node, node->getLo(), main, x1);
+    drawNode(node, node->getHi(), main, x1);
+  }
+};
+
+/*----------------------------------------------------------------------------*/
+
 class WsMatViewPriv {
 public:
   WsMatViewCfg cfg;
@@ -477,6 +535,7 @@ public:
   ImgTiny     imgTiny;
   ImgYlab     imgYlab;
   ImgXlab     imgXlab;
+  ImgYden     imgYden;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -490,11 +549,12 @@ WsMatView::WsMatView(WsService* s, uint32_t clientId) :
   m->sendUpdate = true;
   m->mat = new HmMat();
   //m->mat->read("data/disreg_matrix_half.txt");
+  //m->mat->read("data/disreg_matrix_10x8.txt");
   m->mat->read("data/disreg_matrix.txt");
 //  m->mat->orderByNameY();
 //  m->mat->orderByNameX();
-  m->mat->orderBySlClusterY();
-  m->mat->orderBySlClusterX();
+  m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
+  m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
   //m->mat->transpose();
   m->imgUnscaled.update(m->mat);
 }
@@ -583,7 +643,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_ONAMEX, strlen(CMD_PFX_ONAMEX)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_ONAMEX);
-    m->mat->orderByNameX();
+    m->mat->order(HmMat::ORDER_ALPHABELIC_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
@@ -591,7 +651,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_ONAMEY, strlen(CMD_PFX_ONAMEY)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_ONAMEY);
-    m->mat->orderByNameY();
+    m->mat->order(HmMat::ORDER_ALPHABELIC_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
@@ -599,7 +659,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_ORANDX, strlen(CMD_PFX_ORANDX)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_ORANDX);
-    m->mat->orderRandomX();
+    m->mat->order(HmMat::ORDER_RANDOM_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
@@ -607,7 +667,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_ORANDY, strlen(CMD_PFX_ORANDY)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_ORANDY);
-    m->mat->orderRandomY();
+    m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
@@ -615,7 +675,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_OCLUSSLX, strlen(CMD_PFX_OCLUSSLX)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_OCLUSSLX);
-    m->mat->orderBySlClusterX();
+    m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
@@ -623,7 +683,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_OCLUSSLY, strlen(CMD_PFX_OCLUSSLY)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_OCLUSSLY);
-    m->mat->orderBySlClusterY();
+    m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
@@ -684,10 +744,12 @@ void WsMatView::integrate(int64_t serviceTimeUsec) {
     renderTiny();
     renderYlab();
     renderXlab();
+    renderYden();
     sendTiny();
     sendMain();
     sendYlab();
     sendXlab();
+    sendYDen();
     sendInfo();
     m->sendUpdate = false;
     sendStatus('o');
@@ -738,6 +800,14 @@ void WsMatView::sendYlab() {
 
 /*----------------------------------------------------------------------------*/
 
+void WsMatView::sendYDen() {
+  BufferDyn out(1024*1024);
+  out.addf("ydendata:image/jpeg;base64,%s", m->imgYden.jpgB64().cdata());
+  m_srv->sendData(id(), out.cdata(), out.len());
+}
+
+/*----------------------------------------------------------------------------*/
+
 void WsMatView::sendInfo() {
   BufferDyn out(1024);
   out.addf("info");
@@ -745,6 +815,8 @@ void WsMatView::sendInfo() {
   out.addf("%s: %d<br>", CFG_MAIN_WID_INT, m->cfg.getInt(CFG_MAIN_WID_INT));
   out.addf("%s: %d<br>", CFG_XLAB_HEI_INT, m->cfg.getInt(CFG_XLAB_HEI_INT));
   out.addf("%s: %d<br>", CFG_YLAB_WID_INT, m->cfg.getInt(CFG_YLAB_WID_INT));
+  out.addf("%s: %d<br>", CFG_XDEN_HEI_INT, m->cfg.getInt(CFG_XDEN_HEI_INT));
+  out.addf("%s: %d<br>", CFG_YDEN_WID_INT, m->cfg.getInt(CFG_YDEN_WID_INT));
   out.addf("%s: %d<br>", CFG_POSX_INT, m->cfg.getInt(CFG_POSX_INT));
   out.addf("%s: %d<br>", CFG_POSY_INT, m->cfg.getInt(CFG_POSY_INT));
   out.addf("%s: %d<br>", CFG_ZOOM_INT, m->cfg.getInt(CFG_ZOOM_INT));
@@ -773,6 +845,12 @@ void WsMatView::renderXlab() {
 
 void WsMatView::renderYlab() {
   m->imgYlab.update(m->imgMain, m->mat, m->cfg);
+}
+
+/*----------------------------------------------------------------------------*/
+
+void WsMatView::renderYden() {
+  m->imgYden.update(m->imgMain, m->mat, m->cfg);
 }
 
 

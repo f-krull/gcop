@@ -9,6 +9,13 @@
 
 /*----------------------------------------------------------------------------*/
 
+HmMat::~HmMat() {
+  delete m_dendX;
+  delete m_dendY;
+}
+
+/*----------------------------------------------------------------------------*/
+
 bool HmMat::read(const char* fn) {
   /*
    * mat format:
@@ -251,26 +258,30 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-void HmMat::orderBySlClusterY() {
+Dendrogram * HmMat::orderBySlClusterY() {
   DistanceMatrix<float> *dm = DistanceMatrixFactory<float>::getFilled(&m_d,
       HmmRowDistEuclidean());
   std::vector<std::vector<uint32_t> > clusters;
-  std::vector<uint32_t> order = ClustererSl<float>::clusterAll(dm);
+  Dendrogram *d = ClustererSl<float>::clusterAll(dm);
   delete dm;
+  std::vector<uint32_t> order = d->getOrder();
   assert(order.size() == nrow());
   applyOrderY(order);
+  return d;
 }
 
 /*----------------------------------------------------------------------------*/
 
-void HmMat::orderBySlClusterX() {
+Dendrogram * HmMat::orderBySlClusterX() {
   transpose();
-  orderBySlClusterY();
+  Dendrogram *d = orderBySlClusterY();
   transpose();
+  return d;
 }
 /*----------------------------------------------------------------------------*/
 
 void HmMat::orderRandomY() {
+  resetOrderY();
   std::vector<uint32_t> order(nrow());
   std::iota(order.begin(), order.end(), 0);
   auto rnde = std::default_random_engine {};
@@ -284,4 +295,52 @@ void HmMat::orderRandomX() {
   transpose();
   orderRandomY();
   transpose();
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::resetOrderX() {
+  delete m_dendX;
+  m_dendX = NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::resetOrderY() {
+  delete m_dendY;
+  m_dendY = NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::order(OrderType ot) {
+  switch (ot) {
+    case ORDER_ALPHABELIC_X:
+      resetOrderX();
+      orderByNameX();
+      break;
+    case ORDER_ALPHABELIC_Y:
+      resetOrderY();
+      orderByNameY();
+      break;
+    case ORDER_RANDOM_X:
+      resetOrderX();
+      orderByNameX();
+      break;
+    case ORDER_RANDOM_Y:
+      resetOrderY();
+      orderByNameY();
+      break;
+    case ORDER_HCLUSTER_SL_X:
+      resetOrderX();
+      m_dendX = orderBySlClusterX();
+      break;
+    case ORDER_HCLUSTER_SL_Y:
+      resetOrderY();
+      m_dendY = orderBySlClusterY();
+      break;
+    default:
+      assert(false && "enum order type not handeled");
+      break;
+  }
 }

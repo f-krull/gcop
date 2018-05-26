@@ -2,7 +2,7 @@
 #define CLUSTERERSL_H_
 
 #include <stdint.h>
-
+#include "dendrogram.h"
 /*----------------------------------------------------------------------------*/
 
 template<class T>
@@ -10,7 +10,7 @@ class ClustererSl {
 public:
   ClustererSl(DistanceMatrix<T> *dm, T maxDist);
   bool linkNext(uint32_t *i, uint32_t *j, T *dist);
-  static std::vector<uint32_t> clusterAll(DistanceMatrix<T> *dm);
+  static Dendrogram* clusterAll(DistanceMatrix<T> *dm);
 private:
   /* union-find data struct */
   class UfNode {
@@ -46,7 +46,7 @@ private:
 #include <math.h>
 #include <limits.h>
 #include <float.h>
-#include "dendrogram.h"
+
 
 /*----------------------------------------------------------------------------*/
 
@@ -146,18 +146,18 @@ bool ClustererSl<T>::linkNext(uint32_t *i, uint32_t *j, T *dist) {
 /*----------------------------------------------------------------------------*/
 
 template<class T>
-std::vector<uint32_t> ClustererSl<T>::clusterAll(DistanceMatrix<T> *dm) {
+Dendrogram* ClustererSl<T>::clusterAll(DistanceMatrix<T> *dm) {
   T dist;
   /* do clustering */
-  Dendrogram dend(dm->getNumElements());
+  DendrogramBuilder db(dm->getNumElements());
   {
     uint32_t i, j;
     ClustererSl<T> cl(dm, FLT_MAX);
     while ((cl.linkNext(&i, &j, &dist))) {
-      dend.pair(i, j, dist);
+      db.pair(i, j, dist);
     }
   }
-  return dend.getOrder();
+  return db.getDend();
 }
 
 #endif /* CLUSTERERSL_H_ */

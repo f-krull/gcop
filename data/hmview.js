@@ -7,11 +7,6 @@ function assert(condition, message) {
 
 //------------------------------------------------------------------------------
 
-function MVMsgPrefix() {
-  this.MAT_HEIGHT = "MAT_HEIGHT";
-  this.MAT_WIDTH  = "MAT_WIDTH";
-};
-
 function MatViewWs() {
   this._ws = null;
 }
@@ -78,7 +73,7 @@ DragInfo.prototype.start = function(x, y, t) {
   this._deltaY = 0;
 }
 DragInfo.prototype.move = function(x, y) {
-  if (!dragInf._dragging) {
+  if (!this._dragging) {
     return;
   }
   this._coordX = x;
@@ -101,11 +96,15 @@ function requestSize() {
   var main_hei = document.querySelector('tr.rowmain').offsetHeight;
   var xlab_hei = document.querySelector('tr.rowxlab').offsetHeight;
   var ylab_wid = document.querySelector('td.colstat').offsetWidth;
-  mvWs.send("SET MAIN_WID "   + main_wid);
-  mvWs.send("SET MAIN_HEI "   + main_hei);
-  mvWs.send("SET XLAB_HEI "   + xlab_hei);
-  mvWs.send("SET YLAB_WID "   + ylab_wid);
-  mvWs.send("SET LABTXT_HEI " + 13);
+  var xden_hei = document.querySelector('tr.rowxden').offsetHeight;
+  var yden_wid = document.querySelector('td.colyden').offsetWidth;
+  g_mvWs.send("SET MAIN_WID "   + main_wid);
+  g_mvWs.send("SET MAIN_HEI "   + main_hei);
+  g_mvWs.send("SET XLAB_HEI "   + xlab_hei);
+  g_mvWs.send("SET YLAB_WID "   + ylab_wid);
+  g_mvWs.send("SET XDEN_HEI "   + xden_hei);
+  g_mvWs.send("SET YDEN_WID "   + yden_wid);
+  g_mvWs.send("SET LABTXT_HEI " + 13);
   console.log("main_wid " + main_wid);
   console.log("main_hei " + main_hei);
   console.log("xlab_hei " + xlab_hei);
@@ -117,50 +116,50 @@ function requestSize() {
 
 //------------------------------------------------------------------------------
 
-mvWs = new MatViewWs();
-dragInf = new DragInfo();
+var g_mvWs = new MatViewWs();
+var g_dragInf = new DragInfo();
 var g_imgmain = null;
 var g_imgxlab = null;
 var g_imgylab = null;
 
 document.getElementById("main").addEventListener("wheel", function(evt){
   if (evt.deltaY > 0) {
-    mvWs.send("ZOOMIN "  + evt.offsetX + " " + evt.offsetY);
+    g_mvWs.send("ZOOMIN "  + evt.offsetX + " " + evt.offsetY);
   } else if (evt.deltaY < 0) {
-    mvWs.send("ZOOMOUT " + evt.offsetX + " " + evt.offsetY);
+    g_mvWs.send("ZOOMOUT " + evt.offsetX + " " + evt.offsetY);
   }
 });
 document.getElementById("oclusx").addEventListener("click", function(evt){
-  mvWs.send("OCLUSSLX");
+  g_mvWs.send("OCLUSSLX");
 });
 document.getElementById("oclusy").addEventListener("click", function(evt){
-  mvWs.send("OCLUSSLY");
+  g_mvWs.send("OCLUSSLY");
 });
 document.getElementById("onamey").addEventListener("click", function(evt){
-  mvWs.send("ONAMEY");
+  g_mvWs.send("ONAMEY");
 });
 document.getElementById("onamex").addEventListener("click", function(evt){
-  mvWs.send("ONAMEX");
+  g_mvWs.send("ONAMEX");
 });
 document.getElementById("orandy").addEventListener("click", function(evt){
-  mvWs.send("ORANDY");
+  g_mvWs.send("ORANDY");
 });
 document.getElementById("orandx").addEventListener("click", function(evt){
-  mvWs.send("ORANDX");
+  g_mvWs.send("ORANDX");
 });
 document.getElementById('main').ondragstart = function(evt){
-  mvWs.send("TEST " + evt.clientX + " " + evt.clientY);
-  dragInf.start(evt.clientX, evt.clientY, evt.target ? evt.target : evt.srcElement);
+  g_mvWs.send("TEST " + evt.clientX + " " + evt.clientY);
+  g_dragInf.start(evt.clientX, evt.clientY, evt.target ? evt.target : evt.srcElement);
   return false;
 };
 document.getElementById('main').onmousemove = function(evt){
-  dragInf.move(evt.clientX, evt.clientY);
+  g_dragInf.move(evt.clientX, evt.clientY);
   return false;
 };
 document.onmouseup = function(evt){
-  if (dragInf._dragging) {
-    dragInf.stop();
-    mvWs.send("PAN " + dragInf._deltaX + " " + dragInf._deltaY);
+  if (g_dragInf._dragging) {
+    g_dragInf.stop();
+    g_mvWs.send("PAN " + g_dragInf._deltaX + " " + g_dragInf._deltaY);
   }
   return false;
 };
@@ -171,19 +170,19 @@ document.onkeydown = function(e){
   var keyleft  = '37';
   var keyright = '39';
   if (e.keyCode == keyup) {
-    mvWs.send("MOVE UP");
+    g_mvWs.send("MOVE UP");
     return false;
   }
   if (e.keyCode == keydown) {
-    mvWs.send("MOVE DOWN");
+    g_mvWs.send("MOVE DOWN");
     return false;
   }
   if (e.keyCode == keyleft) {
-    mvWs.send("MOVE LEFT");
+    g_mvWs.send("MOVE LEFT");
     return false;
   }
   if (e.keyCode == keyright) {
-    mvWs.send("MOVE RIGHT");
+    g_mvWs.send("MOVE RIGHT");
     return false;
   }
   return true;
@@ -194,7 +193,7 @@ window.addEventListener('resize', function(event){
 });
 
 function Start() {
-  mvWs.connect();
+  g_mvWs.connect();
   //alert(document.querySelector('td.xlab').offsetWidth)
 }
 Start()

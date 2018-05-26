@@ -10,7 +10,7 @@ table {
 }
 
 .colxlab {
-  width: 70%;
+  width: 60%;
 }
 .coltiny {
   width: 15%;
@@ -18,12 +18,18 @@ table {
 .colstat {
   width: 15%;
 }
+.colyden {
+  width: 10%;
+}
 
 tr.rowxlab {
   height: 15%;
 }
 tr.rowmain {
-  height: 85%;
+  height: 75%;
+}
+tr.rowxden {
+  height: 10%;
 }
 
 td {

@@ -4,40 +4,81 @@
 #include <vector>
 #include <stdint.h>
 
-/*----------------------------------------------------------------------------*/
+class DendrogramNode;
 
-class DendrogramNode {
+typedef std::vector<uint32_t> DgNodeHPosMap;
+
+class DgNode {
 public:
-  DendrogramNode(int32_t id);
-  bool isRoot() const;
-  bool isLeaf() const;
-  int32_t id() const;
-  static DendrogramNode * merge(int32_t id, DendrogramNode *l, DendrogramNode *r, float dist);
-  static std::vector<uint32_t> geGlobalLeafIds(const DendrogramNode *root);
-
+  ~DgNode();
+  bool isLeaf() const { return m_lo; }
+  const DgNode *getLo() const {return m_lo;}
+  const DgNode *getHi() const {return m_hi;}
+  void getRoots(uint32_t i0, uint32_t i1, std::vector<const DgNode*> *res) const;
+  static std::vector<DgNode*> build(std::vector<DendrogramNode*> roots, std::vector<uint32_t> *order);
+  double distRel() const {return m_distRel;}
+  double hPos() const {return m_hpos;}
+  void print(uint32_t l=0, char s = '=') const;
 private:
-  DendrogramNode *m_p;
-  DendrogramNode *m_l;
-  DendrogramNode *m_r;
-  float m_dist;
-  float m_minDist;
-  bool m_isLeaf;
-  int32_t m_id;
-  uint32_t m_depth;
-
-  DendrogramNode(int32_t id, DendrogramNode *l, DendrogramNode *r, float dist);
-  void getGlobalLeafIds(std::vector<uint32_t> &leafIds) const;
+  DgNode   *m_lo;
+  DgNode   *m_hi;
+  uint32_t  m_lvl;
+  uint32_t  m_id;
+  double m_distAbs;
+  double m_distRel;
+  /* these will be set by setHPos(): */
+  uint32_t  m_idxLo; /* outer lo ID; used for range search */
+  uint32_t  m_idxHi; /* outer hi ID */
+  double m_hpos; /* [0,1]; 0 <= lo < hi <= 1 */
+  DgNode(const DendrogramNode*, double maxdist);
+  void getOrder(std::vector<uint32_t> *o);
+  void setHPosMap(const std::vector<uint32_t> &m);
 };
+
+
+/*
+ *                o root
+ *   root o      / \
+ *       / \    /   \
+ *      /   o  |     \
+ *     o    |  o     o
+ *    / \   o  |\   / \
+ *    | |  / \ | |  | |
+ * lo                   hi
+ *
+ *       >- order ->
+ *
+ */
+
+
+
 
 /*----------------------------------------------------------------------------*/
 
 class Dendrogram {
 public:
-  Dendrogram(uint32_t n);
+  Dendrogram(const std::vector<DendrogramNode*> &roots);
   ~Dendrogram();
-  bool pair(uint32_t i, uint32_t j, float dist);
-  std::vector<uint32_t> getOrder() const;
+  std::vector<uint32_t> getOrder() const {return m_orderedNodes;}
+  std::vector<const DgNode*> getRoots(uint32_t i0, uint32_t i1) const;
+  const DgNodeHPosMap & getId2Idx() const;
 
+private:
+  std::vector<uint32_t> m_orderedNodes;
+  DgNodeHPosMap         m_id2idx; /* nodeid -> hpos/order */
+  std::vector<DgNode*>  m_roots;
+  Dendrogram(const Dendrogram &o) = delete;
+  Dendrogram & operator=(const Dendrogram &o) = delete;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class DendrogramBuilder {
+public:
+  DendrogramBuilder(uint32_t n);
+  ~DendrogramBuilder();
+  bool pair(uint32_t i, uint32_t j, float dist);
+  Dendrogram* getDend();
 private:
   std::vector<DendrogramNode*> m_nodes;
   uint32_t m_n;
@@ -45,3 +86,4 @@ private:
 };
 
 #endif /* DENDROGRAM_H_ */
+

@@ -21,10 +21,13 @@ private:
   void sendInfo();
   void sendYlab();
   void sendXlab();
+  void sendYDen();
+  void sendXDen();
   void renderMain();
   void renderXlab();
   void renderYlab();
   void renderTiny();
+  void renderYden();
   Log m_log;
   int64_t m_nextupdate;
   WsService *m_srv;
