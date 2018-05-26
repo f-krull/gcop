@@ -99,7 +99,7 @@ void DeNode::getGlobalLeafIds(std::vector<uint32_t> &leafIds) const {
     }
     return;
   }
-  const int32_t globalId = abs(m_id) - 1;
+  const int32_t globalId = m_id;
   assert(globalId >= 0);
   leafIds.push_back(globalId);
 }
@@ -108,13 +108,9 @@ void DeNode::getGlobalLeafIds(std::vector<uint32_t> &leafIds) const {
 
 Dendrogram::Dendrogram(uint32_t n) {
   m_n = n;
-  m_dict.resize(m_n * 2);
-  for (uint32_t i = 0; i < m_dict.size(); i++) {
-    m_dict[i] = i;
-  }
   m_nodes.assign(m_n * 2, NULL);
   for (uint32_t i = 0; i < m_n; i++) {
-    m_nodes[i] = new DeNode(int32_t(i + 1) * -1);
+    m_nodes[i] = new DeNode(i);
   }
   m_numPairs = 0;
 }
@@ -130,7 +126,6 @@ Dendrogram::~Dendrogram() {
 /*----------------------------------------------------------------------------*/
 
 bool Dendrogram::pair(uint32_t i, uint32_t j, float dist) {
-  m_dict[m_numPairs + m_n] = m_dict[i];
   m_nodes[m_numPairs + m_n] = DeNode::merge(m_numPairs + 1, m_nodes[i],
       m_nodes[j], dist);
   m_numPairs++;

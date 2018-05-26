@@ -39,7 +39,6 @@ public:
   std::vector<uint32_t> getOrder() const;
 
 private:
-  std::vector<uint32_t> m_dict;
   std::vector<DendrogramNode*> m_nodes;
   uint32_t m_n;
   uint32_t m_numPairs;
