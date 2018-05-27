@@ -170,6 +170,13 @@ public:
         m_img(j, i, 0) = (col0[0] * (1-colScale) + col1[0] * colScale);
         m_img(j, i, 1) = (col0[1] * (1-colScale) + col1[1] * colScale);
         m_img(j, i, 2) = (col0[2] * (1-colScale) + col1[2] * colScale);
+        if (hm->isSel(i, j)) {
+          const float sscale = 0.5;
+          const uint8_t colSel[]  = { 0xff, 0xff, 0x00 };
+          m_img(j, i, 0) = m_img(j, i, 0) * (1-sscale) + colSel[0] * sscale;
+          m_img(j, i, 1) = m_img(j, i, 1) * (1-sscale) + colSel[1] * sscale;
+          m_img(j, i, 2) = m_img(j, i, 2) * (1-sscale) + colSel[2] * sscale;
+        }
       }
     }
     encode();
@@ -662,6 +669,10 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     out.addf("%d: %s<br>", y, m->mat->ylab(y));
     out.addf("z-score: %f<br>", m->mat->get(y, x));
     m_srv->sendData(id(), out.cdata(), out.len());
+    m->mat->sel(y, x);
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ONAMEX, strlen(CMD_PFX_ONAMEX)) == 0) {
@@ -779,7 +790,7 @@ void WsMatView::integrate(int64_t serviceTimeUsec) {
     sendYlab();
     sendXlab();
     sendYDen();
-    sendInfo();
+    //sendInfo();
     m->sendUpdate = false;
     sendStatus('o');
   }

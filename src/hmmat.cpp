@@ -113,6 +113,10 @@ bool HmMat::read(const char* fn) {
   if (!ret) {
     reset();
   }
+  m_sel.resize(m_d.size());
+  for (uint32_t i = 0; i < m_d.size(); i++) {
+    m_sel[i].resize(m_d[i].size(), 0);
+  }
   return ret;
 }
 
@@ -154,6 +158,7 @@ void HmMat::reset() {
   m_xlab.clear();
   m_ylab.clear();
   m_d.clear();
+  m_sel.clear();
   delete m_dendX;
   delete m_dendY;
   m_dendX = NULL;
@@ -196,8 +201,10 @@ void HmMat::transpose() {
   t.m_dendX = m_dendY;
   for (uint32_t j = 0; j < ncol(); j++) {
     t.m_d.push_back(std::vector<float>());
+    t.m_sel.push_back(std::vector<char>());
     for (uint32_t i = 0; i < nrow(); i++) {
       t.m_d.back().push_back(get(i,j));
+      t.m_sel.back().push_back(isSel(i,j));
     }
   }
   *this= t;

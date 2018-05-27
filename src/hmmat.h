@@ -26,6 +26,8 @@ public:
   ~HmMat();
   bool read(const char* fn);
   float get(uint32_t i, uint32_t j) const { return m_d[i][j]; }
+  char  isSel(uint32_t i, uint32_t j) const { return m_sel[i][j]; }
+  void  sel(uint32_t i, uint32_t j) { m_sel[i][j] = 1; }
   const char* xlab(uint32_t j) const;
   const char* ylab(uint32_t i) const;
   uint32_t nrow() const { return m_d.size(); }
@@ -35,8 +37,8 @@ public:
   float minVal() const;
   void transpose();
   void order(OrderType ot);
-  const Dendrogram *getDendY() const {return m_dendY;}
-  const Dendrogram *getDendX() const {return m_dendX;}
+  const Dendrogram *getDendY() const { return m_dendY; }
+  const Dendrogram *getDendX() const { return m_dendX; }
 private:
   void orderByNameX();
   void orderByNameY();
@@ -47,6 +49,7 @@ private:
   void resetOrderX();
   void resetOrderY();
   std::vector<std::vector<float>> m_d;
+  std::vector<std::vector<char>> m_sel;
   std::vector<std::string> m_xlab;
   std::vector<std::string> m_ylab;
   bool check() const;
