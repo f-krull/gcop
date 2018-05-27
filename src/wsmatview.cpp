@@ -571,6 +571,8 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_MOVE         "MOVE "
 #define CMD_PFX_OCLUSSLX "OCLUSSLX"
 #define CMD_PFX_OCLUSSLY "OCLUSSLY"
+#define CMD_PFX_OCLUSCLX "OCLUSCLX"
+#define CMD_PFX_OCLUSCLY "OCLUSCLY"
 #define CMD_PFX_ONAMEX   "ONAMEX"
 #define CMD_PFX_ONAMEY   "ONAMEY"
 #define CMD_PFX_ORANDX   "ORANDX"
@@ -696,6 +698,24 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     sendStatus('w');
     return;
   }
+
+  if (strncmp(msg, CMD_PFX_OCLUSCLX, strlen(CMD_PFX_OCLUSCLX)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_OCLUSCLX);
+    m->mat->order(HmMat::ORDER_HCLUSTER_CL_X);
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_OCLUSCLY, strlen(CMD_PFX_OCLUSCLY)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_OCLUSCLY);
+    m->mat->order(HmMat::ORDER_HCLUSTER_CL_Y);
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+
   if (strncmp(msg, CMD_PFX_MOVE, strlen(CMD_PFX_MOVE)) == 0) {
     char *arg1 = gettoken(msg, ' ');
     gettoken(arg1, ' '); /* null term */
@@ -709,6 +729,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     char *arg1 = gettoken(msg, ' ');
     gettoken(arg1, ' '); /* null term */
     m_log.dbg("CMD %s%s", CMD_PFX_LOAD, arg1);
+    printf("%s %d\n", __FUNCTION__, __LINE__);
     loadMat(arg1);
     m->sendUpdate = true;
     sendStatus('w');
@@ -717,35 +738,6 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
 }
 
 /*----------------------------------------------------------------------------*/
-
-/**
- * dst:
- * MAIN
- * XLAB
- * YLAB
- * TINY
- * STAT
- * INFO
- *
- */
-
-/*
- * SET YLAB_WIDTH  INT
- * SET XLAB_HEIGHT INT
- * SET MAT_HEIGHT  INT
- * SET MAT_WIDTH   INT -> reset zoom, update
- *
- * SET POSX        INT
- * SET POSY        INT -> update
- *
- * SET ZOOM        INT -> update
- *
- *
- * ZOOMIN  X Y
- * ZOOMOUT X Y
- *
- *
- */
 
 void WsMatView::integrate(int64_t serviceTimeUsec) {
 #if 0

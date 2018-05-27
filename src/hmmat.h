@@ -16,6 +16,8 @@ public:
     ORDER_RANDOM_Y,
     ORDER_HCLUSTER_SL_X,
     ORDER_HCLUSTER_SL_Y,
+    ORDER_HCLUSTER_CL_X,
+    ORDER_HCLUSTER_CL_Y,
     ORDER_ALPHABELIC_X,
     ORDER_ALPHABELIC_Y
   };
@@ -33,13 +35,13 @@ public:
   float minVal() const;
   void transpose();
   void order(OrderType ot);
-  const Dendrogram *getDendY() const {return m_dendY;};
-  const Dendrogram *getDendX() const {return m_dendX;};
+  const Dendrogram *getDendY() const {return m_dendY;}
+  const Dendrogram *getDendX() const {return m_dendX;}
 private:
   void orderByNameX();
   void orderByNameY();
-  Dendrogram* orderBySlClusterY();
-  Dendrogram* orderBySlClusterX();
+  Dendrogram* orderByHClusterY(char clusType);
+  Dendrogram* orderByHClusterX(char clusType);
   void orderRandomX();
   void orderRandomY();
   void resetOrderX();

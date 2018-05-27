@@ -14,7 +14,9 @@ SRCS=main.cpp \
 	wsmatview.cpp \
 	hmmat.cpp \
 	distmatrix.cpp \
-	dendrogram.cpp
+	dendrogram.cpp \
+	clusterersl.cpp \
+	clusterercl.cpp
 
 
 3RDPARTY=3rdparty

@@ -129,11 +129,17 @@ document.getElementById("main").addEventListener("wheel", function(evt){
     g_mvWs.send("ZOOMOUT " + evt.offsetX + " " + evt.offsetY);
   }
 });
-document.getElementById("oclusx").addEventListener("click", function(evt){
+document.getElementById("oclusslx").addEventListener("click", function(evt){
   g_mvWs.send("OCLUSSLX");
 });
-document.getElementById("oclusy").addEventListener("click", function(evt){
+document.getElementById("oclussly").addEventListener("click", function(evt){
   g_mvWs.send("OCLUSSLY");
+});
+document.getElementById("oclusclx").addEventListener("click", function(evt){
+  g_mvWs.send("OCLUSCLX");
+});
+document.getElementById("ocluscly").addEventListener("click", function(evt){
+  g_mvWs.send("OCLUSCLY");
 });
 document.getElementById("onamey").addEventListener("click", function(evt){
   g_mvWs.send("ONAMEY");

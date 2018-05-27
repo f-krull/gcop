@@ -1,11 +1,16 @@
 #include "hmmat.h"
 #include "buffer.h"
-#include "distmatrix.cpp"
+#include "distmatrix.h"
 #include "clusterersl.h"
+#include "clusterercl.h"
 #include <stdio.h>
 #include <float.h>
 #include <numeric>
 #include <algorithm>
+#include <assert.h>
+
+#define HCLUS_TYPE_SL 's'
+#define HCLUS_TYPE_CL 'c'
 
 /*----------------------------------------------------------------------------*/
 
@@ -187,6 +192,8 @@ void HmMat::transpose() {
   HmMat t;
   t.m_xlab = m_ylab;
   t.m_ylab = m_xlab;
+  t.m_dendY = m_dendX;
+  t.m_dendX = m_dendY;
   for (uint32_t j = 0; j < ncol(); j++) {
     t.m_d.push_back(std::vector<float>());
     for (uint32_t i = 0; i < nrow(); i++) {
@@ -194,6 +201,8 @@ void HmMat::transpose() {
     }
   }
   *this= t;
+  t.m_dendY = NULL;
+  t.m_dendX = NULL;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -262,11 +271,11 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-Dendrogram * HmMat::orderBySlClusterY() {
-  DistanceMatrix<float> *dm = DistanceMatrixFactory<float>::getFilled(&m_d,
+Dendrogram * HmMat::orderByHClusterY(char t) {
+  DistanceMatrix *dm = DistanceMatrixFactory::getFilled(&m_d,
       HmmRowDistEuclidean());
   std::vector<std::vector<uint32_t> > clusters;
-  Dendrogram *d = ClustererSl<float>::clusterAll(dm);
+  Dendrogram *d = (t == HCLUS_TYPE_SL) ? ClustererSl::clusterAll(dm) : ClustererCl::clusterAll(dm);
   delete dm;
   std::vector<uint32_t> order = d->getOrder();
   assert(order.size() == nrow());
@@ -276,9 +285,9 @@ Dendrogram * HmMat::orderBySlClusterY() {
 
 /*----------------------------------------------------------------------------*/
 
-Dendrogram * HmMat::orderBySlClusterX() {
+Dendrogram * HmMat::orderByHClusterX(char t) {
   transpose();
-  Dendrogram *d = orderBySlClusterY();
+  Dendrogram *d = orderByHClusterY(t);
   transpose();
   return d;
 }
@@ -337,11 +346,19 @@ void HmMat::order(OrderType ot) {
       break;
     case ORDER_HCLUSTER_SL_X:
       resetOrderX();
-      m_dendX = orderBySlClusterX();
+      m_dendX = orderByHClusterX(HCLUS_TYPE_SL);
       break;
     case ORDER_HCLUSTER_SL_Y:
       resetOrderY();
-      m_dendY = orderBySlClusterY();
+      m_dendY = orderByHClusterY(HCLUS_TYPE_SL);
+      break;
+    case ORDER_HCLUSTER_CL_X:
+      resetOrderX();
+      m_dendX = orderByHClusterX(HCLUS_TYPE_CL);
+      break;
+    case ORDER_HCLUSTER_CL_Y:
+      resetOrderY();
+      m_dendY = orderByHClusterY(HCLUS_TYPE_CL);
       break;
     default:
       assert(false && "enum order type not handeled");
