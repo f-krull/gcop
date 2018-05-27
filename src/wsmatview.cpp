@@ -676,7 +676,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   }
   if (strncmp(msg, CMD_PFX_ORANDY, strlen(CMD_PFX_ORANDY)) == 0) {
     m_log.dbg("CMD %s", CMD_PFX_ORANDY);
-    m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
+    m->mat->order(HmMat::ORDER_RANDOM_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
