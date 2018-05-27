@@ -12,7 +12,9 @@
 
 /*----------------------------------------------------------------------------*/
 
-#define WS_OPCODE_TEXTFAME 0x01
+#define WS_OPCODE_TEXTFRAME 0x01
+#define WS_OPCODE_PING      0x09
+#define WS_OPCODE_PONG      0x0A
 
 /*----------------------------------------------------------------------------*/
 
@@ -39,7 +41,6 @@ struct WebSockHeaderUnpacked {
     uint8_t   masking_key_u8[4];
   };
 };
-
 /*----------------------------------------------------------------------------*/
 
 class WebSockHeaderPacked {
@@ -48,7 +49,7 @@ public:
     memset(m_hdata, 0, sizeof(m_hdata));
     m_hlen = 10;
     setFin(true);
-    setOpcode(WS_OPCODE_TEXTFAME);
+    setOpcode(WS_OPCODE_TEXTFRAME);
   }
   void setFin(bool b)        { BIT_CLEAR(m_hdata[0], BIT1(7)); BIT_SET1(m_hdata[0], BIT(7, b)); }
   void setOpcode(uint8_t oc) { BIT_CLEAR(m_hdata[0], 0xF);     BIT_SET1(m_hdata[0], oc); }
@@ -212,38 +213,64 @@ void WsService::newData(uint32_t clientId, const uint8_t* data, uint32_t len) {
           m_log.dbg("client %u         >>%s", clientId, x.cdata());
         }
 #endif
-        assert(ws_header.payload_len < 126 && "need to implement extended payload len");
-        p++;
-        if (!ws_header.mask) {
-          m_log.dbg("client %u error - no masking bit set", clientId);
-          return;
+        switch (ws_header.opcode) {
+          case WS_OPCODE_TEXTFRAME:
+            {
+              assert(ws_header.payload_len < 126 && "need to implement extended payload len");
+              p++;
+              if (!ws_header.mask) {
+                m_log.dbg("client %u error - no masking bit set", clientId);
+                return;
+              }
+              const uint32_t packet_len = p + 4 + ws_header.payload_len;
+              if (len < packet_len) {
+                m_log.dbg("client %u error - len (%u) < expected len (%u)", clientId, len, packet_len);
+                return;
+              }
+              ws_header.masking_key = ((uint32_t*)&data[p])[0];
+              p+=4;
+      #if 0
+              m_log.dbg("client %u -> masking key: %x", clientId, ws_header.masking_key);
+      #endif
+              /* decode message */
+              const char *msg = NULL;
+              BufferDyn msgb(data+p, ws_header.payload_len);
+              for (uint32_t i = 0; i < msgb.len(); i++) {
+                msgb.data()[i] ^= ws_header.masking_key_u8[i%4];
+              }
+              msgb.toAsci();
+              msg = (const char*)msgb.cdata();
+              m_log.dbg("client %u -> %02x%02x pkt_size:%u,payload_size:%u%s%s",
+                  clientId, data[0], data[1], len,
+                  ws_header.payload_len, msg ? " " : "", msg ? msg : "");
+              cl->newData(msgb.cdata(), msgb.len());
+              /* update pointer to remaining data */
+              data +=  packet_len;
+              len  -= (packet_len);
+            }
+            break;
+          case WS_OPCODE_PING:
+            {
+              m_log.dbg("client %u -> PING %02x%02x", clientId, data[0], data[1]);
+              char msg[] = {'P', 'O', 'N', 'G'};
+              WebSockHeaderPacked wsh;
+              wsh.setOpcode(WS_OPCODE_PONG);
+              wsh.setPayloadLen(sizeof(msg));
+              BufferDyn pkt(wsh.len() + sizeof(msg));
+              pkt.add(wsh.cdata(), wsh.len());
+              pkt.add((uint8_t*)msg, sizeof(msg));
+              m_srv->write(clientId, pkt.cdata(), pkt.len());
+              m_log.dbg("client %u <- PONG pkt_size:%u,payload_size:%u",
+                  clientId, pkt.len(), sizeof(msg));
+              return;
+              //TODO: parse whole package and increment data&len as with textframe
+            }
+          default:
+            m_log.dbg("client %u -> opcode not implemented %02x%02x",
+                clientId, data[0], data[1]);
+            return;
+            break;
         }
-        const uint32_t packet_len = p + 4 + ws_header.payload_len;
-        if (len < packet_len) {
-          m_log.dbg("client %u error - len (%u) < expected len (%u)", clientId, len, packet_len);
-          return;
-        }
-        ws_header.masking_key = ((uint32_t*)&data[p])[0];
-        p+=4;
-#if 0
-        m_log.dbg("client %u -> masking key: %x", clientId, ws_header.masking_key);
-#endif
-
-        /* decode message */
-        const char *msg = NULL;
-        BufferDyn msgb(data+p, ws_header.payload_len);
-        for (uint32_t i = 0; i < msgb.len(); i++) {
-          msgb.data()[i] ^= ws_header.masking_key_u8[i%4];
-        }
-        msgb.toAsci();
-        msg = (const char*)msgb.cdata();
-
-
-        m_log.dbg("client %u -> %02x%02x pkt_size:%u,payload_size:%u%s%s", clientId, data[0], data[1], len, ws_header.payload_len, msg ? " " : "", msg ? msg : "");
-        cl->newData(msgb.cdata(), msgb.len());
-        /* update pointer to remaining data */
-        data +=  packet_len;
-        len  -= (packet_len);
       }
       break;
     default:
