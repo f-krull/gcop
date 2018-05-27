@@ -3,7 +3,7 @@ CPPFLAGS+= -std=c++11
 LDFLAGS += -Wall -Ofast
 LDLIBS  += -pthread -lrt -ljpeg
 
-EXE=matvis
+EXE=hmview
 
 SRCS=main.cpp \
 	server.cpp \
