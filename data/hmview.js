@@ -91,6 +91,8 @@ DragInfo.prototype.stop = function(x, y) {
   this._startY = -1;
 }
 
+//------------------------------------------------------------------------------
+
 function requestSize() {
   var main_wid = document.querySelector('td.colxlab').offsetWidth;
   var main_hei = document.querySelector('tr.rowmain').offsetHeight;
@@ -179,7 +181,12 @@ document.onmouseup = function(evt){
     g_dragInf.stop();
     g_mvWs.send("PAN " + g_dragInf._deltaX + " " + g_dragInf._deltaY);
   }
-  return false;
+};
+document.getElementById('main').onmouseup = function(evt){
+  /* this might conflict with document.onmouseup! */
+  if (!g_dragInf._dragging) {
+    g_mvWs.send("CLICK " + evt.offsetX + " " + evt.offsetY);
+  }
 };
 
 document.onkeydown = function(e){
