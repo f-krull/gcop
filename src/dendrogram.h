@@ -19,6 +19,8 @@ public:
   double distRel() const {return m_distRel;}
   double hPos() const {return m_hpos;}
   void print(uint32_t l=0, char s = '=') const;
+  uint32_t idxLo() const {return m_idxLo;}
+  uint32_t idxHi() const {return m_idxHi;}
 private:
   DgNode   *m_lo;
   DgNode   *m_hi;
@@ -33,6 +35,8 @@ private:
   DgNode(const DendrogramNode*, double maxdist);
   void getOrder(std::vector<uint32_t> *o);
   void setHPosMap(const std::vector<uint32_t> &m);
+  bool isInside(uint32_t i0, uint32_t i1) const;
+  bool hasOverlap(uint32_t i0, uint32_t i1) const;
 };
 
 

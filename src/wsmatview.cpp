@@ -469,13 +469,13 @@ public:
 
 /*----------------------------------------------------------------------------*/
 
-#define DEN_MIN_DIST 6
+#define DEN_MIN_DIST 3
 
 #include "dendrogram.h"
 
 class ImgYden : public ImgBase {
 public:
-  void update(const ImgMain &main, const HmMat *hmm, const WsMatViewCfg &cfg) {
+  void update(const ImgMain &imain, const ImgUnscaled &ius, const HmMat *hmm, const WsMatViewCfg &cfg) {
     unsigned char blvl = 0xFF;
     const uint32_t dw = cfg.getInt(CFG_YDEN_WID_INT);
     const uint32_t dh = cfg.getInt(CFG_MAIN_HEI_INT);
@@ -485,39 +485,41 @@ public:
       if (!dend) {
         break;
       }
-      int32_t i0 = main.dispStartY();
-      int32_t i1 = main.dispStartY() + main.numPxH();
+      int32_t i0 = imain.dispStartY();
+      int32_t i1 = imain.dispStartY() + imain.numPxH() - 1;
 
-      assert(main.dispMatY0() >= 0);
-      assert(main.dispMatY1() >= 0);
+      assert(imain.dispMatY0() >= 0);
+      assert(imain.dispMatY1() >= 0);
       std::vector<const DgNode*> roots = dend->getRoots(i0, i1);
-      printf("%lu nodes %d %d\n", roots.size(), i0, i1);
       for (uint32_t i = 0; i < roots.size(); i++) {
-        drawNode(NULL, roots[i], main, 0);
+        drawNode(NULL, roots[i], imain, ius, 0);
       }
       break;
     }
     encode();
   }
 private:
-  void drawNode(const DgNode* parent, const DgNode *node, const ImgMain &main, int32_t x0) {
+  void drawNode(const DgNode* parent, const DgNode *node, const ImgMain &imain, const ImgUnscaled &ius, int32_t x0) {
     if (!node) {
       return;
     }
 
     const unsigned char fgCol[] = {0x00, 0x00, 0x00};
-    const int32_t axBgn = main.dispMatY0();
-    const int32_t axEnd = main.dispMatY1();
-    float pxHei = float(axEnd - axBgn) / main.numPxH();
-    int32_t y0 = pxHei * node->hPos() * main.numPxH() - axBgn + (pxHei / 2);
+    const int32_t axBgn = imain.dispMatY0();
+    const int32_t axEnd = imain.dispMatY1();
+    float pxHei = float(axEnd - axBgn) / imain.numPxH();
+    int32_t y0 = pxHei * (node->hPos() * ius.img().height() - imain.dispStartY()) + axBgn + (pxHei / 2);
     int32_t x1 = (m_img.width()-1) * (1 - node->distRel());
+    if (x1 - x0 < DEN_MIN_DIST) {
+      x1 = x0;
+    }
     m_img.draw_line(x0, y0, x1, y0, fgCol, 1.f);
     if (parent) {
-      int32_t y1 = pxHei * parent->hPos() * main.numPxH() - axBgn + (pxHei / 2);
+      int32_t y1 = pxHei * (parent->hPos() * ius.img().height() - imain.dispStartY()) + axBgn + (pxHei / 2);
       m_img.draw_line(x0, y0, x0, y1, fgCol, 1.f);
     }
-    drawNode(node, node->getLo(), main, x1);
-    drawNode(node, node->getHi(), main, x1);
+    drawNode(node, node->getLo(), imain, ius, x1);
+    drawNode(node, node->getHi(), imain, ius, x1);
   }
 };
 
@@ -864,7 +866,7 @@ void WsMatView::renderYlab() {
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::renderYden() {
-  m->imgYden.update(m->imgMain, m->mat, m->cfg);
+  m->imgYden.update(m->imgMain, m->imgUnscaled, m->mat, m->cfg);
 }
 
 

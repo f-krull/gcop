@@ -20,10 +20,9 @@ make 3rdparty
 make
 ```
 
-## TODO: 
-* drag
+## TODO:
 * selection highlight
-* draw xy dendrograms
+* draw x dendrograms
 * normalization
 * minimap navigation
 * multi selection + tooltip

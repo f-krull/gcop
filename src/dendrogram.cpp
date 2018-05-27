@@ -140,7 +140,6 @@ Dendrogram* DendrogramBuilder::getDend() {
 
 Dendrogram::Dendrogram(const std::vector<DendrogramNode*> &roots) {
   m_roots = DgNode::build(roots, &m_orderedNodes);
-  printf("Dendrogram num roots: %lu\n", m_roots.size());
 }
 
 /*----------------------------------------------------------------------------*/
@@ -185,8 +184,6 @@ std::vector<DgNode*> DgNode::build(std::vector<DendrogramNode*> rtsin,
   /* apply id2idx to compute h positions */
   for (uint32_t i = 0; i < rtsout.size(); i++) {
     rtsout[i]->setHPosMap(id2idx);
-    printf("root: %u\n", i);
-    rtsout[i]->print();
   }
   return rtsout;
 }
@@ -254,7 +251,7 @@ void DgNode::setHPosMap(const std::vector<uint32_t> &m) {
 
 void DgNode::getRoots(uint32_t i0, uint32_t i1, std::vector<const DgNode*> *res) const {
   /* full overlap */
-  if (i0 <= m_idxLo && m_idxHi <= i1) {
+  if (isInside(i0, i1)) {
     res->push_back(this);
     return;
   }
@@ -262,20 +259,13 @@ void DgNode::getRoots(uint32_t i0, uint32_t i1, std::vector<const DgNode*> *res)
   if (!m_lo) {
     return;
   }
-  /* partial lo overlap with i0,i1? */
-  bool searchLo = false;
-  searchLo |= i0 >= m_lo->m_idxLo && i0 <= m_lo->m_idxHi;
-  searchLo |= i1 >= m_lo->m_idxLo && i1 <= m_lo->m_idxHi;
-  if (searchLo) {
-    m_lo->getRoots(i0, i1, res);
+  /* both children have overlap */
+  if (m_lo->hasOverlap(i0,i1) && m_hi->hasOverlap(i0,i1)) {
+    res->push_back(this);
+    return;
   }
-  /* partial hi overlap with i0,i1? */
-  bool searchHi = false;
-  searchHi |= i0 >= m_hi->m_idxLo && i0 <= m_hi->m_idxHi;
-  searchHi |= i1 >= m_hi->m_idxLo && i1 <= m_hi->m_idxHi;
-  if (searchHi) {
-    m_hi->getRoots(i0, i1, res);
-  }
+  m_lo->getRoots(i0, i1, res);
+  m_hi->getRoots(i0, i1, res);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -288,4 +278,19 @@ void DgNode::print(uint32_t l, char s) const {
   m_lo->print(l+2, '/');
   printf("%*c (%u, %u)     h=%f,d=%f\n", l+3, s, m_idxLo, m_idxHi, m_hpos, m_distRel);
   m_hi->print(l+2, '\\');
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool DgNode::isInside(uint32_t i0, uint32_t i1) const {
+  return i0 <= m_idxLo && m_idxHi <= i1;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool DgNode::hasOverlap(uint32_t i0, uint32_t i1) const {
+  bool ov = false;
+  ov |= (i0 <= m_idxLo && m_idxLo <= i1);
+  ov |= (i0 <= m_idxHi && m_idxHi <= i1);
+  return ov;
 }

@@ -310,14 +310,4 @@ void WsService::sendData(uint32_t clientId, const uint8_t* data, uint32_t len) {
   pkt.add(data, len);
   m_srv->write(clientId, pkt.cdata(), pkt.len());
   m_log.dbg("client %u <- pkt_size:%u,payload_size:%u", clientId, pkt.len(), len);
-#if 0
-  {
-    /* show packet */
-    Buffer out(len+1);
-    for (uint32_t i = 0; i < len; i++) {
-      out.addf("%c", data[i]);
-    }
-    m_log.dbg("client %u msg(%u,%u): > %s", cl->id, len, out.len(), out.cdata());
-  }
-#endif
 }
