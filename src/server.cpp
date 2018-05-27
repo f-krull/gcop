@@ -28,7 +28,7 @@ void ISocketService::write(uint32_t clientId, const char *fmt, ...) {
 
 /*----------------------------------------------------------------------------*/
 
-ServerTcp::ServerTcp(const ServerTcpConfig &cfg) {
+ServerTcp::ServerTcp(ISocketService *s, const ServerTcpConfig &cfg) : Server(s) {
   m_config = cfg;
   m_server = SOCK_DISCONNECTED;
   m_lastClientId = 0;
@@ -116,20 +116,14 @@ void ServerTcp::integrate() {
         /* handle data on this connection */
         int32_t dsize = recvfrom(cl->second->fd, m_rxbuf, RX_BUF_LEN, 0, NULL, NULL);
         if (dsize > 0) {
-          std::set<ISocketService*>::iterator sr;
-          for (sr = m_services.begin(); sr != m_services.end(); sr++) {
-            (*sr)->newData(cl->second->id, m_rxbuf, dsize);
-          }
+          m_service->newData(cl->second->id, m_rxbuf, dsize);
         }
         /* disconnected */
         if (dsize == 0) {
           ::close(cl->second->fd);
           cl->second->fd = SOCK_DISCONNECTED;
           handleDiscon = true;
-          std::set<ISocketService*>::iterator sr;
-          for (sr = m_services.begin(); sr != m_services.end(); sr++) {
-            (*sr)->disconnect(cl->second->id);
-          }
+          m_service->disconnect(cl->second->id);
         }
       }
     }
@@ -187,10 +181,7 @@ void ServerTcp::close() {
   for (cl = m_clients.begin(); cl != m_clients.end(); ++cl) {
     ::close(cl->second->fd);
     cl->second->fd = SOCK_DISCONNECTED;
-    std::set<ISocketService*>::iterator sr;
-    for (sr = m_services.begin(); sr != m_services.end(); sr++) {
-      (*sr)->disconnect(cl->second->id);
-    }
+    m_service->disconnect(cl->second->id);
   }
   handleDisconnected();
   ::close(m_server);

@@ -14,32 +14,25 @@ int64_t getTimeUsec() {
 /*----------------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  ServerTcpConfig scfg;
-  scfg.port = 11380;
-  ServerTcp s(scfg);
-  s.listen();
-
-  HttpFileService hfs;
-  hfs.registerFile("data/index.html", "/index.html", HttpFileService::MIMETYPE_TEXT_HTML);
-  hfs.registerFile("data/hmview.css", "/hmview.css", HttpFileService::MIMETYPE_TEXT_CSS);
-  hfs.registerFile("data/hmview.js",  "/hmview.js",  HttpFileService::MIMETYPE_TEXT_JAVASCRIPT);
-  s.addReader(&hfs);
-
-
-  ServerTcpConfig swcfg;
-  swcfg.port = 11381;
-  ServerTcp sw(swcfg);
-  sw.listen();
-  WsService ws(new WsMatViewFactory());
-  sw.addReader(&ws);
+  /* create HTTP server dor static files */
+  HttpFileService * hfs = new HttpFileService;
+  hfs->registerFile("data/index.html", "/index.html", HttpFileService::MIMETYPE_TEXT_HTML);
+  hfs->registerFile("data/hmview.css", "/hmview.css", HttpFileService::MIMETYPE_TEXT_CSS);
+  hfs->registerFile("data/hmview.js",  "/hmview.js",  HttpFileService::MIMETYPE_TEXT_JAVASCRIPT);
+  ServerTcp srv_http(hfs, ServerTcpConfig{11380});
+  srv_http.listen();
+  /* create WebSocket server with matrix viewer service */
+  WsService *wss = new WsService(new WsMatViewFactory());
+  ServerTcp srv_webs(wss, ServerTcpConfig{11381});
+  srv_webs.listen();
 
   const int64_t t_start = getTimeUsec();
   while (true) {
-    s.integrate();
-    sw.integrate();
+    srv_http.integrate();
+    srv_webs.integrate();
     const int64_t t_cur = getTimeUsec() - t_start;
-    ws.integrate(t_cur);
-#if 0
+    wss->integrate(t_cur);
+#if 1
     if (t_cur > 20 * 1e9) {
       break;
     }

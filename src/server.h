@@ -25,39 +25,32 @@ protected:
 };
 
 /*----------------------------------------------------------------------------*/
-#include <set>
+
 class Server {
 public:
-  virtual ~Server() {}
+  Server(ISocketService *s) : m_service(s) {m_service->setSource(this);}
+  virtual ~Server() {delete m_service;}
   virtual bool write(uint32_t clientId, const uint8_t* data, uint32_t len) = 0;
   virtual bool disconnect(uint32_t clientId) = 0;
-
   virtual void integrate() = 0;
-
-  void addReader(ISocketService *r) {
-    m_services.insert(r);
-    r->setSource(this);
-  }
+  ISocketService * getService() {return m_service;}
 protected:
-  std::set<ISocketService*> m_services;
+  ISocketService* m_service;
 };
 
 /*----------------------------------------------------------------------------*/
+
 #include "buffer.h"
 #include <string>
 #include <map>
 
-class ServerTcpConfig {
-public:
-  ServerTcpConfig() : port(11380) {}
+struct ServerTcpConfig {
   uint32_t port;
 };
 
 class ServerTcp : public Server {
 public:
-
-
-  ServerTcp(const ServerTcpConfig &cfg);
+  ServerTcp(ISocketService *s, const ServerTcpConfig &cfg);
   ~ServerTcp();
 
   virtual void integrate();

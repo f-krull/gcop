@@ -27,5 +27,4 @@ make
 * minimap navigation
 * multi selection + tooltip
 * ...
-* (fix ServerTcp dtor / ownership of service obj)
 * (httpfileservice send Content-Length)
