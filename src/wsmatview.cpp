@@ -87,13 +87,19 @@ public:
     m_jpgbufSize = 0;
   }
   virtual ~ImgBase() {
-    if (m_jpgbuf) {
-      free(m_jpgbuf);
-    }
+    clear();
   }
 
   const BufferDyn& jpgB64() const {
     return m_jpgb64;
+  }
+
+  void clear() {
+    if (m_jpgbuf) {
+      free(m_jpgbuf);
+    }
+    m_jpgbuf = NULL;
+    m_jpgbufSize = 0;
   }
 
   const cimg::CImg<unsigned char> & img() const {
@@ -107,6 +113,7 @@ protected:
   BufferDyn m_jpgb64;
 
   bool encode() {
+    clear();
     FILE *f = open_memstream((char**)&m_jpgbuf, &m_jpgbufSize);
     if (!f) {
       return false;
