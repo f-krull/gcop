@@ -496,7 +496,6 @@ public:
       for (uint32_t i = 0; i < roots.size(); i++) {
         distmax = std::max(distmax, roots[i]->distAbs());
         distmin = std::min(distmin, roots[i]->distAbsMin());
-        printf("(%u,%u) %f\n", roots[i]->idxLo(), roots[i]->idxHi(), roots[i]->distAbsMin());
       }
       for (uint32_t i = 0; i < roots.size(); i++) {
         drawNode(NULL, roots[i], imain, ius, 0, distmin, distmax);
@@ -584,13 +583,13 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ONAMEY   "ONAMEY"
 #define CMD_PFX_ORANDX   "ORANDX"
 #define CMD_PFX_ORANDY   "ORANDY"
-#define CMD_PFX_LOAD       "LOADMAT "
+#define CMD_PFX_LOADMAT    "LOADMAT "
+#define CMD_PFX_TRANSPMAT  "TRANSPMAT"
 
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::loadMat(const char *fn) {
   m->mat->read(fn);
-  m->mat->transpose();
   m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
   m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
   m->imgUnscaled.update(m->mat);
@@ -733,12 +732,19 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     sendStatus('w');
     return;
   }
-  if (strncmp(msg, CMD_PFX_LOAD, strlen(CMD_PFX_LOAD)) == 0) {
+  if (strncmp(msg, CMD_PFX_LOADMAT, strlen(CMD_PFX_LOADMAT)) == 0) {
     char *arg1 = gettoken(msg, ' ');
     gettoken(arg1, ' '); /* null term */
-    m_log.dbg("CMD %s%s", CMD_PFX_LOAD, arg1);
-    printf("%s %d\n", __FUNCTION__, __LINE__);
+    m_log.dbg("CMD %s%s", CMD_PFX_LOADMAT, arg1);
     loadMat(arg1);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_TRANSPMAT, strlen(CMD_PFX_TRANSPMAT)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_TRANSPMAT);
+    m->mat->transpose();
+    m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');
     return;
