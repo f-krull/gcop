@@ -13,12 +13,13 @@ cd hmview
 ## Compile:
 ```
 make
-
 ```
+
 ## Run:
 ```
 ./hmview
 ```
+uses [example data](data/disreg_matrix_10x8.txt) by default
 
 ## TODO:
 * selection highlight
