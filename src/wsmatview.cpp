@@ -491,15 +491,22 @@ public:
       assert(imain.dispMatY0() >= 0);
       assert(imain.dispMatY1() >= 0);
       std::vector<const DgNode*> roots = dend->getRoots(i0, i1);
+      double distmax = 0;
+      double distmin = DBL_MAX;
       for (uint32_t i = 0; i < roots.size(); i++) {
-        drawNode(NULL, roots[i], imain, ius, 0);
+        distmax = std::max(distmax, roots[i]->distAbs());
+        distmin = std::min(distmin, roots[i]->distAbsMin());
+        printf("(%u,%u) %f\n", roots[i]->idxLo(), roots[i]->idxHi(), roots[i]->distAbsMin());
+      }
+      for (uint32_t i = 0; i < roots.size(); i++) {
+        drawNode(NULL, roots[i], imain, ius, 0, distmin, distmax);
       }
       break;
     }
     encode();
   }
 private:
-  void drawNode(const DgNode* parent, const DgNode *node, const ImgMain &imain, const ImgUnscaled &ius, int32_t x0) {
+  void drawNode(const DgNode* parent, const DgNode *node, const ImgMain &imain, const ImgUnscaled &ius, int32_t x0, double distmin, double distmax) {
     if (!node) {
       return;
     }
@@ -509,7 +516,7 @@ private:
     const int32_t axEnd = imain.dispMatY1();
     float pxHei = float(axEnd - axBgn) / imain.numPxH();
     int32_t y0 = pxHei * (node->hPos() * ius.img().height() - imain.dispStartY()) + axBgn + (pxHei / 2);
-    int32_t x1 = (m_img.width()-1) * (1 - node->distRel());
+    int32_t x1 = (m_img.width()-1) * (1 - (node->distAbs() - distmin) / (distmax-distmin));
     if (x1 - x0 < DEN_MIN_DIST) {
       x1 = x0;
     }
@@ -518,8 +525,8 @@ private:
       int32_t y1 = pxHei * (parent->hPos() * ius.img().height() - imain.dispStartY()) + axBgn + (pxHei / 2);
       m_img.draw_line(x0, y0, x0, y1, fgCol, 1.f);
     }
-    drawNode(node, node->getLo(), imain, ius, x1);
-    drawNode(node, node->getHi(), imain, ius, x1);
+    drawNode(node, node->getLo(), imain, ius, x1, distmin, distmax);
+    drawNode(node, node->getHi(), imain, ius, x1, distmin, distmax);
   }
 };
 
@@ -577,12 +584,13 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ONAMEY   "ONAMEY"
 #define CMD_PFX_ORANDX   "ORANDX"
 #define CMD_PFX_ORANDY   "ORANDY"
-#define CMD_PFX_LOAD  "LOADMAT "
+#define CMD_PFX_LOAD       "LOADMAT "
 
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::loadMat(const char *fn) {
   m->mat->read(fn);
+  m->mat->transpose();
   m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
   m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
   m->imgUnscaled.update(m->mat);

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
+#include <float.h>
 
 
 /*----------------------------------------------------------------------------*/
@@ -198,9 +199,13 @@ DgNode::DgNode(const DendrogramNode* n, double maxdist) {
     m_lvl = std::max(m_lo->m_lvl, m_hi->m_lvl) + 1;
     m_distAbs = n->dist();
     m_distRel = n->dist() / maxdist;
+    m_distAbsMin = m_distAbs;
+    m_distAbsMin = m_lo->isLeaf() ? m_distAbsMin : std::min(m_distAbsMin, m_lo->distAbsMin());
+    m_distAbsMin = m_hi->isLeaf() ? m_distAbsMin : std::min(m_distAbsMin, m_hi->distAbsMin());
   } else {
     m_lvl = 0;
     m_distAbs = 0;
+    m_distAbsMin = 0;
     m_distRel = 0;
     m_hi = NULL;
     m_lo = NULL;
