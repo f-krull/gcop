@@ -546,17 +546,10 @@ WsMatView::WsMatView(WsService* s, uint32_t clientId) :
     m_nextupdate(0),
     m_srv(s) {
   m = new WsMatViewPriv;
-  m->sendUpdate = true;
   m->mat = new HmMat();
   //m->mat->read("data/disreg_matrix_half.txt");
-  //m->mat->read("data/disreg_matrix_10x8.txt");
-  m->mat->read("data/disreg_matrix.txt");
-//  m->mat->orderByNameY();
-//  m->mat->orderByNameX();
-  m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
-  m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
-  //m->mat->transpose();
-  m->imgUnscaled.update(m->mat);
+  loadMat("data/disreg_matrix_10x8.txt");
+  //loadMat("data/disreg_matrix.txt");
 }
 
 /*----------------------------------------------------------------------------*/
@@ -580,6 +573,18 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ONAMEY   "ONAMEY"
 #define CMD_PFX_ORANDX   "ORANDX"
 #define CMD_PFX_ORANDY   "ORANDY"
+#define CMD_PFX_LOAD  "LOADMAT "
+
+/*----------------------------------------------------------------------------*/
+
+void WsMatView::loadMat(const char *fn) {
+  m->mat->read(fn);
+  m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
+  m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
+  m->imgUnscaled.update(m->mat);
+  m->cfg.setInt(CFG_ZOOM_INT, 0);
+  m->sendUpdate = true;
+}
 
 /*----------------------------------------------------------------------------*/
 
@@ -694,6 +699,15 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     gettoken(arg1, ' '); /* null term */
     m_log.dbg("CMD %s%s", CMD_PFX_MOVE, arg1);
     m->imgMain.move(arg1);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_LOAD, strlen(CMD_PFX_LOAD)) == 0) {
+    char *arg1 = gettoken(msg, ' ');
+    gettoken(arg1, ' '); /* null term */
+    m_log.dbg("CMD %s%s", CMD_PFX_LOAD, arg1);
+    loadMat(arg1);
     m->sendUpdate = true;
     sendStatus('w');
     return;

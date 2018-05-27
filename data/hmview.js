@@ -147,6 +147,15 @@ document.getElementById("orandy").addEventListener("click", function(evt){
 document.getElementById("orandx").addEventListener("click", function(evt){
   g_mvWs.send("ORANDX");
 });
+document.getElementById("load1").addEventListener("click", function(evt){
+  g_mvWs.send("LOADMAT data/disreg_matrix.txt");
+});
+document.getElementById("load2").addEventListener("click", function(evt){
+  g_mvWs.send("LOADMAT data/disreg_matrix_10x8.txt");
+});
+document.getElementById("load3").addEventListener("click", function(evt){
+  g_mvWs.send("LOADMAT data/disreg_matrix_half.txt");
+});
 document.getElementById('main').ondragstart = function(evt){
   g_mvWs.send("TEST " + evt.clientX + " " + evt.clientY);
   g_dragInf.start(evt.clientX, evt.clientY, evt.target ? evt.target : evt.srcElement);

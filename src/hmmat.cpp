@@ -10,8 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 HmMat::~HmMat() {
-  delete m_dendX;
-  delete m_dendY;
+  reset();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -24,6 +23,7 @@ bool HmMat::read(const char* fn) {
    * <ylab1> [sep] ...
    * ...
    */
+  reset();
   FILE *f = fopen(fn, "r");
   if (f == NULL) {
     return false;
@@ -149,6 +149,10 @@ void HmMat::reset() {
   m_xlab.clear();
   m_ylab.clear();
   m_d.clear();
+  delete m_dendX;
+  delete m_dendY;
+  m_dendX = NULL;
+  m_dendY = NULL;
 }
 
 /*----------------------------------------------------------------------------*/

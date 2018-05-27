@@ -28,6 +28,7 @@ private:
   void renderYlab();
   void renderTiny();
   void renderYden();
+  void loadMat(const char *fn);
   Log m_log;
   int64_t m_nextupdate;
   WsService *m_srv;
