@@ -2,6 +2,15 @@
 #include "httpfileservice.h"
 #include "wsmatview.h"
 #include <time.h>
+#include <signal.h>
+
+/*----------------------------------------------------------------------------*/
+
+volatile sig_atomic_t g_stop = 0;
+
+static void signalHandler(int signum) {
+  g_stop = 1;
+}
 
 /*----------------------------------------------------------------------------*/
 
@@ -14,6 +23,9 @@ int64_t getTimeUsec() {
 /*----------------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
+  signal(SIGINT, signalHandler);
+  Log log("main");
+
   /* create HTTP server dor static files */
   HttpFileService * hfs = new HttpFileService;
   hfs->registerFile("data/index.html", "/index.html", HttpFileService::MIMETYPE_TEXT_HTML);
@@ -27,16 +39,17 @@ int main(int argc, char **argv) {
   srv_webs.listen();
 
   const int64_t t_start = getTimeUsec();
-  while (true) {
+  while (!g_stop) {
     srv_http.integrate();
     srv_webs.integrate();
     const int64_t t_cur = getTimeUsec() - t_start;
     wss->integrate(t_cur);
-#if 1
+#if 0
     if (t_cur > 20 * 1e9) {
       break;
     }
 #endif
   }
+  log.dbg("shutdown");
   return 0;
 }
