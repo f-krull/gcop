@@ -13,6 +13,7 @@
     select_fun(MIMETYPE_TEXT_EVENTSTREAM, "text/event-stream") \
     select_fun(MIMETYPE_IMAGE_PNG       , "image/png"        )
 
+class HttpHeader;
 
 class HttpFileService: public ISocketService {
 public:
@@ -30,7 +31,7 @@ public:
   void registerFile(const char *path, const char *url, MimeType mt);
 
 protected:
-  void http_get(uint32_t clientId, const char* url);
+  void http_get(uint32_t clientId, const char* url, const HttpHeader *);
   struct RegFile {
     MimeType mimetype;
     std::string path;

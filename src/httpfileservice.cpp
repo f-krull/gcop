@@ -16,6 +16,26 @@
 
 /*----------------------------------------------------------------------------*/
 
+class HttpHeader {
+public:
+  bool connectionKeepAlive;
+
+  HttpHeader() {
+    connectionKeepAlive = false;
+  }
+
+  bool setHeaderField(const char *name, const char* value) {
+    if (strcmp(name, "Connection:") == 0) {
+      connectionKeepAlive = strcmp(value, "keep-alive") == 0;
+      return true;
+    }
+    return false;
+  }
+private:
+};
+
+/*----------------------------------------------------------------------------*/
+
 HttpFileService::HttpFileService() : m_log("HttpFileServer") {
 }
 
@@ -59,15 +79,17 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
     return;
   }
   m_log.dbg("client %u -> request %s %s %s ...", clientId, inget, inurl, inrem);
-  /* show header fields */
+  /* get header fields */
+  HttpHeader hd;
   while (lineN[0] != '\0' && lineN[0] != '\r') {
     char *hfname = lineN;
     lineN = gettoken(lineN, '\n');
     char *hfvalue = gettoken(hfname, ' ');
     gettoken(hfvalue, '\r');
-    m_log.dbg("client %u -> header field:%s %s", clientId, hfname, hfvalue);
+    const bool knownHf = hd.setHeaderField(hfname, hfvalue);
+    m_log.dbg("client %u -> %sheader field: %s %s", clientId, knownHf ? "" : "ignoring ", hfname, hfvalue);
   }
-  http_get(clientId, inurl);
+  http_get(clientId, inurl, &hd);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -81,7 +103,7 @@ void HttpFileService::registerFile(const char *path, const char *url, MimeType m
 
 /*----------------------------------------------------------------------------*/
 
-void HttpFileService::http_get(uint32_t clientId, const char* url) {
+void HttpFileService::http_get(uint32_t clientId, const char* url, const HttpHeader *header) {
   std::map<std::string, RegFile>::const_iterator it = m_rfiles.find(url);
   if (it == m_rfiles.end()) {
     m_log.dbg("client %u requested invalid file (%s)", clientId, url);
@@ -118,5 +140,7 @@ void HttpFileService::http_get(uint32_t clientId, const char* url) {
     }
   }
   fclose(fin);
-  m_srv->disconnect(clientId);
+  if (!header->connectionKeepAlive) {
+    m_srv->disconnect(clientId);
+  }
 }
