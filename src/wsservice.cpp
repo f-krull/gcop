@@ -15,6 +15,7 @@
 #define WS_OPCODE_TEXTFRAME 0x01
 #define WS_OPCODE_PING      0x09
 #define WS_OPCODE_PONG      0x0A
+#define WS_OPCODE_CLOSE     0x08
 
 /*----------------------------------------------------------------------------*/
 
@@ -265,6 +266,22 @@ void WsService::newData(uint32_t clientId, const uint8_t* data, uint32_t len) {
               return;
               //TODO: parse whole package and increment data&len as with textframe
             }
+            break;
+          case WS_OPCODE_CLOSE:
+            {
+              m_log.dbg("client %u -> CLOSE %02x%02x", clientId, data[0], data[1]);
+              WebSockHeaderPacked wsh;
+              wsh.setOpcode(WS_OPCODE_CLOSE);
+              wsh.setPayloadLen(0);
+              BufferDyn pkt(wsh.len());
+              pkt.add(wsh.cdata(), wsh.len());
+              m_srv->write(clientId, pkt.cdata(), pkt.len());
+              m_log.dbg("client %u <- CLOSE pkt_size:%u,payload_size:%u",
+                  clientId, pkt.len(), 0);
+              m_srv->disconnect(clientId);
+              return;
+            }
+            break;
           default:
             m_log.dbg("client %u -> opcode not implemented %02x%02x",
                 clientId, data[0], data[1]);
