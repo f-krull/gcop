@@ -79,7 +79,7 @@ bool HmMat::read(const char* fn) {
         case READ_YLAB:
           switch (c) {
             case sep:
-              m_d.push_back(std::vector<float>());
+              m_d.push_back(std::vector<double>());
               state = READ_VAL;
               break;
             default:
@@ -164,11 +164,11 @@ void HmMat::reset() {
 
 /*----------------------------------------------------------------------------*/
 
-float HmMat::minVal() const {
-  float r = FLT_MAX;
+double HmMat::minVal() const {
+  double r = DBL_MAX;
   for (uint32_t i = 0; i < nrow(); i++) {
     for (uint32_t j = 0; j < ncol(); j++) {
-      const float v = m_d[i][j];
+      const double v = m_d[i][j];
       r = r < v ? r : v;
     }
   }
@@ -177,11 +177,11 @@ float HmMat::minVal() const {
 
 /*----------------------------------------------------------------------------*/
 
-float HmMat::maxVal() const {
-  float r = FLT_MIN;
+double HmMat::maxVal() const {
+  double r = DBL_MIN;
   for (uint32_t i = 0; i < nrow(); i++) {
     for (uint32_t j = 0; j < ncol(); j++) {
-      const float v = m_d[i][j];
+      const double v = m_d[i][j];
       r = r > v ? r : v;
     }
   }
@@ -197,7 +197,7 @@ void HmMat::transpose() {
   t.m_dendY = m_dendX;
   t.m_dendX = m_dendY;
   for (uint32_t j = 0; j < ncol(); j++) {
-    t.m_d.push_back(std::vector<float>());
+    t.m_d.push_back(std::vector<double>());
     t.m_sel.push_back(std::vector<char>());
     for (uint32_t i = 0; i < nrow(); i++) {
       t.m_d.back().push_back(get(i,j));
@@ -229,7 +229,7 @@ void HmMat::applyOrderY(const std::vector<uint32_t> &order) {
     ylab_new.push_back(m_ylab[order[i]]);
   }
   m_ylab = ylab_new;
-  std::vector<std::vector<float>> d_new;
+  std::vector<std::vector<double>> d_new;
   for (uint32_t i = 0; i < nrow(); i++) {
     d_new.push_back(m_d[order[i]]);
   }
@@ -257,18 +257,18 @@ void HmMat::orderByNameX() {
 
 /*----------------------------------------------------------------------------*/
 
-typedef std::vector<float> HmmRow;
+typedef std::vector<double> HmmRow;
 
 class HmmRowDistEuclidean {
 public:
-  float operator()(const HmmRow &r1, const HmmRow &r2) const {
-    float sumsq = 0.f;
+  double operator()(const HmmRow &r1, const HmmRow &r2) const {
+    double sumsq = 0.f;
 #define POW2(x) ((x)*(x))
     for (uint32_t j = 0; j < r1.size(); j++) {
       sumsq += POW2(r1[j] - r2[j]);
     }
 #undef POW2
-    return sqrtf(sumsq);
+    return sqrt(sumsq);
   }
 private:
 };
@@ -432,11 +432,11 @@ void HmMat::cropSel() {
     return;
   }
   /* crop */
-  std::vector<std::vector<float>> dnew;
+  std::vector<std::vector<double>> dnew;
   std::vector<std::string> ylabnew;
   std::vector<std::string> xlabnew;
   for (uint32_t i = r0; i <= r1; i++) {
-    dnew.push_back(std::vector<float>());
+    dnew.push_back(std::vector<double>());
     for (uint32_t j = c0; j <= c1; j++) {
       dnew.back().push_back(m_d[i][j]);
     }
