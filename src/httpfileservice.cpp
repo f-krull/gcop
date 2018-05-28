@@ -42,7 +42,9 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
   }
   BufferDyn buf(_data, _len);
   buf.addf(""); /* null-term str */
-  char *inget = (char*)buf.data();
+  char *line1 = (char*)buf.data();
+  char *lineN = gettoken(line1, '\n');
+  char *inget = line1;
   char *inurl = gettoken(inget, ' ');
   char *inrem = gettoken(inurl, ' ');
   gettoken(inrem, '\r');
@@ -52,27 +54,19 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
   }
   if (inurl[0] == '\0') {
     m_log.err("client %u - didn't send url", HTTP_CMD_GET);
+    write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_BADREQUEST);
+    write(clientId, "\r\n");
     return;
   }
-#if 0
-  //m_log.dbg("HttpReceiver: client %u:\n%s", clientId, data);
-  const char *urls = strchr((char*)data, ' ');
-  if (urls == NULL || urls - (char*)data > (int32_t)len) {
-    m_log.err("line %d", __LINE__);
-    return;
-  }
-  urls++;
-  const char *urle = strchr((char*)urls, ' ');
-  if (urle == NULL || urle - (char*)data > (int32_t)len) {
-    m_log.err("line %d", __LINE__);
-    return;
-  }
-  /* copy + null-terminate sting */
-  char* url = new char[urle-urls+1];
-  memcpy(url, urls, urle-urls);
-  url[urle-urls] = '\0';
-#endif
   m_log.dbg("client %u -> request %s %s %s ...", clientId, inget, inurl, inrem);
+  /* show header fields */
+  while (lineN[0] != '\0' && lineN[0] != '\r') {
+    char *hfname = lineN;
+    lineN = gettoken(lineN, '\n');
+    char *hfvalue = gettoken(hfname, ' ');
+    gettoken(hfvalue, '\r');
+    m_log.dbg("client %u -> header field:%s %s", clientId, hfname, hfvalue);
+  }
   http_get(clientId, inurl);
 }
 

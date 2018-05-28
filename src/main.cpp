@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   signal(SIGINT, signalHandler);
   Log log("main");
 
-  /* create HTTP server dor static files */
+  /* create HTTP server for static files */
   HttpFileService * hfs = new HttpFileService;
   hfs->registerFile("data/index.html", "/index.html", HttpFileService::MIMETYPE_TEXT_HTML);
   hfs->registerFile("data/hmview.css", "/hmview.css", HttpFileService::MIMETYPE_TEXT_CSS);
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   WsService *wss = new WsService(new WsMatViewFactory());
   ServerTcp srv_webs(wss, ServerTcpConfig{11381});
   srv_webs.listen();
-
+  /* start servers */
   const int64_t t_start = getTimeUsec();
   while (!g_stop) {
     srv_http.integrate();
