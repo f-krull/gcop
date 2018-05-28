@@ -25,5 +25,4 @@ uses [example data](data/disreg_matrix_10x8.txt) by default
 * draw x dendrograms
 * normalization
 * minimap navigation
-* multi selection + tooltip
 * ...

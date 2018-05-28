@@ -113,10 +113,7 @@ bool HmMat::read(const char* fn) {
   if (!ret) {
     reset();
   }
-  m_sel.resize(m_d.size());
-  for (uint32_t i = 0; i < m_d.size(); i++) {
-    m_sel[i].resize(m_d[i].size(), 0);
-  }
+  init();
   return ret;
 }
 
@@ -370,5 +367,45 @@ void HmMat::order(OrderType ot) {
     default:
       assert(false && "enum order type not handeled");
       break;
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::sel(uint32_t _r0, uint32_t _c0, uint32_t _r1, uint32_t _c1) {
+  /* make r0,c0 top-left and r1,c1 bottom-right */
+  unSel();
+  const uint32_t r0 = _r0 <= _r1 ? _r0 : _r1;
+  const uint32_t r1 = _r1 >= _r0 ? _r1 : _r0;
+  const uint32_t c0 = _c0 <= _c1 ? _c0 : _c1;
+  const uint32_t c1 = _c1 >= _c0 ? _c1 : _c0;
+  for (uint32_t i = r0; i <= r1; i++) {
+    for (uint32_t j = c0; j <= c1; j++) {
+      sel(i, j);
+    }
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::unSel() {
+  for (uint32_t i = 0; i < m_sel.size(); i++) {
+    for (uint32_t j = 0; j < m_sel[i].size(); j++) {
+      m_sel[i][j] = 0;
+    }
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::init() {
+  delete m_dendX;
+  delete m_dendY;
+  m_dendX = NULL;
+  m_dendY = NULL;
+  m_sel.resize(m_d.size());
+  for (uint32_t i = 0; i < m_d.size(); i++) {
+    m_sel[i].clear();
+    m_sel[i].resize(m_d[i].size(), 0);
   }
 }

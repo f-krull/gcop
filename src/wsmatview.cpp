@@ -172,7 +172,7 @@ public:
         m_img(j, i, 2) = (col0[2] * (1-colScale) + col1[2] * colScale);
         if (hm->isSel(i, j)) {
           const float sscale = 0.5;
-          const uint8_t colSel[]  = { 0xff, 0xff, 0x00 };
+          const uint8_t colSel[]  = { 0xad, 0xff, 0x2f };
           m_img(j, i, 0) = m_img(j, i, 0) * (1-sscale) + colSel[0] * sscale;
           m_img(j, i, 1) = m_img(j, i, 1) * (1-sscale) + colSel[1] * sscale;
           m_img(j, i, 2) = m_img(j, i, 2) * (1-sscale) + colSel[2] * sscale;
@@ -587,6 +587,7 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ZOOMIN       "ZOOMIN "
 #define CMD_PFX_ZOOMOUT      "ZOOMOUT "
 #define CMD_PFX_CLICK        "CLICK "
+#define CMD_PFX_SELECT       "SELECT "
 #define CMD_PFX_PAN          "PAN "
 #define CMD_PFX_MOVE         "MOVE "
 #define CMD_PFX_OCLUSSLX "OCLUSSLX"
@@ -670,6 +671,23 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     out.addf("z-score: %f<br>", m->mat->get(y, x));
     m_srv->sendData(id(), out.cdata(), out.len());
     m->mat->sel(y, x);
+    m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_SELECT, strlen(CMD_PFX_SELECT)) == 0) {
+    char *arg1 = gettoken(msg, ' ');
+    char *arg2 = gettoken(arg1, ' ');
+    char *arg3 = gettoken(arg2, ' ');
+    char *arg4 = gettoken(arg3, ' ');
+    gettoken(arg4, ' ');
+    m_log.dbg("CMD %s%s %s %s %s", CMD_PFX_SELECT, arg1, arg2, arg3, arg4);
+    uint32_t x0 = m->imgMain.clippedPx2CellX(atoi(arg1));
+    uint32_t y0 = m->imgMain.clippedPx2CellY(atoi(arg2));
+    uint32_t x1 = m->imgMain.clippedPx2CellX(atoi(arg3));
+    uint32_t y1 = m->imgMain.clippedPx2CellY(atoi(arg4));
+    m->mat->sel(y0, x0, y1, x1);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
     sendStatus('w');

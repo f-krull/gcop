@@ -107,10 +107,6 @@ function requestSize() {
   g_mvWs.send("SET XDEN_HEI "   + xden_hei);
   g_mvWs.send("SET YDEN_WID "   + yden_wid);
   g_mvWs.send("SET LABTXT_HEI " + 13);
-  console.log("main_wid " + main_wid);
-  console.log("main_hei " + main_hei);
-  console.log("xlab_hei " + xlab_hei);
-  console.log("ylab_wid " + ylab_wid);
   g_imgmain = document.getElementById("main");
   g_imgxlab = document.getElementById("xlab");
   g_imgylab = document.getElementById("ylab");
@@ -119,7 +115,8 @@ function requestSize() {
 //------------------------------------------------------------------------------
 
 var g_mvWs = new MatViewWs();
-var g_dragInf = new DragInfo();
+var g_dragInf   = new DragInfo();
+var g_selectInf = new DragInfo();
 var g_imgmain = null;
 var g_imgxlab = null;
 var g_imgylab = null;
@@ -168,8 +165,11 @@ document.getElementById("load3").addEventListener("click", function(evt){
   g_mvWs.send("LOADMAT data/disreg_matrix_half.txt");
 });
 document.getElementById('main').ondragstart = function(evt){
-  g_mvWs.send("TEST " + evt.clientX + " " + evt.clientY);
-  g_dragInf.start(evt.clientX, evt.clientY, evt.target ? evt.target : evt.srcElement);
+  if (!evt.shiftKey) {
+    g_dragInf.start(evt.clientX, evt.clientY, evt.target ? evt.target : evt.srcElement);
+  } else {
+    g_selectInf.start(evt.offsetX, evt.offsetY, evt.target ? evt.target : evt.srcElement);
+  }
   return false;
 };
 document.getElementById('main').onmousemove = function(evt){
@@ -184,7 +184,11 @@ document.onmouseup = function(evt){
 };
 document.getElementById('main').onmouseup = function(evt){
   /* this might conflict with document.onmouseup! */
-  if (!g_dragInf._dragging) {
+  if (g_selectInf._dragging) {
+    g_mvWs.send("SELECT " + g_selectInf._startX + " " + g_selectInf._startY + " "
+                          + evt.offsetX         + " " + evt.offsetY);
+    g_selectInf.stop();
+  } else if (!g_dragInf._dragging) {
     g_mvWs.send("CLICK " + evt.offsetX + " " + evt.offsetY);
   }
 };

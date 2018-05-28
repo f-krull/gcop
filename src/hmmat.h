@@ -25,9 +25,11 @@ public:
   HmMat() : m_dendX(NULL), m_dendY(NULL) {}
   ~HmMat();
   bool read(const char* fn);
-  float get(uint32_t i, uint32_t j) const { return m_d[i][j]; }
-  char  isSel(uint32_t i, uint32_t j) const { return m_sel[i][j]; }
-  void  sel(uint32_t i, uint32_t j) { m_sel[i][j] = 1; }
+  float get(uint32_t row, uint32_t col) const { return m_d[row][col]; }
+  char   isSel(uint32_t row, uint32_t col) const { return m_sel[row][col]; }
+  void   sel(uint32_t row, uint32_t col) { m_sel[row][col] = 1; }
+  void   sel(uint32_t r0, uint32_t c0, uint32_t r1, uint32_t c1);
+  void unSel();
   const char* xlab(uint32_t j) const;
   const char* ylab(uint32_t i) const;
   uint32_t nrow() const { return m_d.size(); }
@@ -40,6 +42,7 @@ public:
   const Dendrogram *getDendY() const { return m_dendY; }
   const Dendrogram *getDendX() const { return m_dendX; }
 private:
+  void init();
   void orderByNameX();
   void orderByNameY();
   Dendrogram* orderByHClusterY(char clusType);
