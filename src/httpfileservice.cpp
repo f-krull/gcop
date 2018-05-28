@@ -91,11 +91,16 @@ void HttpFileService::http_get(uint32_t clientId, const char* url) {
     write(clientId, "\r\n");
     return;
   }
-  m_log.dbg("client %u <- sending file '%s'", clientId, url);
+  /* get file size */
+  fseek(fin, 0L, SEEK_END);
+  const size_t flen = ftell(fin);
+  rewind(fin);
+  m_log.dbg("client %u <- sending file '%s' size=%zu", clientId, url, flen);
   write(clientId, "HTTP/1.1 200 OK\r\n");
   write(clientId, "Content-Type: %s\r\n", MimeTypeStr[it->second.mimetype]);
   write(clientId, "Cache-Control: no-cache\r\n");
-  write(clientId, "\r\n"); //TODO: Content-Length: 4100
+  write(clientId, "Content-Length: %zu\r\n", flen);
+  write(clientId, "\r\n");
   {
     /* read file and send to client */
     uint8_t buf[16*1024];
