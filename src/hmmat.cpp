@@ -409,3 +409,45 @@ void HmMat::init() {
     m_sel[i].resize(m_d[i].size(), 0);
   }
 }
+
+/*----------------------------------------------------------------------------*/
+
+void HmMat::cropSel() {
+  /* get (i0,j0) (i1,j1) */
+  uint32_t r0 = nrow() > 0 ? nrow()-1 : 0;
+  uint32_t r1 = 0;
+  uint32_t c0 = ncol() > 0 ? ncol()-1 : 0;
+  uint32_t c1 = 0;
+  for (uint32_t i = 0; i < m_sel.size(); i++) {
+    for (uint32_t j = 0; j < m_sel[i].size(); j++) {
+      if (m_sel[i][j]) {
+        r0 = std::min(r0, i);
+        r1 = std::max(r1, i);
+        c0 = std::min(c0, j);
+        c1 = std::max(c1, j);
+      }
+    }
+  }
+  if (r0 > r1 || c0 > c1) {
+    return;
+  }
+  /* crop */
+  std::vector<std::vector<float>> dnew;
+  std::vector<std::string> ylabnew;
+  std::vector<std::string> xlabnew;
+  for (uint32_t i = r0; i <= r1; i++) {
+    dnew.push_back(std::vector<float>());
+    for (uint32_t j = c0; j <= c1; j++) {
+      dnew.back().push_back(m_d[i][j]);
+    }
+    ylabnew.push_back(m_ylab[i]);
+  }
+  for (uint32_t j = c0; j <= c1; j++) {
+    xlabnew.push_back(m_xlab[j]);
+  }
+  /* replace current data */
+  m_d = dnew;
+  m_xlab = xlabnew;
+  m_ylab = ylabnew;
+  init();
+}

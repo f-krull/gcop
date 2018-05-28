@@ -30,6 +30,7 @@ public:
   void   sel(uint32_t row, uint32_t col) { m_sel[row][col] = 1; }
   void   sel(uint32_t r0, uint32_t c0, uint32_t r1, uint32_t c1);
   void unSel();
+  void cropSel();
   const char* xlab(uint32_t j) const;
   const char* ylab(uint32_t i) const;
   uint32_t nrow() const { return m_d.size(); }

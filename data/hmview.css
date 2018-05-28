@@ -39,3 +39,9 @@ td {
 td > img {
   position: relative;
 }
+
+.colstat > input[type=button] {
+  width: 90px;
+  height: 24px;
+  font-size: 10px
+}

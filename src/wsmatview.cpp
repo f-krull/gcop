@@ -600,6 +600,7 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ORANDY   "ORANDY"
 #define CMD_PFX_LOADMAT    "LOADMAT "
 #define CMD_PFX_TRANSPMAT  "TRANSPMAT"
+#define CMD_PFX_CROPMAT    "CROPMAT"
 
 /*----------------------------------------------------------------------------*/
 
@@ -781,6 +782,15 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     m_log.dbg("CMD %s", CMD_PFX_TRANSPMAT);
     m->mat->transpose();
     m->imgUnscaled.update(m->mat);
+    m->sendUpdate = true;
+    sendStatus('w');
+    return;
+  }
+  if (strncmp(msg, CMD_PFX_CROPMAT, strlen(CMD_PFX_CROPMAT)) == 0) {
+    m_log.dbg("CMD %s", CMD_PFX_CROPMAT);
+    m->mat->cropSel();
+    m->imgUnscaled.update(m->mat);
+    m->cfg.setInt(CFG_ZOOM_INT, 0);
     m->sendUpdate = true;
     sendStatus('w');
     return;

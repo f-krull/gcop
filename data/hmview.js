@@ -155,6 +155,9 @@ document.getElementById("orandx").addEventListener("click", function(evt){
 document.getElementById("transpose").addEventListener("click", function(evt){
   g_mvWs.send("TRANSPMAT");
 });
+document.getElementById("crop").addEventListener("click", function(evt){
+  g_mvWs.send("CROPMAT");
+});
 document.getElementById("load1").addEventListener("click", function(evt){
   g_mvWs.send("LOADMAT data/disreg_matrix.txt");
 });
