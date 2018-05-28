@@ -3,6 +3,17 @@
 #include <assert.h>
 #include <string.h>
 
+
+// https://tools.ietf.org/html/rfc2616
+
+
+/*----------------------------------------------------------------------------*/
+
+#define HTTP_STATUS_OK                  200
+#define HTTP_STATUS_BADREQUEST          400
+#define HTTP_STATUS_NOTFOUND            404
+#define HTTP_STATUS_INTERNALSERVERERROR 500
+
 /*----------------------------------------------------------------------------*/
 
 HttpFileService::HttpFileService() : m_log("HttpFileServer") {
@@ -80,14 +91,14 @@ void HttpFileService::http_get(uint32_t clientId, const char* url) {
   std::map<std::string, RegFile>::const_iterator it = m_rfiles.find(url);
   if (it == m_rfiles.end()) {
     m_log.dbg("client %u requested invalid file (%s)", clientId, url);
-    write(clientId, "HTTP/1.1 400\r\n");
+    write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_NOTFOUND);
     write(clientId, "\r\n");
     return;
   }
   FILE *fin = fopen(it->second.path.c_str(), "rb");
   if (fin == NULL) {
     m_log.err("client %u - error opening file %s", it->second.path.c_str());
-    write(clientId, "HTTP/1.1 400\r\n");
+    write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_INTERNALSERVERERROR);
     write(clientId, "\r\n");
     return;
   }
