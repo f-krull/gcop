@@ -38,10 +38,14 @@ public:
 
 class WsService : public ISocketService {
 public:
+  enum SendFlags {
+    SEND_BINARY = 0x02
+  };
+
   WsService(IWsServiceClientFractory *f) : m_dhfac(f), m_log("WsService") {}
   virtual ~WsService();
   virtual void newData(uint32_t clientId, const uint8_t* data, uint32_t len);
-  void sendData(uint32_t clientId, const uint8_t* data, uint32_t len);
+  void sendData(uint32_t clientId, const uint8_t* data, uint32_t len, int32_t flags = 0);
   virtual void disconnect(uint32_t clientId);
   void integrate(int64_t serviceTimeUsec);
 protected:

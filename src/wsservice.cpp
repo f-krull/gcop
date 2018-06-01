@@ -12,10 +12,11 @@
 
 /*----------------------------------------------------------------------------*/
 
-#define WS_OPCODE_TEXTFRAME 0x01
-#define WS_OPCODE_PING      0x09
-#define WS_OPCODE_PONG      0x0A
-#define WS_OPCODE_CLOSE     0x08
+#define WS_OPCODE_TEXTFRAME   0x01
+#define WS_OPCODE_BINARYFRAME 0x02
+#define WS_OPCODE_PING        0x09
+#define WS_OPCODE_PONG        0x0A
+#define WS_OPCODE_CLOSE       0x08
 
 /*----------------------------------------------------------------------------*/
 
@@ -319,12 +320,13 @@ void WsService::integrate(int64_t sericeTimeUsec) {
 
 /*----------------------------------------------------------------------------*/
 
-void WsService::sendData(uint32_t clientId, const uint8_t* data, uint32_t len) {
+void WsService::sendData(uint32_t clientId, const uint8_t* data, uint32_t len, int32_t flags ) {
   WebSockHeaderPacked wsh;
   wsh.setPayloadLen(len);
+  wsh.setOpcode( flags & SEND_BINARY ? WS_OPCODE_BINARYFRAME : WS_OPCODE_TEXTFRAME );
   BufferDyn pkt(wsh.len() + len);
   pkt.add(wsh.cdata(), wsh.len());
   pkt.add(data, len);
   m_srv->write(clientId, pkt.cdata(), pkt.len());
-  m_log.dbg("client %u <- pkt_size:%u,payload_size:%u", clientId, pkt.len(), len);
+  m_log.dbg("client %u <- type=%s,pkt_size=%u,payload_size=%u", clientId, flags & SEND_BINARY ? "bin" : "txt", pkt.len(), len);
 }
