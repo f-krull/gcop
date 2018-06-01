@@ -23,17 +23,27 @@ MatViewWs.prototype.connect = function() {
   }
   if ("WebSocket" in window) {
     this._ws = new WebSocket("ws://" + window.location.hostname + ":11381");
+    this._ws.binaryType = "arraybuffer";
     this._ws.onopen = function() {
       requestSize();
     };
     this._ws.onmessage = function (evt) {
       var received_msg = evt.data;
       var dst_len = 4;
-      var dst = received_msg.substring(0, dst_len);
+      /* convert first 4 bytes to string */
+      var dst = received_msg.slice(0, 4);
+      if (typeof(dst) != "string") {
+        dst = new TextDecoder("utf-8").decode(dst);
+      }
       if (dst == "info") {
+        /* transmitted as string */
         document.getElementById(dst).innerHTML = received_msg.slice(dst_len);
       } else {
-        document.getElementById(dst).src = received_msg.slice(dst_len);
+        /* transmitted as binary */
+        var bytes = new Uint8Array(received_msg.slice(dst_len));
+        var blob = new Blob([bytes.buffer], {type: "image/jpeg"});
+        var url = URL.createObjectURL(blob);
+        document.getElementById(dst).src = url;
         g_imgmain.style.left = 0 + 'px';
         g_imgmain.style.top  = 0 + 'px';
         g_imgxlab.style.left = 0 + 'px';

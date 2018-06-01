@@ -94,6 +94,10 @@ public:
     return m_jpgb64;
   }
 
+  const BufferDyn& jpg() const {
+    return m_jpg;
+  }
+
   void clear() {
     if (m_jpgbuf) {
       free(m_jpgbuf);
@@ -111,6 +115,7 @@ protected:
   uint8_t   *m_jpgbuf;
   size_t    m_jpgbufSize;
   BufferDyn m_jpgb64;
+  BufferDyn m_jpg;
 
   bool encode() {
     clear();
@@ -121,6 +126,7 @@ protected:
     m_img.save_jpeg(f, JPEG_QUALITY);
     fclose(f);
     m_jpgb64.set(m_jpgbuf, m_jpgbufSize);
+    m_jpg.set(m_jpgbuf, m_jpgbufSize);
     m_jpgb64.toBase64();
     return true;
   }
@@ -827,26 +833,29 @@ void WsMatView::integrate(int64_t serviceTimeUsec) {
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::sendStatus(char s) {
-  ImgBase *img = ((s == 'o') ? ((ImgBase*)&m->imgStatusOk) : ((ImgBase*)&m->imgStatusWarn));
   BufferDyn out(1024*1024);
-  out.addf("statdata:image/jpeg;base64,%s", img->jpgB64().cdata());
-  m_srv->sendData(id(), out.cdata(), out.len());
+  ImgBase *img = ((s == 'o') ? ((ImgBase*)&m->imgStatusOk) : ((ImgBase*)&m->imgStatusWarn));
+  out.addf("stat");
+  out.add(img->jpg().cdata(), img->jpg().len());
+  m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
 }
 
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::sendTiny() {
   BufferDyn out(1024*1024);
-  out.addf("tinydata:image/jpeg;base64,%s", m->imgTiny.jpgB64().cdata());
-  m_srv->sendData(id(), out.cdata(), out.len());
+  out.addf("tiny");
+  out.add(m->imgTiny.jpg().cdata(), m->imgTiny.jpg().len());
+  m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
 }
 
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::sendMain() {
   BufferDyn out(1024*1024);
-  out.addf("maindata:image/jpeg;base64,%s", m->imgMain.jpgB64().cdata());
-  m_srv->sendData(id(), out.cdata(), out.len());
+  out.addf("main");
+  out.add(m->imgMain.jpg().cdata(), m->imgMain.jpg().len());
+  m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
 }
 
 
@@ -854,24 +863,27 @@ void WsMatView::sendMain() {
 
 void WsMatView::sendXlab() {
   BufferDyn out(1024*1024);
-  out.addf("xlabdata:image/jpeg;base64,%s", m->imgXlab.jpgB64().cdata());
-  m_srv->sendData(id(), out.cdata(), out.len());
+  out.addf("xlab");
+  out.add(m->imgXlab.jpg().cdata(), m->imgXlab.jpg().len());
+  m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
 }
 
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::sendYlab() {
   BufferDyn out(1024*1024);
-  out.addf("ylabdata:image/jpeg;base64,%s", m->imgYlab.jpgB64().cdata());
-  m_srv->sendData(id(), out.cdata(), out.len());
+  out.addf("ylab");
+  out.add(m->imgYlab.jpg().cdata(), m->imgYlab.jpg().len());
+  m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
 }
 
 /*----------------------------------------------------------------------------*/
 
 void WsMatView::sendYDen() {
   BufferDyn out(1024*1024);
-  out.addf("ydendata:image/jpeg;base64,%s", m->imgYden.jpgB64().cdata());
-  m_srv->sendData(id(), out.cdata(), out.len());
+  out.addf("yden");
+  out.add(m->imgYden.jpg().cdata(), m->imgYden.jpg().len());
+  m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
 }
 
 /*----------------------------------------------------------------------------*/
