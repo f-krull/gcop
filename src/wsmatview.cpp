@@ -90,10 +90,6 @@ public:
     clear();
   }
 
-  const BufferDyn& jpgB64() const {
-    return m_jpgb64;
-  }
-
   const BufferDyn& jpg() const {
     return m_jpg;
   }
@@ -114,7 +110,6 @@ protected:
   cimg::CImg<unsigned char> m_img;
   uint8_t   *m_jpgbuf;
   size_t    m_jpgbufSize;
-  BufferDyn m_jpgb64;
   BufferDyn m_jpg;
 
   bool encode() {
@@ -125,9 +120,7 @@ protected:
     }
     m_img.save_jpeg(f, JPEG_QUALITY);
     fclose(f);
-    m_jpgb64.set(m_jpgbuf, m_jpgbufSize);
     m_jpg.set(m_jpgbuf, m_jpgbufSize);
-    m_jpgb64.toBase64();
     return true;
   }
 
