@@ -18,10 +18,10 @@ class HttpHeader;
 class HttpFileService: public ISocketService {
 public:
   enum MimeType {
-  #define ENUM_GET_ENAME(name, str) name,
+#define ENUM_GET_ENAME(name, str) name,
     ENUM_MIMETYPE(ENUM_GET_ENAME)
     MIMETPYE_NUMENTRIES
-  #undef ENUM_GET_ENAME
+#undef ENUM_GET_ENAME
   };
   static const char* MimeTypeStr[];
 
