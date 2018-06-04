@@ -58,4 +58,8 @@ buffer_test: buffer.o buffer_test.o
 	$(CXX) $(LDFLAGS) buffer.o buffer_test.o -o buffer_test
 
 hmmat_test: hmmat.o hmmat_test.o
-	$(CXX) $(LDFLAGS) hmmat.o hmmat_test.o -o hmmat_test 
+	$(CXX) $(LDFLAGS) hmmat.o hmmat_test.o -o hmmat_test
+
+correlationt_test: src/correlation_test.o
+	$(CXX) $(LDFLAGS) src/correlation_test.o -o correlationt_test
+
