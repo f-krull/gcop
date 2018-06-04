@@ -17,19 +17,19 @@ time echo "
   load_strtable \
      dst=tab_tfbs \
      file=${GCOPDIR}/testdata/tfbs_gtrd/tab_gtrdtf.txt \
-     maxlines=200000 \
+     maxlines=20000 \
      header=1
-     
+
 
   load_strtable \
      dst=tab_gwas \
      file=${GCOPDIR}/testdata/gwascat/tab_genes.txt \
-     maxlines=681 \
+     maxlines=20000 \
      header=1
 
 
-  disreg tab1=tab_tfbs fmt1=cse \
-         tab2=tab_gwas  fmt2=..c.se \
+  disreg tabs=tab_gwas fmts=..c.se \
+         tabp=tab_tfbs fmtp=cse \
          expand2=25000 \
          output=/tmp/disreg_matrix.txt
 " \
@@ -50,3 +50,10 @@ time Rscript <(echo '
   gplots::heatmap.2(t, margins=c(32,12), trace="none", key=F)
   dev.off()
 ')
+
+
+#t <- read.table("/tmp/bla", skip=1, sep="\t")
+#x <- seq(-4,4, length=100)
+#plot(x,dnorm(x), type="l", col="red", ylim=c(0,0.6))
+#points(density(unlist(t)), type="l")
+#legend("topleft", c("normal dist","z-scores"), fill=c("red","black"))

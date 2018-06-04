@@ -181,6 +181,13 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
   assert(l2.ncols() >= 1);
   ChrInfoHg19 hg19;
 
+  /*
+   * s_N_vec: [1,s_m] segments/genes
+   * p_M_vec: [1,p_n] points
+   *
+   *
+   */
+
   const StrTable &inp_s_tab = l1;
   const StrTable &inp_p_tab = l2;
   const uint32_t s_m = inp_s_tab.nrows();
@@ -193,18 +200,18 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
   //std::vector<double>              p_N_UP_vec(p_n, 0.f);
 
   /* compute O_ij */
-  for (uint32_t j = 0; j < s_m; j++) {
-    o_mat[j].resize(inp_p_tab.nrows(), 0.f);
-    GCords s_g;
-    s_g.read(inp_s_tab.body()[j][0].c_str(), fmt1, 0, &hg19, true);
-    s_g.flatten();
-    GCordsInfoCache s_ginf(&s_g);
-    for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
-      GCords p_g;
-      p_g.read(inp_p_tab.body()[i][0].c_str(), fmt2, 0, &hg19, true);
-      p_g.expand(expand2);
-      p_g.flatten();
-      GCordsInfoCache p_ginf(&p_g);
+  for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
+    GCords p_g;
+    p_g.read(inp_p_tab.body()[i][0].c_str(), fmt2, 0, &hg19, true);
+    p_g.toPoints();
+    GCordsInfoCache p_ginf(&p_g);
+    for (uint32_t j = 0; j < s_m; j++) {
+      o_mat[j].resize(inp_p_tab.nrows(), 0.f);
+      GCords s_g;
+      s_g.read(inp_s_tab.body()[j][0].c_str(), fmt1, 0, &hg19, true);
+      s_g.expand(expand2);
+      s_g.flatten();
+      GCordsInfoCache s_ginf(&s_g);
       //e_mat[j][i] = p_ginf.len()->get() * s_ginf.leqn()->get() / p_ginf.gcords()->chrinfo().len();
       o_mat[j][i] = numOverlap(p_ginf, s_ginf);
     }
@@ -220,7 +227,7 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
 
   /* compute M_1 .. M_m */
   p_M_vec.resize(p_n, 0);
-  for (uint32_t i = 0; i < s_m; i++) {
+  for (uint32_t i = 0; i < p_n; i++) {
     p_M_vec[i] = 0;
     for (uint32_t j = 0; j < s_m; j++) {
       p_M_vec[i] += o_mat[j][i];
@@ -238,14 +245,17 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
   }
 #endif
 
-  //const double p_N_UP = std::accumulate(p_N_UP_vec.begin(), p_N_UP_vec.end(), 0.);
+#if 0
+  const double p_N_UP = std::accumulate(p_N_UP_vec.begin(), p_N_UP_vec.end(), 0.);
+#endif
   const double sp_N  = std::accumulate(s_N_vec.begin(),     s_N_vec.end(),    0.);
 
 
   /* compute E_ij */
+  assert(e_mat.size() == s_m);
   for (uint32_t j = 0; j < s_m; j++) {
-    e_mat[j].resize(inp_p_tab.nrows(), 0.);
-    for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
+    e_mat[j].resize(p_n, 0.);
+    for (uint32_t i = 0; i < p_n; i++) {
       e_mat[j][i] =  s_N_vec[j] * p_M_vec[i] / sp_N;
     }
   }
@@ -257,7 +267,7 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
     z_mat[j].resize(inp_p_tab.nrows(), 0.f);
     for (uint32_t i = 0; i < p_n; i++) {
       const double num = o_mat[j][i] - e_mat[j][i];
-      const double den = sqrt(e_mat[j][i] * (1 - e_mat[j][i]/s_N_vec[i]));
+      const double den = sqrt(e_mat[j][i] * (1 - e_mat[j][i]/s_N_vec[j]));
       //const double num = e_mat[j][i];
       //const double den = 1.f;
       z_mat[j][i] = (den != 0) ? num / den : 0.f;
@@ -347,39 +357,39 @@ void CmdLoadStrTable::executeChild(const char *, GcObjSpace *os) {
 class CmdDisReg : public GcCommand {
 public:
   CmdDisReg() {
-    addParam(GcCmdParam(PARAM_TABLE1_STR, GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_TABLE2_STR, GcCmdParam::PARAM_STRING, ""));
-    addParam(GcCmdParam(PARAM_FORMAT1_STR, GcCmdParam::PARAM_STRING, "cse"));
-    addParam(GcCmdParam(PARAM_FORMAT2_STR, GcCmdParam::PARAM_STRING, "cse"));
+    addParam(GcCmdParam(PARAM_TABLE_SEG_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_TABLE_PNT_STR, GcCmdParam::PARAM_STRING, ""));
+    addParam(GcCmdParam(PARAM_FORMAT_SEG_STR, GcCmdParam::PARAM_STRING, "cse"));
+    addParam(GcCmdParam(PARAM_FORMAT_PNT_STR, GcCmdParam::PARAM_STRING, "cse"));
     addParam(GcCmdParam(PARAM_EXPAND2_INT, GcCmdParam::PARAM_INT, "0"));
     addParam(GcCmdParam(PARAM_OUTPUT_STR,  GcCmdParam::PARAM_STRING, "/tmp/disreg_mat.txt"));
   }
   const char* name() const {
     return "disreg";
   }
-  static std::string PARAM_TABLE1_STR;
-  static std::string PARAM_TABLE2_STR;
-  static std::string PARAM_FORMAT1_STR;
-  static std::string PARAM_FORMAT2_STR;
+  static std::string PARAM_TABLE_SEG_STR;
+  static std::string PARAM_TABLE_PNT_STR;
+  static std::string PARAM_FORMAT_SEG_STR;
+  static std::string PARAM_FORMAT_PNT_STR;
   static std::string PARAM_EXPAND2_INT;
   static std::string PARAM_OUTPUT_STR;
 protected:
   void executeChild(const char *, GcObjSpace *os);
 };
 
-std::string CmdDisReg::PARAM_TABLE1_STR  = "tab1";
-std::string CmdDisReg::PARAM_TABLE2_STR  = "tab2";
-std::string CmdDisReg::PARAM_FORMAT1_STR  = "fmt1";
-std::string CmdDisReg::PARAM_FORMAT2_STR  = "fmt2";
+std::string CmdDisReg::PARAM_TABLE_SEG_STR  = "tabs";
+std::string CmdDisReg::PARAM_TABLE_PNT_STR  = "tabp";
+std::string CmdDisReg::PARAM_FORMAT_SEG_STR  = "fmts";
+std::string CmdDisReg::PARAM_FORMAT_PNT_STR  = "fmtp";
 std::string CmdDisReg::PARAM_EXPAND2_INT  = "expand2";
 std::string CmdDisReg::PARAM_OUTPUT_STR   = "output";
 
 void CmdDisReg::executeChild(const char *, GcObjSpace *os) {
-  GcObjStrTable *gcl1 = os->getObj<GcObjStrTable>(getParam(PARAM_TABLE1_STR)->valStr().c_str());
-  GcObjStrTable *gcl2 = os->getObj<GcObjStrTable>(getParam(PARAM_TABLE2_STR)->valStr().c_str());
+  GcObjStrTable *gcl1 = os->getObj<GcObjStrTable>(getParam(PARAM_TABLE_SEG_STR)->valStr().c_str());
+  GcObjStrTable *gcl2 = os->getObj<GcObjStrTable>(getParam(PARAM_TABLE_PNT_STR)->valStr().c_str());
   const uint64_t expand2 = getParam(PARAM_EXPAND2_INT)->valInt();
-  const char *fmt1 =  getParam(PARAM_FORMAT1_STR)->valStr().c_str();
-  const char *fmt2 =  getParam(PARAM_FORMAT2_STR)->valStr().c_str();
+  const char *fmt1 =  getParam(PARAM_FORMAT_SEG_STR)->valStr().c_str();
+  const char *fmt2 =  getParam(PARAM_FORMAT_PNT_STR)->valStr().c_str();
   const char *outfn = getParam(PARAM_OUTPUT_STR)->valStr().c_str();
   disreg(*gcl1->d(), *gcl2->d(), fmt1, fmt2, expand2, outfn);
 }
