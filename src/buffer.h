@@ -22,6 +22,7 @@ public:
   uint8_t *data();
   const uint8_t *data() const;
   const uint8_t *cdata() const;
+  const char* cstr() const;
   uint32_t len() const;
   uint32_t max() const;
   void toAsci();

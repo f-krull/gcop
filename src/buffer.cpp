@@ -96,6 +96,12 @@ const uint8_t *BufferDyn::cdata() const {
 
 /*----------------------------------------------------------------------------*/
 
+const char *BufferDyn::cstr() const {
+  return (char*)m_buf;
+}
+
+/*----------------------------------------------------------------------------*/
+
 uint32_t BufferDyn::len() const {
   return m_len;
 }
