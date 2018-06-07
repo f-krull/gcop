@@ -169,13 +169,23 @@ document.getElementById("crop").addEventListener("click", function(evt){
   g_mvWs.send("CROPMAT");
 });
 document.getElementById("load1").addEventListener("click", function(evt){
-  g_mvWs.send("LOADMAT data/disreg_matrix.txt");
+  g_mvWs.send("LOADMAT data/disreg_matrix_1073x681.txt");
 });
 document.getElementById("load2").addEventListener("click", function(evt){
   g_mvWs.send("LOADMAT data/disreg_matrix_10x8.txt");
 });
 document.getElementById("load3").addEventListener("click", function(evt){
-  g_mvWs.send("LOADMAT data/disreg_matrix_half.txt");
+  g_mvWs.send("LOADMAT data/matrix_gwas-gwas_1073x1073.txt");
+});
+document.getElementById("dist_euclidean").addEventListener("click", function(evt){
+  g_mvWs.send("ODISTFUN euclidean");
+});
+document.getElementById("dist_pearson").addEventListener("click", function(evt){
+  g_mvWs.send("ODISTFUN corrpearson");
+  g_mvWs.send("SELECTY Schiz.*|Bipolar.*");
+});
+document.getElementById("dist_spears").addEventListener("click", function(evt){
+  g_mvWs.send("ODISTFUN corrspears");
 });
 document.getElementById('main').ondragstart = function(evt){
   if (!evt.shiftKey) {

@@ -208,6 +208,18 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
+class ImageStatusErr : public ImgBase {
+public:
+  ImageStatusErr() {
+    const unsigned char colYellow[] = {0xFF, 0x00, 0};
+    m_img = cimg::CImg<unsigned char>(30, 30, 1, 3, 0);
+    m_img.draw_fill(0, 0, colYellow);
+    encode();
+  }
+private:
+};
+/*----------------------------------------------------------------------------*/
+
 class ImgMain : public ImgBase {
 public:
   ImgMain() {
@@ -258,7 +270,13 @@ public:
     /* add borders */
     m_imgUSCropAsp = m_imgUSCrop;
     fixAspRatio(m_imgUSCropAsp, dwid, dhei);
-    m_img = m_imgUSCropAsp.get_resize(dwid, dhei);
+    {
+      /* use linear interpolation (slower) if image is downscaled */
+      const int32_t i_nn  = 1;
+      const int32_t i_lin = 3;
+      const int32_t interpolation = m_imgUSCropAsp.width() > (int32_t)dwid ? i_lin : i_nn;
+      m_img = m_imgUSCropAsp.get_resize(dwid, dhei, -100, -100, interpolation);
+    }
     /* save info for pixel id calc */
     m_dispMatX0 = (m_imgUSCropAsp.width()  - m_imgUSCrop.width())  / 2 * pz_new;
     m_dispMatY0 = (m_imgUSCropAsp.height() - m_imgUSCrop.height()) / 2 * pz_new;
@@ -432,6 +450,7 @@ public:
     m_img = cimg::CImg<unsigned char>(dw, dh, 1, 3, blvl);
     const unsigned char bgCol[] = {blvl, blvl, blvl};
     const unsigned char fgCol[] = {0x00, 0x00, 0x00};
+    const unsigned char hiCol[] = {0xFF, 0x66, 0x66};
     const int32_t tickW = 2 < m_img.width() ? 2 : m_img.width();
     const int32_t axBgn = main.dispMatY0();
     const int32_t axEnd = main.dispMatY1();
@@ -442,7 +461,10 @@ public:
       int32_t currpos = axBgn + pxHei * i + (pxHei / 2) - (float(textHeight) / 2);
       if (currpos - posprev >  textHeight) {
         m_img.draw_line(0, currpos+float(textHeight)/2, tickW, currpos+float(textHeight)/2, fgCol, 1.f);
-        m_img.draw_text(tickW+3, currpos, "%s", fgCol, bgCol, 1, textHeight, hmm->ylab(main.dispStartY()+ i));
+        const uint32_t e = main.dispStartY() + i;
+        assert(e < hmm->nrow());
+        const bool selected = hmm->isSelLab(HmMat::SERIESTYPE_ROW, e);
+        m_img.draw_text(tickW+3, currpos, "%s", selected ? hiCol : fgCol, bgCol, 1, textHeight, hmm->ylab(e));
         posprev = currpos;
       }
     }
@@ -513,6 +535,10 @@ public:
       for (uint32_t i = 0; i < roots.size(); i++) {
         drawNode(NULL, roots[i], imain, ius, 0, distmin, distmax);
       }
+      const int32_t textHeight = cfg.getInt(CFG_LABTXT_HEI_INT);
+      const unsigned char fgCol[] = {0x00, 0x00, 0x00};
+      const unsigned char bgCol[] = {0xff, 0xff, 0xff};
+      m_img.draw_text(1, 1, "max=%g\nmin=%g", fgCol, bgCol, 0.7f, textHeight, distmax, distmin);
       break;
     }
     encode();
@@ -550,6 +576,7 @@ public:
   bool sendUpdate;
   ImageStatusOk   imgStatusOk;
   ImageStatusWarn imgStatusWarn;
+  ImageStatusErr  imgStatusErr;
   HmMat *mat;
   ImgUnscaled imgUnscaled;
   ImgMain     imgMain;
@@ -587,6 +614,8 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ZOOMOUT      "ZOOMOUT "
 #define CMD_PFX_CLICK        "CLICK "
 #define CMD_PFX_SELECT       "SELECT "
+#define CMD_PFX_SELECTX      "SELECTX "
+#define CMD_PFX_SELECTY      "SELECTY "
 #define CMD_PFX_PAN          "PAN "
 #define CMD_PFX_MOVE         "MOVE "
 #define CMD_PFX_OCLUSSLX "OCLUSSLX"
@@ -597,6 +626,7 @@ WsMatView::~WsMatView() {
 #define CMD_PFX_ONAMEY   "ONAMEY"
 #define CMD_PFX_ORANDX   "ORANDX"
 #define CMD_PFX_ORANDY   "ORANDY"
+#define CMD_PFX_ODISTFUN "ODISTFUN "
 #define CMD_PFX_LOADMAT    "LOADMAT "
 #define CMD_PFX_TRANSPMAT  "TRANSPMAT"
 #define CMD_PFX_CROPMAT    "CROPMAT"
@@ -623,42 +653,43 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
   msgbuf.addf("\0");
   char *msg = (char*)msgbuf.data();
   if (strncmp(msg, CMD_PFX_SET, strlen(CMD_PFX_SET)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_SET, arg1, arg2);
     m->cfg.set(arg1, arg2); /* points to null char in worst case */
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ZOOMIN, strlen(CMD_PFX_ZOOMIN)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_ZOOMIN, arg1, arg2);
     m->imgMain.zoomin(atoi(arg1), atoi(arg2), &m->cfg);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ZOOMOUT, strlen(CMD_PFX_ZOOMOUT)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_ZOOMOUT, arg1, arg2);
     m->imgMain.zoomout(atoi(arg1), atoi(arg2), &m->cfg);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_PAN, strlen(CMD_PFX_PAN)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_PAN, arg1, arg2);
     m->imgMain.pan(atoi(arg1), atoi(arg2));
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_CLICK, strlen(CMD_PFX_CLICK)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     m_log.dbg("CMD %s%s %s", CMD_PFX_CLICK, arg1, arg2);
@@ -673,10 +704,10 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     m->mat->sel(y, x);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_SELECT, strlen(CMD_PFX_SELECT)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     char *arg2 = gettoken(arg1, ' ');
     char *arg3 = gettoken(arg2, ' ');
@@ -690,110 +721,126 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
     m->mat->sel(y0, x0, y1, x1);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ONAMEX, strlen(CMD_PFX_ONAMEX)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_ONAMEX);
     m->mat->order(HmMat::ORDER_ALPHABELIC_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ONAMEY, strlen(CMD_PFX_ONAMEY)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_ONAMEY);
     m->mat->order(HmMat::ORDER_ALPHABELIC_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ORANDX, strlen(CMD_PFX_ORANDX)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_ORANDX);
     m->mat->order(HmMat::ORDER_RANDOM_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_ORANDY, strlen(CMD_PFX_ORANDY)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_ORANDY);
     m->mat->order(HmMat::ORDER_RANDOM_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_OCLUSSLX, strlen(CMD_PFX_OCLUSSLX)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_OCLUSSLX);
     m->mat->order(HmMat::ORDER_HCLUSTER_SL_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_OCLUSSLY, strlen(CMD_PFX_OCLUSSLY)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_OCLUSSLY);
     m->mat->order(HmMat::ORDER_HCLUSTER_SL_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
-
   if (strncmp(msg, CMD_PFX_OCLUSCLX, strlen(CMD_PFX_OCLUSCLX)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_OCLUSCLX);
     m->mat->order(HmMat::ORDER_HCLUSTER_CL_X);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_OCLUSCLY, strlen(CMD_PFX_OCLUSCLY)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_OCLUSCLY);
     m->mat->order(HmMat::ORDER_HCLUSTER_CL_Y);
     m->imgUnscaled.update(m->mat);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
-
+  if (strncmp(msg, CMD_PFX_ODISTFUN, strlen(CMD_PFX_ODISTFUN)) == 0) {
+    char *arg1 = gettoken(msg, ' ');
+    gettoken(arg1, ' '); /* null term */
+    m_log.dbg("CMD %s%s", CMD_PFX_ODISTFUN, arg1);
+    bool ret = m->mat->setDistFunc(arg1);
+    sendStatus(ret ? 'o' : 'e');
+    return;
+  }
   if (strncmp(msg, CMD_PFX_MOVE, strlen(CMD_PFX_MOVE)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     gettoken(arg1, ' '); /* null term */
     m_log.dbg("CMD %s%s", CMD_PFX_MOVE, arg1);
     m->imgMain.move(arg1);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_LOADMAT, strlen(CMD_PFX_LOADMAT)) == 0) {
+    sendStatus('w');
     char *arg1 = gettoken(msg, ' ');
     gettoken(arg1, ' '); /* null term */
     m_log.dbg("CMD %s%s", CMD_PFX_LOADMAT, arg1);
     loadMat(arg1);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_TRANSPMAT, strlen(CMD_PFX_TRANSPMAT)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_TRANSPMAT);
     m->mat->transpose();
     m->imgUnscaled.update(m->mat);
+    m->cfg.setInt(CFG_ZOOM_INT, 0);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
   if (strncmp(msg, CMD_PFX_CROPMAT, strlen(CMD_PFX_CROPMAT)) == 0) {
+    sendStatus('w');
     m_log.dbg("CMD %s", CMD_PFX_CROPMAT);
     m->mat->cropSel();
     m->imgUnscaled.update(m->mat);
     m->cfg.setInt(CFG_ZOOM_INT, 0);
     m->sendUpdate = true;
-    sendStatus('w');
     return;
   }
+  if (strncmp(msg, CMD_PFX_SELECTY, strlen(CMD_PFX_SELECTY)) == 0) {
+    sendStatus('w');
+    char *arg1 = gettoken(msg, ' ');
+    gettoken(arg1, ' '); /* null term */
+    m_log.dbg("CMD %s%s", CMD_PFX_SELECTY, arg1);
+    m->mat->selLab(HmMat::SERIESTYPE_ROW, arg1);
+    m->sendUpdate = true;
+    return;
+  }
+  m_log.dbg("command not recognized: %s", msg);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -827,7 +874,17 @@ void WsMatView::integrate(int64_t serviceTimeUsec) {
 
 void WsMatView::sendStatus(char s) {
   BufferDyn out(1024*1024);
-  ImgBase *img = ((s == 'o') ? ((ImgBase*)&m->imgStatusOk) : ((ImgBase*)&m->imgStatusWarn));
+  ImgBase *img = ((ImgBase*)&m->imgStatusErr);
+  switch (s) {
+    case 'o':
+      img = ((ImgBase*)&m->imgStatusOk);
+      break;
+    case 'w':
+      img = ((ImgBase*)&m->imgStatusWarn);
+      break;
+    default:
+      break;
+  }
   out.addf("stat");
   out.add(img->jpg().cdata(), img->jpg().len());
   m_srv->sendData(id(), out.cdata(), out.len(), WsService::SEND_BINARY);
