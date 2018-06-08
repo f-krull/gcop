@@ -3,14 +3,145 @@
 #include "distmatrix.h"
 #include "clusterersl.h"
 #include "clusterercl.h"
+#include "correlation.h"
 #include <stdio.h>
 #include <float.h>
 #include <numeric>
 #include <algorithm>
 #include <assert.h>
+#include <map>
+#include <string.h>
+
+/*----------------------------------------------------------------------------*/
 
 #define HCLUS_TYPE_SL 's'
 #define HCLUS_TYPE_CL 'c'
+
+/*----------------------------------------------------------------------------*/
+
+const char* HmMat::DistFuncTypeStr[] = {
+#define  ENUM_GET_STR(name, str) str,
+        ENUM_DISTFUNCTYPE(ENUM_GET_STR)
+        "undefined"
+#undef ENUM_GET_NAME
+};
+
+/*----------------------------------------------------------------------------*/
+
+typedef std::vector<double> HmmRow;
+
+/*----------------------------------------------------------------------------*/
+
+class HmmRowDistFunc {
+public:
+  virtual ~HmmRowDistFunc() {}
+  virtual double operator()(const HmmRow &r1, const HmmRow &r2) = 0;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class HmmRowDistEuclidean : public HmmRowDistFunc {
+public:
+  double operator()(const HmmRow &r1, const HmmRow &r2) {
+    double sumsq = 0.f;
+#define POW2(x) ((x)*(x))
+    for (uint32_t j = 0; j < r1.size(); j++) {
+      sumsq += POW2(r1[j] - r2[j]);
+    }
+#undef POW2
+    return sqrt(sumsq);
+  }
+private:
+};
+
+/*----------------------------------------------------------------------------*/
+
+class HmmRowDistCorrPearsonCache : public HmmRowDistFunc {
+public:
+  double operator()(const HmmRow &r1, const HmmRow &r2) {
+    const AvgSdInf i1 = getAvgSdInf(&r1);
+    const AvgSdInf i2 = getAvgSdInf(&r2);
+    return (1.-corrPearson(r1, r2, i1.avg, i2.avg, i1.stddev, i2.stddev))/2;
+  }
+private:
+  struct AvgSdInf {
+    double avg;
+    double stddev;
+  };
+  const AvgSdInf & getAvgSdInf(const HmmRow *r1) {
+    auto it = m_row2inf.find(r1);
+    if (it != m_row2inf.end()) {
+      return it->second;
+    }
+    const double mean = avg(*r1);
+    const double sd  = stddev(*r1, mean);
+    auto p = std::make_pair(r1, AvgSdInf{mean, sd});
+    return m_row2inf.insert(p).first->second;
+  }
+  std::map<const HmmRow*, AvgSdInf > m_row2inf;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class HmmRowDistCorrSpearsCache : public HmmRowDistFunc {
+public:
+  double operator()(const HmmRow &r1, const HmmRow &r2) {
+    const std::vector<uint32_t> &cr1 = getCachedRank(&r1);
+    const std::vector<uint32_t> &cr2 = getCachedRank(&r2);
+    return (1.-corrSpearsRanked(cr1, cr2))/2;
+  }
+private:
+  const std::vector<uint32_t> & getCachedRank(const HmmRow *r1) {
+    auto it = m_row2rank.find(r1);
+    if (it != m_row2rank.end()) {
+      return it->second;
+    }
+    auto p = std::make_pair(r1, rank(*r1));
+    return m_row2rank.insert(p).first->second;
+  }
+  std::map<const HmmRow*, std::vector<uint32_t> > m_row2rank;
+};
+
+/*----------------------------------------------------------------------------*/
+
+class HmmRowDistCmp {
+public:
+  HmmRowDistCmp(HmMat::DistFuncType t) {
+    m_f = NULL;
+    setType(t);
+  }
+  ~HmmRowDistCmp() {
+    delete m_f;
+  }
+  void setType(HmMat::DistFuncType t) {
+    delete  m_f;
+    switch (t) {
+      case HmMat::DISTFUNC_EUCLIDEAN:
+        m_f = new HmmRowDistEuclidean;
+        break;
+      case HmMat::DISTFUNC_CORRPEARSON:
+        m_f = new HmmRowDistCorrPearsonCache;
+        break;
+      case HmMat::DISTFUNC_CORRSPEARS:
+        m_f = new HmmRowDistCorrSpearsCache;
+        break;
+      default:
+        assert(false);
+        break;
+    }
+  }
+  double operator()(const HmmRow &r1, const HmmRow &r2) const {
+    return (*m_f)(r1, r2);
+  }
+private:
+  HmmRowDistFunc *m_f;
+};
+
+/*----------------------------------------------------------------------------*/
+
+HmMat::HmMat() : m_dendX(NULL), m_dendY(NULL) {
+  m_distFunc = DISTFUNC_EUCLIDEAN;
+}
 
 /*----------------------------------------------------------------------------*/
 
@@ -156,6 +287,8 @@ void HmMat::reset() {
   m_ylab.clear();
   m_d.clear();
   m_sel.clear();
+  m_selLabX.clear();
+  m_selLabY.clear();
   delete m_dendX;
   delete m_dendY;
   m_dendX = NULL;
@@ -196,6 +329,9 @@ void HmMat::transpose() {
   t.m_ylab = m_xlab;
   t.m_dendY = m_dendX;
   t.m_dendX = m_dendY;
+  t.m_distFunc = m_distFunc;
+  t.m_selLabX = m_selLabY;
+  t.m_selLabY = m_selLabX;
   for (uint32_t j = 0; j < ncol(); j++) {
     t.m_d.push_back(std::vector<double>());
     t.m_sel.push_back(std::vector<char>());
@@ -257,27 +393,9 @@ void HmMat::orderByNameX() {
 
 /*----------------------------------------------------------------------------*/
 
-typedef std::vector<double> HmmRow;
-
-class HmmRowDistEuclidean {
-public:
-  double operator()(const HmmRow &r1, const HmmRow &r2) const {
-    double sumsq = 0.f;
-#define POW2(x) ((x)*(x))
-    for (uint32_t j = 0; j < r1.size(); j++) {
-      sumsq += POW2(r1[j] - r2[j]);
-    }
-#undef POW2
-    return sqrt(sumsq);
-  }
-private:
-};
-
-/*----------------------------------------------------------------------------*/
-
 Dendrogram * HmMat::orderByHClusterY(char t) {
-  DistanceMatrix *dm = DistanceMatrixFactory::getFilled(&m_d,
-      HmmRowDistEuclidean());
+  HmmRowDistCmp cmp(m_distFunc);
+  DistanceMatrix *dm = DistanceMatrixFactory::getFilled(&m_d, cmp);
   std::vector<std::vector<uint32_t> > clusters;
   Dendrogram *d = (t == HCLUS_TYPE_SL) ? ClustererSl::clusterAll(dm) : ClustererCl::clusterAll(dm);
   delete dm;
@@ -319,6 +437,9 @@ void HmMat::orderRandomX() {
 void HmMat::resetOrderX() {
   delete m_dendX;
   m_dendX = NULL;
+  m_selLabX.clear();
+  m_selLabX.resize(ncol(), 0);
+  unSel();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -326,6 +447,9 @@ void HmMat::resetOrderX() {
 void HmMat::resetOrderY() {
   delete m_dendY;
   m_dendY = NULL;
+  m_selLabY.clear();
+  m_selLabY.resize(nrow(), 0);
+  unSel();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -365,7 +489,7 @@ void HmMat::order(OrderType ot) {
       m_dendY = orderByHClusterY(HCLUS_TYPE_CL);
       break;
     default:
-      assert(false && "enum order type not handeled");
+      assert(false && "enum ordertype not handled");
       break;
   }
 }
@@ -408,6 +532,10 @@ void HmMat::init() {
     m_sel[i].clear();
     m_sel[i].resize(m_d[i].size(), 0);
   }
+  m_selLabX.clear();
+  m_selLabY.clear();
+  m_selLabX.resize(ncol(), 0);
+  m_selLabY.resize(nrow(), 0);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -450,4 +578,40 @@ void HmMat::cropSel() {
   m_xlab = xlabnew;
   m_ylab = ylabnew;
   init();
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool HmMat::setDistFunc(const char* str) {
+  for (uint32_t i = 0; i < DISTFUNC_NUMENTRIES; i++) {
+    if (strcmp(str, DistFuncTypeStr[i]) == 0) {
+      m_distFunc = (DistFuncType)i;
+      return true;
+    }
+  }
+  return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+#include <regex.h>
+void HmMat::selLab(SeriesType st, const char *str) {
+  regex_t regex;
+  if (regcomp(&regex, str, REG_EXTENDED | REG_ICASE) != 0) {
+    return;
+  }
+  std::vector<char> & labsel        = (st == SERIESTYPE_COL) ? m_selLabX : m_selLabY;
+  std::vector<std::string> & labstr = (st == SERIESTYPE_COL) ? m_xlab    : m_ylab;
+  assert(labsel.size() == labstr.size());
+  for (uint32_t i = 0; i < labstr.size(); i++) {
+    labsel[i] = regexec(&regex, labstr[i].c_str(), 0, NULL, 0) == 0;
+  }
+  regfree(&regex);
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool HmMat::isSelLab(SeriesType t, uint32_t k) const {
+  const std::vector<char> & sel = (t == SERIESTYPE_COL) ? m_selLabX : m_selLabY;
+  return sel[k];
 }

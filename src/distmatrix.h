@@ -34,14 +34,14 @@ private:
 protected:
 public:
   template<typename U, typename C>
-  static DistanceMatrix* getFilled(std::vector<U> *elements, const C &cmp);
+  static DistanceMatrix* getFilled(std::vector<U> *elements, C &cmp);
 };
 
 /*----------------------------------------------------------------------------*/
 
 template<typename U, typename C>
 DistanceMatrix* DistanceMatrixFactory::getFilled(std::vector<U> *elements,
-    const C &cmp) {
+    C &cmp) {
   DistanceMatrix* dm = new DistanceMatrix(elements->size());
   uint32_t numdist;
   uint32_t maxnumdist;
