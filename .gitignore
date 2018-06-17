@@ -1,0 +1,8 @@
+testdata/*
+zlib-1.2.11/*
+src/*.o
+hapdose2bed
+.settings/*
+.project
+.cproject
+src/.depend
