@@ -54,9 +54,9 @@ public:
 
   bool isOk(const InfoFileEntry &e) const {
     bool ret = true;
-//    ret = ret && checkMaf(e);
-//    ret = ret && checkAvgCall(e);
-//    ret = ret && checkRsq(e);
+    ret = ret && checkMaf(e);
+    ret = ret && checkAvgCall(e);
+    ret = ret && checkRsq(e);
     return ret;
   }
   float getMafMin() const { return m_mafMin; }
