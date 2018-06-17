@@ -81,12 +81,12 @@ bool HapDoseReader::open(const char* fn) {
           strlen(m->buf) - 1, fn, lineCount);
       RETURN_ERR;
     }
-    char *id  = line;
-    char *fid = gettoken(id, '-'); /* "id->fid" */
-    if (fid[0] == '>') {
-      fid++;
+    char *fid  = line;
+    char *id = gettoken(fid, '-'); /* "fid->id" */
+    if (id[0] == '>') {
+      id++;
     }
-    char *hap = gettoken(fid, DELIMITER);
+    char *hap = gettoken(id, DELIMITER);
     if (hapIdx == HAPLINDEX_1) {
       m->sampleInfo.push_back(SampleInfo());
       m->sampleInfo.back().id       = id;
