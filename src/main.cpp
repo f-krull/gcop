@@ -107,16 +107,20 @@ int main(int argc, char **argv) {
   const BufferDyn fout_bim("%s.bim", foutpfx);
   const BufferDyn fout_fam("%s.fam", foutpfx);
 
-  /* read info file */
+  printf("reading info file '%s'\n", fin_info.cstr());
   InfoFile info;
   if (!info.read(fin_info.cstr(), variantFilter)) {
     return EXIT_FAILURE;
   }
-  /* open hapdose file */
+  printf("  num variants:          %zu\n", info.numVariants());
+  printf("  num variants after QC: %zu (%.2f%%)\n",
+    info.numVariantsOk(), float(info.numVariantsOk())/info.numVariants()*100);
+  printf("reading hapdose file '%s'\n", fin_hapd.cstr());
   HapDoseReader hapd;
-  if (!hapd.open(fin_hapd.cstr())) {
+  if (!hapd.open(fin_hapd.cstr(), info.numVariants())) {
     return EXIT_FAILURE;
   }
+  printf("  num samples: %zu\n", hapd.sampleInfo().size());
   /* write bim file */
   writeBim(fout_bim.cstr(), info);
   /* write fam file */
@@ -135,6 +139,9 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   for (uint32_t i = 0; i < info.numVariants(); i++) {
+    printf("%s variant %u (%.2f%%)\n",
+      info.variantStatus()[i] ? "writing" : "skipping",
+      i+1 , float(i+1)/info.numVariants()*100);
     const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & sh = hapd.nextVar();
     assert(sh.size() == hapd.sampleInfo().size());
     /* skip bad variant? */

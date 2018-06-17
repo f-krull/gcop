@@ -12,33 +12,29 @@
 
 /*----------------------------------------------------------------------------*/
 
+typedef std::vector<std::array<float, HAPLINDEX_NUMENRIES>> Samples;
+typedef std::vector<Samples> VariantBuf;
+
 class HapDoseReaderPriv {
 public:
-  std::vector<std::vector<float>> doseBuf;
   std::vector<HapDoseReader::SampleInfo> sampleInfo;
   gzFile f;
   uint32_t buflen;
   char* buf;
   std::vector<ptrdiff_t> lineoffsets;
 
-  struct Samples {
-    std::vector<std::array<float, HAPLINDEX_NUMENRIES>> hap;
-  };
-  struct VariantBuf {
-    int32_t varIdx;
-    Samples samples;
-  } variantBuf;
+  VariantBuf variantBuf;
+  int32_t varIdx;
 };
 
 /*----------------------------------------------------------------------------*/
 
 HapDoseReader::HapDoseReader() {
   m = new HapDoseReaderPriv;
-  m->doseBuf.resize(HAPLINDEX_NUMENRIES);
   m->f = NULL;
   m->buflen = LINE_LENGTH_INIT;
   m->buf = new char[m->buflen];
-  m->variantBuf.varIdx = -1;
+  m->varIdx = -1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -51,11 +47,30 @@ HapDoseReader::~HapDoseReader() {
 
 /*----------------------------------------------------------------------------*/
 
+bool HapDoseReader::allocVarBuf(uint32_t numVar, uint32_t numSamples) {
+  uint32_t numBufVar = numVar;
+  /* try to alloc for all variants - use half if alloc fails */
+  while (numBufVar >= 1) {
+    try {
+      std::array<float, 2> hinit = {0.f,0.f};
+      Samples s(m->sampleInfo.size(), hinit);
+      m->variantBuf.resize(numVar, s);
+    } catch (const std::bad_alloc &) {
+      numBufVar /= 2;
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
 #define RETURN_ERR gzclose(m->f); \
                    m->f = NULL; \
                    return false;
 
-bool HapDoseReader::open(const char* fn) {
+bool HapDoseReader::open(const char* fn, uint32_t numVar) {
   m->f = gzopen(fn, "r");
   uint32_t lineCount = 0;
   while (true) {
@@ -69,7 +84,7 @@ bool HapDoseReader::open(const char* fn) {
     if (strlen(m->buf)+1 == m->buflen) {
       /* realloc and retry the same line */
       m->buflen = m->buflen * 2;
-      printf("realloc line buffer - %u bytes\n", m->buflen);
+      //printf("realloc line buffer - %u bytes\n", m->buflen);
       delete [] m->buf;
       m->buf = new char[m->buflen];
       gzseek(m->f, p_cur, 0);
@@ -103,12 +118,11 @@ bool HapDoseReader::open(const char* fn) {
     }
     char *dosage = gettoken(hap, DELIMITER);
     ptrdiff_t lineoffset = dosage - line;
-    //lineoffset = readDosage(m, line, lineoffset);
     m->lineoffsets.push_back(lineoffset);
     lineCount++;
   }
   assert(m->sampleInfo.size() * HAPLINDEX_NUMENRIES == lineCount);
-  return true;
+  return allocVarBuf(numVar, m->sampleInfo.size());
 }
 
 /*----------------------------------------------------------------------------*/
@@ -120,14 +134,15 @@ const std::vector<HapDoseReader::SampleInfo> HapDoseReader::sampleInfo() const {
 /*----------------------------------------------------------------------------*/
 #include <array>
 const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & HapDoseReader::nextVar() {
+  if (m->varIdx >= 0 && (uint32_t)m->varIdx < m->variantBuf.size()) {
+    m->varIdx++;
+    return m->variantBuf[m->varIdx];
+  }
   assert(m->f && "hap file not opened");
   /* rewind */
   gzseek(m->f, 0, 0);
-  {
-    std::array<float, 2> hinit = {0.f,0.f};
-    m->variantBuf.samples.hap.resize(m->sampleInfo.size(),hinit );
-  }
   uint32_t lineCount = 0;
+  printf("  buffering variants 0%%");
   while (true) {
     const HaplIndexType hapIdx = (HaplIndexType)(lineCount % HAPLINDEX_NUMENRIES);
     const uint32_t   sampleIdx =                 lineCount / HAPLINDEX_NUMENRIES;
@@ -137,13 +152,23 @@ const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & HapDoseReader::nextV
     }
     char *dosage      = line + m->lineoffsets[lineCount];
     char *dosage_next = gettoken(dosage, DELIMITER);
-    m->variantBuf.samples.hap[sampleIdx][hapIdx] = atof(dosage);
+
+    uint32_t vars_read = 0;
+    while (dosage[0] != '\0' && vars_read < m->variantBuf.size()) {
+      m->variantBuf[vars_read][sampleIdx][hapIdx] = atof(dosage);
+      dosage      = dosage_next;
+      dosage_next = gettoken(dosage, DELIMITER);
+      vars_read++;
+    }
     /* point to next dosage in line for subsequent call */
     m->lineoffsets[lineCount] =  dosage_next - line;
     lineCount++;
+    printf("\r  buffering %zu variants %.2f%%", m->variantBuf.size(),
+      float(lineCount)/2/m->sampleInfo.size()*100);
   }
-  m->variantBuf.varIdx++;
-  return m->variantBuf.samples.hap;
+  printf("\n");
+  m->varIdx = 0;
+  return m->variantBuf[m->varIdx];
 }
 
 /*----------------------------------------------------------------------------*/

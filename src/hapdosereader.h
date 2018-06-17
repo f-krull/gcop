@@ -24,7 +24,7 @@ public:
     std::string familyid;
   };
 
-  bool open(const char *fn);
+  bool open(const char *fn, uint32_t numVar);
   const std::vector<SampleInfo> sampleInfo() const;
   const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & nextVar();
   int32_t currVarIdx() const;
@@ -32,6 +32,7 @@ public:
 
 private:
   HapDoseReaderPriv *m;
+  bool allocVarBuf(uint32_t numVar, uint32_t numSamples);
 };
 
 
