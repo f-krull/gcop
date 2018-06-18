@@ -139,11 +139,11 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   for (uint32_t i = 0; i < info.numVariants(); i++) {
+    const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & sh = hapd.nextVar();
+    assert(sh.size() == hapd.sampleInfo().size());
     printf("%s variant %u (%.2f%%)\n",
       info.variantStatus()[i] ? "writing" : "skipping",
       i+1 , float(i+1)/info.numVariants()*100);
-    const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & sh = hapd.nextVar();
-    assert(sh.size() == hapd.sampleInfo().size());
     /* skip bad variant? */
     if (!info.variantStatus()[i]) {
       continue;
@@ -151,7 +151,6 @@ int main(int argc, char **argv) {
     for (uint32_t j = 0; j < sh.size(); j++) {
       bedw.write(HAPLINDEX_1, sh[j][HAPLINDEX_1]);
       bedw.write(HAPLINDEX_2, sh[j][HAPLINDEX_2]);
-      //printf("var %u sample %u - %f %f\n", i, j, sh[j][HAPLINDEX_1], sh[j][HAPLINDEX_2]);
     }
     bedw.closeVariant();
   }

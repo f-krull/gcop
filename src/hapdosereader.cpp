@@ -7,7 +7,7 @@
 
 /*----------------------------------------------------------------------------*/
 
-#define LINE_LENGTH_INIT (16)
+#define LINE_LENGTH_INIT (1 * 1024 * 1024)
 #define DELIMITER '\t'
 
 /*----------------------------------------------------------------------------*/
@@ -84,7 +84,7 @@ bool HapDoseReader::open(const char* fn, uint32_t numVar) {
     if (strlen(m->buf)+1 == m->buflen) {
       /* realloc and retry the same line */
       m->buflen = m->buflen * 2;
-      //printf("realloc line buffer - %u bytes\n", m->buflen);
+      printf("  realloc line buffer to %u bytes\n", m->buflen);
       delete [] m->buf;
       m->buf = new char[m->buflen];
       gzseek(m->f, p_cur, 0);
@@ -132,7 +132,7 @@ const std::vector<HapDoseReader::SampleInfo> HapDoseReader::sampleInfo() const {
 }
 
 /*----------------------------------------------------------------------------*/
-#include <array>
+
 const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & HapDoseReader::nextVar() {
   if (m->varIdx >= 0 && (uint32_t)m->varIdx < m->variantBuf.size()) {
     m->varIdx++;
