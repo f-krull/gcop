@@ -47,14 +47,14 @@ HapDoseReader::~HapDoseReader() {
 
 /*----------------------------------------------------------------------------*/
 
-bool HapDoseReader::allocVarBuf(uint32_t numVar, uint32_t numSamples) {
-  uint32_t numBufVar = numVar;
+bool HapDoseReader::allocVarBuf(uint32_t _numVar, uint32_t numSamples) {
+  uint32_t numBufVar = _numVar;
   /* try to alloc for all variants - use half if alloc fails */
   while (numBufVar >= 1) {
     try {
       std::array<float, 2> hinit = {0.f,0.f};
       Samples s(m->sampleInfo.size(), hinit);
-      m->variantBuf.resize(numVar, s);
+      m->variantBuf.resize(numBufVar, s);
     } catch (const std::bad_alloc &) {
       numBufVar /= 2;
       continue;
@@ -134,7 +134,7 @@ const std::vector<HapDoseReader::SampleInfo> HapDoseReader::sampleInfo() const {
 /*----------------------------------------------------------------------------*/
 
 const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & HapDoseReader::nextVar() {
-  if (m->varIdx >= 0 && (uint32_t)m->varIdx < m->variantBuf.size()) {
+  if (m->varIdx >= 0 && (uint32_t)m->varIdx+1 < m->variantBuf.size()) {
     m->varIdx++;
     return m->variantBuf[m->varIdx];
   }
@@ -156,12 +156,12 @@ const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & HapDoseReader::nextV
     uint32_t vars_read = 0;
     while (dosage[0] != '\0' && vars_read < m->variantBuf.size()) {
       m->variantBuf[vars_read][sampleIdx][hapIdx] = atof(dosage);
+      m->lineoffsets[lineCount] =  dosage_next - line;
       dosage      = dosage_next;
       dosage_next = gettoken(dosage, DELIMITER);
       vars_read++;
     }
     /* point to next dosage in line for subsequent call */
-    m->lineoffsets[lineCount] =  dosage_next - line;
     lineCount++;
     printf("\r  buffering %zu variants %.2f%%", m->variantBuf.size(),
       float(lineCount)/2/m->sampleInfo.size()*100);
