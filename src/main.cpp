@@ -120,42 +120,50 @@ int main(int argc, char **argv) {
   if (!hapd.open(fin_hapd.cstr(), info.numVariants())) {
     return EXIT_FAILURE;
   }
-  printf("  num samples: %zu\n", hapd.sampleInfo().size());
   /* write bim file */
-  writeBim(fout_bim.cstr(), info);
-  /* write fam file */
+  if (!writeBim(fout_bim.cstr(), info)) {
+    return EXIT_FAILURE;
+  }
+  /* open write fam file */
   FamWriter famw;
   if (!famw.open(fout_fam.cstr())) {
     return EXIT_FAILURE;
   }
-  for (uint32_t i = 0; i < hapd.sampleInfo().size(); i++) {
-    FamWriter::Entry e(hapd.sampleInfo()[i].id.c_str());
-    e.fid = hapd.sampleInfo()[i].familyid;
-    famw.write(e);
-  }
-  famw.close();
-  /* open bed file */
-  if (!bedw.open(fout_bed.cstr())) {
+  if (!bedw.open(fout_bed.cstr(), info.numVariantsOk())) {
     return EXIT_FAILURE;
   }
-  for (uint32_t i = 0; i < info.numVariants(); i++) {
-    const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & sh = hapd.nextVar();
-    assert(sh.size() == hapd.sampleInfo().size());
-    printf("%s variant %u (%.2f%%)\n",
-      info.variantStatus()[i] ? "writing" : "skipping",
-      i+1 , float(i+1)/info.numVariants()*100);
-    /* skip bad variant? */
-    if (!info.variantStatus()[i]) {
-      continue;
+  uint32_t sampleIdx = 0;
+  while (hapd.nextSample()) {
+    if (hapd.getHapDose1().size() != info.numVariants()) {
+      fprintf(stderr,
+          "error - hapdose and info file have different number of variants (%zu vs %zu)\n",
+          hapd.getHapDose1().size(), info.numVariants());
+      return false;
     }
-    for (uint32_t j = 0; j < sh.size(); j++) {
-      bedw.write(HAPLINDEX_1, sh[j][HAPLINDEX_1]);
-      bedw.write(HAPLINDEX_2, sh[j][HAPLINDEX_2]);
+    FamWriter::Entry e(hapd.getSampleInfo().id.c_str());
+    e.fid = hapd.getSampleInfo().familyid;
+    if (!famw.write(e)) {
+      return EXIT_FAILURE;
     }
-    bedw.closeVariant();
+    uint64_t outVarIdx = 0;
+    for (uint32_t i = 0; i < hapd.getHapDose1().size(); i++) {
+      if (info.variantStatus()[i]) {
+        if (!bedw.write(outVarIdx, sampleIdx, hapd.getHapDose1()[i], hapd.getHapDose2()[i])) {
+          return EXIT_FAILURE;
+        }
+        outVarIdx++;
+      }
+    }
+    sampleIdx++;
+    if (sampleIdx % 1000 == 0) {
+      printf("  %u samples read\n", sampleIdx);
+    }
   }
-  /* cleanup */
+  printf("%u samples written\n", sampleIdx);
+  famw.close();
   hapd.close();
-  bedw.close();
+  if (!bedw.close()) {
+    return EXIT_FAILURE;
+  }
   return EXIT_SUCCESS;
 }

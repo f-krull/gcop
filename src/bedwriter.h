@@ -16,18 +16,15 @@ public:
 
   void setDelta(float f) { m_delta = f; }
   float getDelta() { return m_delta; }
-  bool open(const char*);
-  bool write(HaplIndexType h, double d);
-  bool closeVariant();
-  void close();
+  bool open(const char*, uint64_t numVar);
+  bool write(uint64_t varIdx, uint32_t sampIdx, double d1, double d2);
+  bool close();
 
 private:
 
   FILE *m_f;
-  std::vector<std::vector<float>> m_sampleBuf;
-  uint8_t *m_outBuf;
-  uint32_t m_outBufLen;
-  std::vector<uint64_t> m_num;
+  std::vector<uint64_t> m_numStat;
+  std::vector<std::vector<uint8_t>>  m_outBuf;
   float m_delta;
 };
 

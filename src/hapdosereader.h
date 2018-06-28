@@ -25,9 +25,11 @@ public:
   };
 
   bool open(const char *fn, uint32_t numVar);
-  const std::vector<SampleInfo> sampleInfo() const;
-  const std::vector<std::array<float, HAPLINDEX_NUMENRIES>> & nextVar();
-  int32_t currVarIdx() const;
+
+  bool nextSample();
+  const std::vector<float> & getHapDose1() const;
+  const std::vector<float> & getHapDose2() const;
+  const SampleInfo & getSampleInfo() const;
   void close();
 
 private:
