@@ -8,6 +8,7 @@
 #include <float.h>
 #include <numeric>
 #include <algorithm>
+#include <random>
 #include <assert.h>
 #include <map>
 #include <string.h>

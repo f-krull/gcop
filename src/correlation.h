@@ -6,6 +6,7 @@
 #include <math.h>
 #include <vector>
 #include <assert.h>
+#include <numeric>
 
 static double avg(const std::vector<double> &x) {
   return std::accumulate(x.begin(), x.end(), 0.0f) / x.size();
