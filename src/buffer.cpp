@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <ctype.h>
 
 /*----------------------------------------------------------------------------*/
 
@@ -181,7 +182,7 @@ void BufferDyn::toAsci() {
   BufferDyn b(4);
   for (uint32_t i = 0; i < m_len; i++) {
     const char cin  = m_buf[i];
-    const char cout = (cin >= 32 && cin <= 126) ? cin : '.';
+    const char cout = isprint(cin) ? cin : '.';
     b.addf("%c", cout);
   }
   swap(b);
