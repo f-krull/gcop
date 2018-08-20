@@ -85,7 +85,7 @@ const char* getFileExtention(const char *fn) {
 
 File::FileType getFileType(const char *fn) {
   const char *ext = getFileExtention(fn);
-  if (strcmp(ext, "GZ")) {
+  if (strcmp(ext, "gz") == 0) {
     return File::FILETYPE_GZ;
   }
   return File::FILETYPE_TXT;

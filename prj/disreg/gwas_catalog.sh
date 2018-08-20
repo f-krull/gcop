@@ -9,7 +9,7 @@ mkdir -p "$OUTDIR"
 mkdir -p "$OUTDIR"/tmp
 
 
-declare -r GWASCAT="$OUTDIR"/tmp/gwas_catalog_v1.0.1-associations_e91_r2018-02-06.tsv.gz
+declare -r GWASCAT="$OUTDIR"/tmp/gwas_catalog.tsv.gz
 
 if [ ! -e $GWASCAT ]; then
   wget https://www.ebi.ac.uk/gwas/api/search/downloads/alternative \
@@ -37,10 +37,10 @@ done
 
 
 # make table of traits
-{ 
-  printf  "%s\t%s\t%s\n" path name num.SNPs 
+{
+  printf  "%s\t%s\t%s\n" path name num.SNPs
   cat $OUTDIR/list.txt \
-      | while read line; do 
+      | while read line; do
       printf "%s\t%s\t%s\n" $line \
                           $(basename $line ".txt.gz" | sed "s/['(),:]//g") \
                           $( zcat $line | wc -l )
@@ -81,4 +81,10 @@ fi
                           "$trait" \
                           "$(echo "$genepos" | wc -l)"
   done < <(tail -n +2 $OUTDIR/tab.txt)
+} > $OUTDIR/tab_genes_all.txt
+
+# get all with >= 20 genes
+{
+  head -n 1 $OUTDIR/tab_genes_all.txt
+  tail -n +2 $OUTDIR/tab_genes_all.txt | awk '$3 > 20 { print $0 }'
 } > $OUTDIR/tab_genes.txt
