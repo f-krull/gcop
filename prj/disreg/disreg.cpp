@@ -193,18 +193,18 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
   //std::vector<double>              p_N_UP_vec(p_n, 0.f);
 
   /* compute O_ij */
-  for (uint32_t j = 0; j < s_m; j++) {
-    o_mat[j].resize(inp_p_tab.nrows(), 0.f);
-    GCords s_g;
-    s_g.read(inp_s_tab.body()[j][0].c_str(), fmt1, 0, &hg19, true);
-    s_g.flatten();
-    GCordsInfoCache s_ginf(&s_g);
-    for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
-      GCords p_g;
-      p_g.read(inp_p_tab.body()[i][0].c_str(), fmt2, 0, &hg19, true);
-      p_g.expand(expand2);
-      p_g.flatten();
-      GCordsInfoCache p_ginf(&p_g);
+  for (uint32_t i = 0; i < inp_p_tab.nrows(); i++) {
+    GCords p_g;
+    p_g.read(inp_p_tab.body()[i][0].c_str(), fmt2, 0, &hg19, true);
+    p_g.toPoints();
+    GCordsInfoCache p_ginf(&p_g);
+    for (uint32_t j = 0; j < s_m; j++) {
+      o_mat[j].resize(inp_p_tab.nrows(), 0.f);
+      GCords s_g;
+      s_g.read(inp_s_tab.body()[j][0].c_str(), fmt1, 0, &hg19, true);
+      s_g.expand(expand2);
+      s_g.flatten();
+      GCordsInfoCache s_ginf(&s_g);
       //e_mat[j][i] = p_ginf.len()->get() * s_ginf.leqn()->get() / p_ginf.gcords()->chrinfo().len();
       o_mat[j][i] = numOverlap(p_ginf, s_ginf);
     }
@@ -238,7 +238,9 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
   }
 #endif
 
-  //const double p_N_UP = std::accumulate(p_N_UP_vec.begin(), p_N_UP_vec.end(), 0.);
+#if 0
+  const double p_N_UP = std::accumulate(p_N_UP_vec.begin(), p_N_UP_vec.end(), 0.);
+#endif
   const double sp_N  = std::accumulate(s_N_vec.begin(),     s_N_vec.end(),    0.);
 
 
@@ -257,7 +259,7 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
     z_mat[j].resize(inp_p_tab.nrows(), 0.f);
     for (uint32_t i = 0; i < p_n; i++) {
       const double num = o_mat[j][i] - e_mat[j][i];
-      const double den = sqrt(e_mat[j][i] * (1 - e_mat[j][i]/s_N_vec[i]));
+      const double den = sqrt(e_mat[j][i] * (1 - e_mat[j][i]/s_N_vec[j]));
       //const double num = e_mat[j][i];
       //const double den = 1.f;
       z_mat[j][i] = (den != 0) ? num / den : 0.f;
