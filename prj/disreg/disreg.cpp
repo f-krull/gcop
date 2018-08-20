@@ -280,15 +280,15 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
 
 /*----------------------------------------------------------------------------*/
 
-#include "../../int/objs_decl.h"
+#include <int/objs_decl.h>
 
 OBJS_DECL_GCCLASS(StrList,  StrList)
 OBJS_DECL_GCCLASS(StrTable, StrTable)
 
 /*----------------------------------------------------------------------------*/
 
-#include "../../int/command.h"
-#include "../../int/objspace.h"
+#include <int/command.h>
+#include <int/objspace.h>
 
 class CmdLoadStrList : public GcCommand {
 public:
@@ -316,8 +316,8 @@ void CmdLoadStrList::executeChild(const char *, GcObjSpace *os) {
 
 /*----------------------------------------------------------------------------*/
 
-#include "../../int/command.h"
-#include "../../int/objspace.h"
+#include <int/command.h>
+#include <int/objspace.h>
 
 class CmdLoadStrTable : public GcCommand {
 public:
@@ -396,7 +396,7 @@ void CmdDisReg::executeChild(const char *, GcObjSpace *os) {
 
 /*----------------------------------------------------------------------------*/
 
-#include "../../int/scriptenv.h"
+#include <int/scriptenv.h>
 int main(int argc, char **argv) {
   if (argc == 4) {
     const char* fnl1 = argv[1];
