@@ -6,5 +6,4 @@ Genomic coordinate processing
 
 depends on:
 * gcc cxx11
-* libz
-* R + ggplot2
+

@@ -1,3 +1,5 @@
+export LIBZA := $(shell pwd)/src/3rdparty/zlib/zlib-1.2.11/build/libz.a
+
 SRCS := src/data/chrinfo.cpp \
         src/data/fieldformat.cpp \
         src/data/fieldtypes.cpp \
@@ -21,26 +23,29 @@ CXXFLAGS ?= -std=c++11 -Ofast -Wall -g2
 
 all: gcop
 
-
 disreg: libgcop.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -I./src -L. -lgcop -lz -o bin/disreg
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -I./src -L. -lgcop $(LIBZA) -o bin/disreg
 
 libgcop.a: $(OBJECTS)
 	$(AR) rcs libgcop.a $(OBJECTS)
 
-gcop: $(OBJECTS) src/main.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) src/main.o -lz -o bin/gcop
+gcop: $(OBJECTS) $(LIBZA) src/main.o
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) src/main.o $(LIBZA) -o bin/gcop
 
 %.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+test: libgcop.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o src/bin/intervaltree_test
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp -L. -lgcop -lz -o src/test/flatten_test
 
 clean:
 	$(RM) bin/*
 	$(RM) prj/*/*.o src/*.o src/*/*.o
 	$(RM) libgcop.a
+	$(MAKE) -C src/3rdparty/zlib clean
 
-test: libgcop.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o src/bin/intervaltree_test
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp -L. -lgcop -lz -o src/test/flatten_test
+$(LIBZA):
+	$(MAKE) -C src/3rdparty/zlib
 
 .PHONY: test
