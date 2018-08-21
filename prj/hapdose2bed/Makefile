@@ -12,5 +12,3 @@ all: $(BIN)
 
 $(BIN): $(LIBZA) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(BIN) $(OBJS) $(LDLIBS) $(LIBZA)
-
-
