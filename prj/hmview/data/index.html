@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="hmview.css" type="text/css"/>
+    <title>HmView</title>
+  </head>
+  <body>
+    <table>
+      <tr class="rowxlab">
+        <td>
+        </td>
+        <td class="colxlab">
+          <img id="xlab">
+        </td>
+        <td class="coltiny">
+          <img id="tiny">
+        </td>
+        <td class="colstat">
+          <img id="stat"><br>
+          <input type="button" id="onamex"    value="X alphabetical">
+          <input type="button" id="onamey"    value="Y alphabetical"><br>
+          <input type="button" id="oclusslx"  value="X cluster sl">
+          <input type="button" id="oclussly"  value="Y cluster sl"><br>
+          <input type="button" id="oclusclx"  value="X cluster cl">
+          <input type="button" id="ocluscly"  value="Y cluster cl"><br>
+          <input type="button" id="orandx"    value="X random">
+          <input type="button" id="orandy"    value="Y random"><br>
+          <input type="button" id="transpose" value="transpose">
+          <input type="button" id="crop"      value="crop"><br>
+          <input type="button" id="load1"  value="load mat1">
+          <input type="button" id="load2"  value="load mat2">
+          <input type="button" id="load3"  value="load mat3">
+          <input type="button" id="dist_euclidean" value="euclidean">
+          <input type="button" id="dist_pearson"   value="Pearson">
+          <input type="button" id="dist_spears"    value="Spears">
+        </td>
+      </tr>
+      <tr class="rowmain">
+        <td class="colyden">
+          <img id="yden">
+        </td>
+        <td style="border: 1px solid gray; overflow:hidden;">
+          <img id="main">
+        </td>
+        <td>
+          <img id="ylab">
+        </td>
+        <td style="padding-left: 30px;">
+          <p id="info"></p>
+        </td>
+      </tr>
+      <tr class="rowxden">
+        <td>
+        </td>
+        <td>
+          <img id="xden">
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+      </tr>
+    </table>
+    <script type="text/javascript" src="hmview.js"></script>
+  </body>
+</html>

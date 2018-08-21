@@ -1,0 +1,47 @@
+html, body {
+  height: 100%;
+  font-family: verdana,arial,helvetica,sans-serif;
+  overflow: hidden;
+}
+
+table {
+  width:  100%;
+  height: 95%;
+}
+
+.colxlab {
+  width: 60%;
+}
+.coltiny {
+  width: 15%;
+}
+.colstat {
+  width: 15%;
+}
+.colyden {
+  width: 10%;
+}
+
+tr.rowxlab {
+  height: 15%;
+}
+tr.rowmain {
+  height: 75%;
+}
+tr.rowxden {
+  height: 10%;
+}
+
+td {
+  overflow: hidden;
+}
+
+td > img {
+  position: relative;
+}
+
+.colstat > input[type=button] {
+  width: 90px;
+  height: 24px;
+  font-size: 10px
+}
