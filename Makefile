@@ -1,4 +1,6 @@
-export LIBZA := $(shell pwd)/src/3rdparty/zlib/zlib-1.2.11/build/libz.a
+export LIBZA   := $(shell pwd)/src/3rdparty/zlib/zlib-1.2.11/build/libz.a
+export BINDIR  := $(shell pwd)/bin
+export LIBGCOP := $(shell pwd)/libgcop.a
 
 SRCS := src/data/chrinfo.cpp \
         src/data/fieldformat.cpp \
@@ -26,25 +28,38 @@ LDFLAGS += -Wall -Ofast -static
 
 all: gcop
 
-disreg: libgcop.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -I./src -L. -lgcop $(LIBZA) -o bin/disreg
+disreg: $(LIBGCOP)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) prj/disreg/disreg.cpp -I./src $(LIBGCOP) $(LIBZA) -o  $(BINDIR)/disreg
 
-libgcop.a: $(OBJECTS)
-	$(AR) rcs libgcop.a $(OBJECTS)
+$(LIBGCOP): $(OBJECTS)
+	$(AR) rcs $(LIBGCOP) $(OBJECTS)
 
 gcop: $(OBJECTS) $(LIBZA) src/main.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) src/main.o $(LIBZA) -o bin/gcop
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) src/main.o $(LIBZA) -o  $(BINDIR)/gcop
 
 %.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test: libgcop.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o src/bin/intervaltree_test
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp -L. -lgcop -lz -o src/test/flatten_test
+test: $(LIBGCOP)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o $(BINDIR)/intervaltree_test
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp $(LIBGCOP) -lz -o $(BINDIR)/flatten_test
+
+prj:
+	$(MAKE) -C prj/hapdose2bed LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)"
+
+libs: $(LIBZA)
+
+$(LIBZA):
+	$(MAKE) -C src/3rdparty/zlib
 
 distclean: clean
 	$(RM) *~ src/.depend
 	$(MAKE) -C src/3rdparty/zlib clean
+
+clean:
+	$(RM) $(BINDIR)/*
+	$(RM) prj/*/*.o src/*.o src/*/*.o
+	$(RM) $(LIBGCOP)
 
 src/.depend: $(SRCS) | libs
 	$(RM) src/.depend
@@ -56,14 +71,4 @@ ifneq ($(MAKECMDGOALS),distclean)
 endif
 endif
 
-clean:
-	$(RM) bin/*
-	$(RM) prj/*/*.o src/*.o src/*/*.o
-	$(RM) libgcop.a
-
-libs: $(LIBZA)
-
-$(LIBZA):
-	$(MAKE) -C src/3rdparty/zlib
-
-.PHONY: test libs
+.PHONY: test libs prj

@@ -1,9 +1,9 @@
-#include "buffer.h"
+#include "l_buffer.h"
 #include "infofile.h"
 #include "hapdosereader.h"
 #include "famwriter.h"
 #include "bedwriter.h"
-#include "gettoken.h"
+#include "l_gettoken.h"
 #include <zlib.h>
 #include <stdlib.h>
 #include <stdio.h>

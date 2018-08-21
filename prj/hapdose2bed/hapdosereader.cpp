@@ -1,5 +1,5 @@
 #include "hapdosereader.h"
-#include "gettoken.h"
+#include "l_gettoken.h"
 #include <zlib.h>
 #include <stdio.h>
 #include <assert.h>

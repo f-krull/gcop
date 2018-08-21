@@ -1,5 +1,5 @@
 #include "infofile.h"
-#include "gettoken.h"
+#include "l_gettoken.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
