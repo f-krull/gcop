@@ -10,3 +10,4 @@ prj/*/*.o
 bin/*
 
 
+src/.depend

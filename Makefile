@@ -19,7 +19,10 @@ SRCS := src/data/chrinfo.cpp \
 OBJECTS = $(patsubst %.cpp, %.o, $(SRCS))
 HEADERS = $(patsubst %.cpp, %.h, $(SRCS))
 
-CXXFLAGS ?= -std=c++11 -Ofast -Wall -g2
+CXXFLAGS+= -Wall -g -Ofast -march=native -isystem $(ZLIB) -static
+CPPFLAGS+= -std=c++11
+LDFLAGS += -Wall -Ofast -static
+
 
 all: gcop
 
@@ -39,13 +42,28 @@ test: libgcop.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o src/bin/intervaltree_test
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp -L. -lgcop -lz -o src/test/flatten_test
 
+distclean: clean
+	$(RM) *~ src/.depend
+	$(MAKE) -C src/3rdparty/zlib clean
+
+src/.depend: $(SRCS) | libs
+	$(RM) src/.depend
+	$(CXX) $(CPPFLAGS) -MM $^>>src/.depend;
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+    -include src/.depend
+endif
+endif
+
 clean:
 	$(RM) bin/*
 	$(RM) prj/*/*.o src/*.o src/*/*.o
 	$(RM) libgcop.a
-	$(MAKE) -C src/3rdparty/zlib clean
+
+libs: $(LIBZA)
 
 $(LIBZA):
 	$(MAKE) -C src/3rdparty/zlib
 
-.PHONY: test
+.PHONY: test libs
