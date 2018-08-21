@@ -1,3 +1,4 @@
+BINDIR ?= ./
 BIN=$(BINDIR)/hapdose2bed
 
 SRCS=main.cpp \
@@ -12,3 +13,8 @@ all: $(BIN)
 
 $(BIN): $(LIBZA) $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(BIN) $(OBJS) $(LDLIBS) $(LIBZA)
+
+clean:
+	$(RM) $(OBJS) $(BIN)
+
+distclean: clean

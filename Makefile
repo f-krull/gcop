@@ -21,8 +21,8 @@ SRCS := src/data/chrinfo.cpp \
 OBJECTS = $(patsubst %.cpp, %.o, $(SRCS))
 HEADERS = $(patsubst %.cpp, %.h, $(SRCS))
 
-CXXFLAGS+= -Wall -g -Ofast -march=native -isystem $(ZLIB) -static
-CPPFLAGS+= -std=c++11
+CXXFLAGS+= -Wall -g -Ofast -march=native -isystem $(ZLIB) -static -std=c++11
+CPPFLAGS+=
 LDFLAGS += -Wall -Ofast -static
 
 
@@ -46,6 +46,7 @@ test: $(LIBGCOP)
 
 prj:
 	$(MAKE) -C prj/hapdose2bed LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)"
+	$(MAKE) -C prj/hmview      LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)"
 
 libs: $(LIBZA)
 
@@ -55,11 +56,15 @@ $(LIBZA):
 distclean: clean
 	$(RM) *~ src/.depend
 	$(MAKE) -C src/3rdparty/zlib clean
+	$(MAKE) -C prj/hapdose2bed distclean
+	$(MAKE) -C prj/hmview      distclean
 
 clean:
 	$(RM) $(BINDIR)/*
-	$(RM) prj/*/*.o src/*.o src/*/*.o
+	$(RM) src/*.o src/*/*.o
 	$(RM) $(LIBGCOP)
+	$(MAKE) -C prj/hapdose2bed clean
+	$(MAKE) -C prj/hmview     clean
 
 src/.depend: $(SRCS) | libs
 	$(RM) src/.depend
