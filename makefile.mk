@@ -1,0 +1,96 @@
+BASEDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+BINDIR  := $(BASEDIR)/bin/
+LIBDIR  := $(BASEDIR)/lib/
+BINDEPS ?= 
+TARGETS ?= 
+PHONIES ?=
+CLEANDIRS ?=
+DISTCLEANDIRS ?= 
+export LIBZA   = $(BASEDIR)/src/3rdparty/zlib/zlib-1.2.11/build/libz.a
+export LIBGCOP = $(BASEDIR)/lib/libgcop.a
+
+CXXFLAGS+= -Wall -g -Ofast -flto -static -march=native -std=c++11
+LDFLAGS += -Wall -g -Ofast -flto -static
+
+SRCS ?= $(wildcard *.cpp)
+OBJS  = $(patsubst %.cpp, %.o, $(SRCS))
+
+ifeq ($(HAS_LIBGCOP),1)
+LDLIBS   += $(LIBGCOP)
+BINDEPS  += $(LIBGCOP)
+CXXFLAGS += -I$(BASEDIR)/src/libgcop/
+endif
+
+ifeq ($(HAS_LIBZ),1)
+LDLIBS  += $(LIBZA)
+BINDEPS += $(LIBZA)
+endif
+
+_all: all # entry target
+
+# build binary?
+ifneq ($(BINNAME),)
+BINPATH = $(BINDIR)/$(BINNAME)
+TARGETS += $(BINPATH)
+$(BINPATH): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $(BINPATH) $(OBJS) $(LDLIBS)
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+  -include .depend
+endif
+endif
+.depend: $(SRCS) | $(BINDEPS)
+	$(RM) .depend
+	$(CXX) $(CPPFLAGS) -MM $^>>.depend;
+endif
+
+
+ifneq ($(LIBNAME),)
+LIBPATH = $(LIBDIR)/lib$(LIBNAME).a
+TARGETS += $(LIBPATH)
+$(LIBPATH): $(OBJS)
+	$(AR) rcs $(LIBPATH) $(OBJS)
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+  -include .depend
+endif
+endif
+.depend: $(SRCS) | $(BINDEPS)
+	$(RM) .depend
+	$(CXX) $(CPPFLAGS) -MM $^>>.depend;
+endif
+
+
+
+clean:
+	$(RM) $(OBJS) $(BINPATH) $(LIBPATH) .depend
+	$(foreach var,$(CLEANDIRS), $(MAKE) -C $(var) clean;)
+
+distclean: clean
+	$(foreach var,$(DISTCLEANDIRS), $(MAKE) -C $(var) distclean;)
+
+
+.PHONY: $(PHONIES)
+
+
+$(LIBZA):
+	$(MAKE) -C $(BASEDIR)/src/3rdparty/zlib
+
+$(LIBGCOP):
+	$(MAKE) -C $(BASEDIR)/src/libgcop/
+
+
+
+#CXXFLAGS+= -Wall -g -Ofast -march=native -std=c++11
+
+
+#CXXFLAGS+= -Wall -g -Ofast -march=native -isystem $(ZLIB) -static -std=c++11
+#CPPFLAGS+=
+#LDFLAGS += -Wall -Ofast -static
+
+#$(LIBGCOP): $(OBJECTS)
+#	$(AR) rcs $(LIBGCOP) $(OBJECTS)
+
+#test: $(LIBGCOP)
+#	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o $(BINDIR)/intervaltree_test
+#	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp $(LIBGCOP) -lz -o $(BINDIR)/flatten_test

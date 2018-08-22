@@ -133,7 +133,7 @@ std::string CmdLoadGCords::PARAM_SKIP_INT   = "skip";
 std::string CmdLoadGCords::PARAM_BUILD_STR  = "build";
 
 #include <stdio.h>
-#include "../data/gcords.h"
+#include "../gcords.h"
 void CmdLoadGCords::executeChild(const char *, GcObjSpace *os) {
   const char *str_buid = getParam(PARAM_BUILD_STR)->valStr().c_str();
   GcObjChrInfo *gchr = os->getObj<GcObjChrInfo>(str_buid);
@@ -163,7 +163,7 @@ protected:
 std::string CmdGCordsInfo::PARAM_SRC_STR = "src";
 
 #include <stdio.h>
-#include "../data/gcords.h"
+#include "../gcords.h"
 #include "objs.h"
 void CmdGCordsInfo::executeChild(const char *, GcObjSpace *os) {
   const char *src = getParam(PARAM_SRC_STR)->valStr().c_str();
@@ -193,7 +193,7 @@ std::string CmdLoadChrInfo::PARAM_DST_STR    = "dst";
 std::string CmdLoadChrInfo::PARAM_FILE_STR   = "file";
 
 #include <stdio.h>
-#include "../data/chrinfo.h"
+#include "../chrinfo.h"
 void CmdLoadChrInfo::executeChild(const char *, GcObjSpace *os) {
   GcObjChrInfo *gci = new GcObjChrInfo();
   gci->d()->read(getParam(PARAM_FILE_STR)->valStr().c_str());
@@ -221,7 +221,7 @@ std::string CmdForbes::PARAM_SRCA_STR = "srca";
 std::string CmdForbes::PARAM_SRCB_STR = "srcb";
 
 #include <stdio.h>
-#include "../data/gcords.h"
+#include "../gcords.h"
 void CmdForbes::executeChild(const char *, GcObjSpace *os) {
   const char *srca = getParam(PARAM_SRCA_STR)->valStr().c_str();
   const char *srcb = getParam(PARAM_SRCB_STR)->valStr().c_str();

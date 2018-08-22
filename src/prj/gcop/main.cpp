@@ -1,4 +1,4 @@
-#include "int/scriptenv.h"
+#include <script/scriptenv.h>
 #include <stdlib.h>
 
 /*----------------------------------------------------------------------------*/

@@ -2,7 +2,6 @@ ZLIB  = zlib-1.2.11
 #ZLIBA = zlib-1.2.11/build/libz.a
 
 all: $(LIBZA)
-	echo $(LIBZA)
 
 $(LIBZA):
 	tar xf $(ZLIB).tar.gz && \

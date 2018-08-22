@@ -1,11 +1,11 @@
 #include "gcords.h"
 #include "intervaltree.cpp"
 #include "fieldformat.h"
-#include "../util/tokenreader.h"
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "tokenreader.h"
 
 /*----------------------------------------------------------------------------*/
 
@@ -129,7 +129,7 @@ std::string field2str(const FieldValue &f) {
 }
 
 
-#include "../util/file.h"
+#include "../shared/file.h"
 bool GCords::read(const char *filename, const char *fmt, uint32_t skip, const ChrInfo *chrinf, bool allowUndefChr) {
   m_ci = *chrinf;
   const char delim = '\t';

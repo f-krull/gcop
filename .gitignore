@@ -2,12 +2,8 @@
 .project
 .settings/
 testdata/
-gcop
-*.o
 libgcop.a
-
-prj/*/*.o
+*.o
 bin/*
-
-
-src/.depend
+lib/*
+*.depend

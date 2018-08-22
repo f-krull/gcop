@@ -2,7 +2,7 @@
 #include "cmd_base.h"
 #include "command.h"
 #include "objs_base.h"
-#include "../util/timer.h"
+#include "../timer.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>

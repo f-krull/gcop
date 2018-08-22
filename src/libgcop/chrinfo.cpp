@@ -1,12 +1,12 @@
 #include "chrinfo.h"
-#include "../util/file.h"
-#include "../util/tokenreader.h"
+#include "../shared/file.h"
 #include <map>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "tokenreader.h"
 
 /*----------------------------------------------------------------------------*/
 

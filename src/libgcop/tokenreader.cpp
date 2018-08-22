@@ -1,4 +1,4 @@
-#include "tokenreader.h"
+#include "../libgcop/tokenreader.h"
 
 #include <assert.h>
 #include <stdlib.h>
