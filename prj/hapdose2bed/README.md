@@ -1,7 +1,7 @@
 # hapdose2bed
 
 Converts Mach3 hapdose/info files to binary plink bed/fam files. 
-Allows to set some QC parameters (see 'hapdose2bed -h'). 
+Allows to set some QC parameters (see `hapdose2bed -h`). 
 
 
 Problem: The input matrix needs to be transposed.
