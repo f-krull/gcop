@@ -1,6 +1,6 @@
 #include "wsservice.h"
 #include "bitops_def.h"
-#include "buffer.h"
+#include "l_buffer.h"
 #include <memory.h>
 #include <assert.h>
 

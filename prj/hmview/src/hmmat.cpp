@@ -1,5 +1,5 @@
 #include "hmmat.h"
-#include "buffer.h"
+#include "l_buffer.h"
 #include "distmatrix.h"
 #include "clusterersl.h"
 #include "clusterercl.h"

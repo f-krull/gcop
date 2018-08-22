@@ -40,6 +40,7 @@ bool InfoFileFilter::checkRsq(const InfoFileEntry &e) const {
   const float rsq = atof(e.get(InfoFileEntry::FIELD_RSQ));
   return m_rsqMin <= rsq;
 }
+
 /*----------------------------------------------------------------------------*/
 
 #define READ_RETURN(b) delete [] buf; \

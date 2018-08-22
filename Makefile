@@ -37,18 +37,20 @@ $(LIBGCOP): $(OBJECTS)
 gcop: $(OBJECTS) $(LIBZA) src/main.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) src/main.o $(LIBZA) -o  $(BINDIR)/gcop
 
-%.o: %.cpp %.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+#%.o: %.cpp %.h
+#	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 test: $(LIBGCOP)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/data/intervaltree_test.cpp -o $(BINDIR)/intervaltree_test
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -DDEBUG -g2 -Wall src/test/flatten_test.cpp $(LIBGCOP) -lz -o $(BINDIR)/flatten_test
 
-prj:
-	$(MAKE) -C prj/hapdose2bed LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)"
-	$(MAKE) -C prj/hmview      LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)"
+prj = prj/hmview \
+      prj/hapdose2bed
 
-libs: $(LIBZA)
+$(prj): 3rdpartylibs $(LIBGCOP)
+	$(MAKE) -C $@ LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS) -I../../src" CXXFLAGS="$(CXXFLAGS)"
+
+3rdpartylibs: $(LIBZA)
 
 $(LIBZA):
 	$(MAKE) -C src/3rdparty/zlib
@@ -66,7 +68,7 @@ clean:
 	$(MAKE) -C prj/hapdose2bed clean
 	$(MAKE) -C prj/hmview     clean
 
-src/.depend: $(SRCS) | libs
+src/.depend: $(SRCS) | 3rdpartylibs
 	$(RM) src/.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>src/.depend;
 
@@ -76,4 +78,4 @@ ifneq ($(MAKECMDGOALS),distclean)
 endif
 endif
 
-.PHONY: test libs prj
+.PHONY: test 3rdpartylibs $(prj)

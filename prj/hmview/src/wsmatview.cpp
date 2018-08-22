@@ -1,5 +1,5 @@
 #include "wsmatview.h"
-#include "buffer.h"
+#include "l_buffer.h"
 #include "hmmat.h"
 #include <string.h>
 #include <assert.h>

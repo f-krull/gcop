@@ -6,7 +6,7 @@ all: $(LIBZA)
 
 $(LIBZA):
 	tar xf $(ZLIB).tar.gz && \
-	mkdir $(ZLIB)/build && \
+	mkdir -p $(ZLIB)/build && \
 	cd $(ZLIB)/build && ../configure
 	$(MAKE) -C $(ZLIB)/build
 

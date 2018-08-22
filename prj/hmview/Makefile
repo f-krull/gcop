@@ -1,9 +1,9 @@
 export LIBJPEG=$(shell pwd)/3rdparty/libjpeg/lib/libjpeg.a
 BINDIR ?= ./
 
-CXXFLAGS+= -Wall -g -Ofast
-CPPFLAGS+= -std=c++11
-LDFLAGS += -Wall -Ofast
+CXXFLAGS ?= -Wall -g -Ofast
+CPPFLAGS ?= -std=c++11
+LDFLAGS  ?= -Wall -Ofast
 LDLIBS  += -pthread -lrt $(LIBJPEG)
 
 EXE=$(BINDIR)/hmview
@@ -12,7 +12,7 @@ SRCS=main.cpp \
 	server.cpp \
 	httpfileservice.cpp \
 	wsservice.cpp \
-	buffer.cpp \
+	l_buffer.cpp \
 	debuglog.cpp \
 	wsmatview.cpp \
 	hmmat.cpp \
@@ -26,16 +26,14 @@ SRCS=main.cpp \
 SRCS:=$(addprefix src/, $(SRCS))
 OBJS =$(subst .cpp,.o,$(SRCS))
 
-
 all: $(EXE)
 
-$(EXE): $(OBJS)
+$(EXE): $(3RDPARTY) | $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(EXE) $(OBJS) $(LDLIBS)
  
 clean:
 	$(RM) $(OBJS) src/.depend
 	$(RM) $(BINDIR)/hmview
-	$(MAKE) -C $(3RDPARTY) clean
 
 distclean: clean
 	$(RM) *~ src/.depend
