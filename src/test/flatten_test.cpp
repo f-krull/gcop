@@ -2,6 +2,8 @@
 #include "../data/intervaltree.h"
 #include "assert.h"
 
+/*----------------------------------------------------------------------------*/
+
 static bool is_flat(const GCords &g) {
   for (auto chr_it = g.begin(); chr_it != g.end(); ++chr_it) {
     if (chr_it->empty()) {
@@ -19,10 +21,12 @@ static bool is_flat(const GCords &g) {
   return true;
 }
 
+/*----------------------------------------------------------------------------*/
+
 int main(int argc, char **argv) {
   GCords g;
-  ChrInfoHg19 hg19;
-  g.read("test/flatten_data.txt", "cse", 1, &hg19);
+  const ChrInfoHg19 hg19;
+  g.read("test/flatten_data.txt", "cse", 1, &hg19, false);
 
   printf("\n");
   g.write(stdout);
@@ -50,7 +54,8 @@ int main(int argc, char **argv) {
   g.write(stdout);
   assert(is_flat(g));
 
-  g.read("./testdata/gwascat/Body_mass_index.txt.gz", "...........cs", 0, &hg19);
+#if 0
+  g.read("./testdata/gwascat/Body_mass_index.txt.gz", "...........cs", 0, &hg19, false);
 
   g.flatten();
   printf("flat:\n");
@@ -65,6 +70,6 @@ int main(int argc, char **argv) {
   g.write(stdout, 10);
   //is_flat(g);
   //assert(is_flat(g));
-
+#endif
   return 0;
 }
