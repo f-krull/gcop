@@ -2,6 +2,7 @@ TINYSHA1=TinySHA1.hpp
 CIMG=CImg.h
 LIBJPEGSRC=jpegsrc.v9c.tar.gz
 LIBJPEGDIR=$(CURDIR)/libjpeg/
+LIBJPEG=$(LIBJPEGDIR)/lib/libjpeg.a
 
 all: $(TINYSHA1) $(CIMG) $(LIBJPEG)
 
@@ -23,7 +24,7 @@ $(LIBJPEG): $(LIBJPEGSRC)
 clean:
 	$(RM) -r $(LIBJPEGDIR)
 
-distclean:
+distclean: clean
 	$(RM) $(TINYSHA1) $(CIMG) 
 	$(RM) $(LIBJPEGSRC)
 	$(RM) -r jpeg-9c
