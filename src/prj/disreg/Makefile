@@ -1,8 +1,10 @@
-HAS_LIBZA=1
+HAS_LIBZ=1
 HAS_LIBGCOP=1
 
 BINNAME=disreg
 
--include ../../makefile.mk
+SRCS=disreg.cpp
+
+-include ../../../makefile.mk
 
 all: $(TARGETS)

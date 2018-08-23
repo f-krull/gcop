@@ -1,6 +1,6 @@
-#include <data/gcords.h>
-#include <data/chrinfo.h>
-#include <data/intervaltree.h>
+#include <gcords.h>
+#include <chrinfo.h>
+#include <intervaltree.h>
 
 
 class LengthsSumChr {
