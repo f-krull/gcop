@@ -1,6 +1,7 @@
 prjs = src/prj/hapdose2bed \
        src/prj/gcop \
-       src/prj/hmview
+       src/prj/hmview \
+       src/prj/disreg
 
 libs = src/libgcop
 
