@@ -1,5 +1,6 @@
 #include "hapdosereader.h"
 #include "l_gettoken.h"
+#include "l_linereader.h"
 #include <zlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -17,9 +18,7 @@ typedef std::vector<std::vector<float>> SampleBuf;
 class HapDoseReaderPriv {
 public:
   HapDoseReader::SampleInfo sampleInfo;
-  gzFile f;
-  uint32_t buflen;
-  char* buf;
+  LineReader lr;
   SampleBuf sampleBuf;
 };
 
@@ -27,9 +26,6 @@ public:
 
 HapDoseReader::HapDoseReader() {
   m = new HapDoseReaderPriv;
-  m->f = NULL;
-  m->buflen = LINE_LENGTH_INIT;
-  m->buf = new char[m->buflen];
   m->sampleBuf.resize(HAPLINDEX_NUMENRIES);
 }
 
@@ -37,7 +33,6 @@ HapDoseReader::HapDoseReader() {
 
 HapDoseReader::~HapDoseReader() {
   close();
-  delete [] m->buf;
   delete m;
 }
 
@@ -47,13 +42,8 @@ HapDoseReader::~HapDoseReader() {
                    m->f = NULL; \
                    return false;
 
-bool HapDoseReader::open(const char* fn, uint32_t numVar) {
-  m->f = gzopen(fn, "r");
-  if (!m->f) {
-    fprintf(stderr, "error - cannot open '%s'\n", fn);
-    return false;
-  }
-  return true;
+bool HapDoseReader::open(const char* fn) {
+  return m->lr.open(fn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -77,32 +67,21 @@ const HapDoseReader::SampleInfo & HapDoseReader::getSampleInfo() const {
 /*----------------------------------------------------------------------------*/
 
 bool HapDoseReader::nextSample() {
-  assert(m->f && "hap file not opened");
+  assert(m->lr.isOpen() && "hap file not opened");
   m->sampleBuf[HAPLINDEX_1].clear();
   m->sampleBuf[HAPLINDEX_2].clear();
   uint32_t lineCount = 0;
   while (lineCount < HAPLINDEX_NUMENRIES) {
     const HaplIndexType hapIdx = (HaplIndexType)(lineCount % HAPLINDEX_NUMENRIES);
-    z_off_t p_cur = gztell(m->f);
-    char *line = gzgets(m->f, m->buf, m->buflen);
+    char *line = m->lr.readLine();
     /* end of file? */
     if (line == NULL) {
         return false;
     }
-    /* buffer too small? */
-    if (strlen(m->buf)+1 == m->buflen) {
-      /* realloc and retry the same line */
-      m->buflen = m->buflen * 2;
-      printf("  realloc line buffer to %u bytes\n", m->buflen);
-      delete [] m->buf;
-      m->buf = new char[m->buflen];
-      gzseek(m->f, p_cur, 0);
-      continue;
-    }
     /* patch line end */
     if (line[strlen(line) - 1] != '\n') {
       fprintf(stderr, "error - expected newline at %zu (hapdosefile line %u)\n",
-          strlen(m->buf) - 1, lineCount);
+          strlen(line) - 1, lineCount);
       return false;
     }
     /* parse id and fid */
@@ -148,8 +127,5 @@ bool HapDoseReader::nextSample() {
 /*----------------------------------------------------------------------------*/
 
 void HapDoseReader::close() {
-  if (m->f) {
-    gzclose(m->f);
-    m->f = NULL;
-  }
+  m->lr.close();
 }

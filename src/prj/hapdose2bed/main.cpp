@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
     info.numVariantsOk(), float(info.numVariantsOk())/info.numVariants()*100);
   printf("reading hapdose file '%s'\n", fin_hapd.cstr());
   HapDoseReader hapd;
-  if (!hapd.open(fin_hapd.cstr(), info.numVariants())) {
+  if (!hapd.open(fin_hapd.cstr())) {
     return EXIT_FAILURE;
   }
   /* write bim file */

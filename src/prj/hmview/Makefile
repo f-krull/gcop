@@ -1,5 +1,4 @@
 BINNAME=hmview
-
 SRCS=main.cpp \
 	server.cpp \
 	httpfileservice.cpp \
@@ -20,7 +19,7 @@ DISTCLEANDIRS += 3rdparty
 
 #-------------------------------------------------------------------------------
 
--include ../../../makefile.mk
+include ../../../makefile.mk
 
 #-------------------------------------------------------------------------------
 

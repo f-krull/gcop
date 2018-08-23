@@ -1,13 +1,12 @@
 prjs = src/prj/hapdose2bed \
-      src/prj/gcop \
-      src/prj/hmview
+       src/prj/gcop \
+       src/prj/hmview
 
 libs = src/libgcop
 
 all: $(prjs)
 
 $(prjs):
-	#$(MAKE) -C $@ LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)"
 	$(MAKE) -C $@
 
 distclean: clean

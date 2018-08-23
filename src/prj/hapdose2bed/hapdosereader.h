@@ -24,7 +24,7 @@ public:
     std::string familyid;
   };
 
-  bool open(const char *fn, uint32_t numVar);
+  bool open(const char *fn);
 
   bool nextSample();
   const std::vector<float> & getHapDose1() const;
