@@ -1,9 +1,9 @@
 .cproject
 .project
 .settings/
-testdata/
-libgcop.a
-*.o
 bin/*
 lib/*
+testdata/*
+*.o
 *.depend
+makefile_cfg.mk
