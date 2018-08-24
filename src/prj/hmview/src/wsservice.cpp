@@ -158,7 +158,7 @@ void WsService::newData(uint32_t clientId, const uint8_t* data, uint32_t len) {
             m_log.dbg("client %u error - invalid key length(%u, '%s')", clientId, strlen(ws_key), ws_key);
             break;
           }
-          char sha1_inp[expected_key_len + strlen(magic_str)];
+          char *sha1_inp = new char[expected_key_len + strlen(magic_str)];
           strcpy(sha1_inp, ws_key);
           strcpy(sha1_inp+expected_key_len, magic_str);
           sha1::SHA1 sha;
@@ -179,6 +179,7 @@ void WsService::newData(uint32_t clientId, const uint8_t* data, uint32_t len) {
           //m_log.dbg("client %u sent:\n>%s", clientId, buf.data());
           cl->setState(IWsServiceClient::CONNSTATE_CONNECTED);
           m_log.dbg("client %u connected", clientId);
+          delete [] sha1_inp;
           break;
         }
         free(msg);

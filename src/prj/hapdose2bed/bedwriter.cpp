@@ -56,7 +56,7 @@ bool BedWriter::close() {
   printf("  num HOMOZYGOUS_A2:    %lu\n", m_numStat[HOMOZYGOUS_A2]);
   printf("  num MISSING_GENOTYPE: %lu\n", m_numStat[MISSING_GENOTYPE]);
   return ret && sameSize;
-};
+}
 
 /*----------------------------------------------------------------------------*/
 
