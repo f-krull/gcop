@@ -4,8 +4,10 @@ LIBDIR  := $(BASEDIR)/lib/
 BINDEPS ?= 
 TARGETS ?= 
 PHONIES ?=
-CLEANDIRS ?=
-DISTCLEANDIRS ?= 
+CLEANDIRS     ?=
+DISTCLEANDIRS ?=
+DLCLEANDIRS   ?=
+DOWNLOADDIRS  ?=  
 export LIBZA   = $(BASEDIR)/src/3rdparty/zlib/zlib-1.2.11/build/libz.a
 export LIBGCOP = $(BASEDIR)/lib/libgcop.a
 SRCS ?= $(wildcard *.cpp)
@@ -41,9 +43,13 @@ BINPATH = $(BINDIR)/$(BINNAME)
 TARGETS += $(BINPATH)
 $(BINPATH): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(BINPATH) $(OBJS) $(LDLIBS)
+ifneq ($(MAKECMDGOALS),download)
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
+ifneq ($(MAKECMDGOALS),dlclean)
   -include .depend
+endif
+endif
 endif
 endif
 .depend: $(SRCS) | $(BINDEPS)
@@ -59,9 +65,13 @@ LIBPATH = $(LIBDIR)/lib$(LIBNAME).a
 TARGETS += $(LIBPATH)
 $(LIBPATH): $(OBJS)
 	$(AR) rcs $(LIBPATH) $(OBJS)
+ifneq ($(MAKECMDGOALS),download)
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
+ifneq ($(MAKECMDGOALS),dlclean)
   -include .depend
+endif
+endif
 endif
 endif
 .depend: $(SRCS) | $(BINDEPS)
@@ -71,6 +81,8 @@ endif
 
 #-------------------------------------------------------------------------------
 
+download:
+	$(foreach var,$(DOWNLOADIRS), $(MAKE) -C $(var) download;)
 
 clean:
 	$(RM) $(OBJS) $(BINPATH) $(LIBPATH) .depend
@@ -79,8 +91,10 @@ clean:
 distclean: clean
 	$(foreach var,$(DISTCLEANDIRS), $(MAKE) -C $(var) distclean;)
 
+dlclean:
+	$(foreach var,$(DLCLEANDIRS), $(MAKE) -C $(var) dlclean;)
 
-.PHONY: $(PHONIES)
+.PHONY: $(PHONIES) download clean distclean dlclean
 
 #-------------------------------------------------------------------------------
 

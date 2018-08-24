@@ -16,6 +16,8 @@ SRCS:=$(addprefix src/, $(SRCS))
 PHONIES += 3rdparty
 BINDEPS += 3rdparty
 DISTCLEANDIRS += 3rdparty
+DOWNLOADIRS   += 3rdparty
+DLCLEANDIRS   += 3rdparty
 
 #-------------------------------------------------------------------------------
 

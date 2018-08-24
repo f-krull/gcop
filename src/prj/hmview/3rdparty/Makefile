@@ -6,7 +6,6 @@ LIBJPEG=$(LIBJPEGDIR)/lib/libjpeg.a
 
 all: $(TINYSHA1) $(CIMG) $(LIBJPEG)
 
-
 $(TINYSHA1):
 	wget https://raw.githubusercontent.com/ipkn/crow/master/include/crow/TinySHA1.hpp -O $(TINYSHA1)
 
@@ -21,10 +20,15 @@ $(LIBJPEG): $(LIBJPEGSRC)
 	  && cd jpeg-9c \
 		&& ./configure --prefix=$(LIBJPEGDIR) --disable-shared && $(MAKE) && $(MAKE) install
 
-clean:
-	$(RM) -r $(LIBJPEGDIR)
+download: $(TINYSHA1) $(CIMG) $(LIBJPEGSRC)
+
+clean:	
 
 distclean: clean
-	$(RM) $(TINYSHA1) $(CIMG) 
-	$(RM) $(LIBJPEGSRC)
+	$(RM) -r $(LIBJPEGDIR)
 	$(RM) -r jpeg-9c
+
+dlclean: 
+	$(RM) $(TINYSHA1) $(CIMG) $(LIBJPEGSRC)
+
+.PHONY: clean distclean download dlclean
