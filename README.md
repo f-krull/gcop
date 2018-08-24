@@ -2,8 +2,24 @@
 
 Genomic coordinate processing
 
+Various tools for working with plain-text or gzipped text files.
+
+## Build
+
 `git clone https://github.com/precimed/gcop && cd gcop && make`
 
-depends on:
-* gcc cxx11
+## Build dependencies
 
+* g++ cxx11
+* make
+* wget
+* (md5sum)
+
+## Make targets
+
+* `all` - build everything (binaries and libs)
+* `clean` - delete binaries and libs
+* `distclean` - delete 3rdparty builds
+* `download` - download 3rdparty sources
+* `dlclean` - delete 3rdparty sources
+* (`test`) - TODO
