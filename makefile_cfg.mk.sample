@@ -1,0 +1,19 @@
+# To include this file in the build, rename it to "makefile_cfg.mk" 
+
+
+# debug:
+
+# CXXFLAGS := -Wall -g -O0 -std=c++11
+# LDFLAGS  := -Wall -g -O0
+
+
+# dynamic linking:
+
+# CXXFLAGS := -Wall -g -Ofast -flto -march=native -std=c++11
+# LDFLAGS  := -Wall -g -Ofast -flto
+
+
+# portable:
+
+# CXXFLAGS := -Wall -g -Ofast -flto -static -march=sandybridge -std=c++11
+# LDFLAGS  := -Wall -g -Ofast -flto -static

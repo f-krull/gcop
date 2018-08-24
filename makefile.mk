@@ -18,6 +18,8 @@ OBJS  = $(patsubst %.cpp, %.o, $(SRCS))
 CXXFLAGS+= -Wall -g -Ofast -flto -static -march=native -std=c++11
 LDFLAGS += -Wall -g -Ofast -flto -static
 
+-include makefile_cfg.mk
+
 #-------------------------------------------------------------------------------
 
 ifeq ($(HAS_LIBGCOP),1)
