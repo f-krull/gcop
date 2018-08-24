@@ -12,7 +12,7 @@ public:
   class IConv {
   public:
     ~IConv() {};
-    virtual void operator()(const char* s) {};
+    virtual void operator()(const char*) {};
   };
 
   static char* read_uint64(char *pos, char delim, uint64_t *v);

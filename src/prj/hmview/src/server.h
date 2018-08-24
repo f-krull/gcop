@@ -16,7 +16,7 @@ public:
   virtual ~ISocketService() {}
   virtual void setSource(Server *s) {m_srv = s;}
   virtual void newData(uint32_t clientId, const uint8_t* data, uint32_t len) = 0;
-  virtual void disconnect(uint32_t clientId) {}
+  virtual void disconnect(uint32_t) {}
 protected:
   /* convenience functions */
   void write(uint32_t clientId, const uint8_t* data, uint32_t len);

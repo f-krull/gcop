@@ -16,7 +16,7 @@ public:
     CONNSTATE_CONNECTED
   };
   uint32_t id() const {return m_id;}
-  virtual void integrate(int64_t serviceTimeUsec) {}
+  virtual void integrate(int64_t /* serviceTimeUsec */) {}
   ConnectionState state() const {return m_connstate;}
   void setState(ConnectionState s) {m_connstate = s;}
   virtual void disconnect() {};

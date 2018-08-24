@@ -86,8 +86,8 @@ public:
 
   const std::vector<InfoFileEntry> & variants() const { return m_variants; }
   const std::vector<char> & variantStatus() const { return m_variantStatus; }
-  const size_t numVariants() const { return m_variants.size(); }
-  const size_t numVariantsOk() const { return m_numVarOk; }
+  size_t numVariants() const { return m_variants.size(); }
+  size_t numVariantsOk() const { return m_numVarOk; }
 private:
   std::vector<InfoFileEntry> m_variants;
   std::vector<char> m_variantStatus;

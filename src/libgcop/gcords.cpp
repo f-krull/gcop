@@ -223,11 +223,11 @@ bool GCords::write(FILE *f, uint64_t maxlines) const {
         break;
       }
       const GCord &g = *gc_it;
-      printf("%s%c%lu%c%lu", m_ci.ctype2str(g.chr), sep, g.s, sep, g.e);
+      fprintf(f, "%s%c%lu%c%lu", m_ci.ctype2str(g.chr), sep, g.s, sep, g.e);
       for (uint32_t j = 0; j < ncols(); j++) {
-        printf("\t%s", field2str(g.d(j)).c_str());
+        fprintf(f, "\t%s", field2str(g.d(j)).c_str());
       }
-      printf("\n");
+      fprintf(f, "\n");
       n++;
     }
   }

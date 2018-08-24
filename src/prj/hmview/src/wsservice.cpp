@@ -82,7 +82,7 @@ public:
     m_hdata[9] = plen8[0];
   }
   const uint8_t* cdata() const {return m_hdata;}
-  const uint32_t len()   const {return m_hlen;}
+  uint32_t len() const {return m_hlen;}
 private:
   uint8_t m_hdata[14];
   uint8_t m_hlen;

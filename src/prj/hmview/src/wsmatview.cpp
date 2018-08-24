@@ -66,7 +66,7 @@ private:
   std::map<std::string, std::string> m_cfg;
 
 
-  void defineInt(const char *name, const char *v, int32_t min, int32_t max) {
+  void defineInt(const char *name, const char *v, int32_t, int32_t) {
     m_cfg[name] = v;
   }
 };
@@ -305,7 +305,7 @@ public:
 #endif
   }
 
-  void zoomout(int32_t x, int32_t y, WsMatViewCfg *cfg) {
+  void zoomout(int32_t /* x */, int32_t /* y */, WsMatViewCfg *cfg) {
     const int32_t z = cfg->getInt(CFG_ZOOM_INT);
     cfg->setInt(CFG_ZOOM_INT, z > 0 ? z - 1 : z);
     m_cellX = clippedPx2CellX(cfg->getInt(CFG_MAIN_WID_INT)/2);
@@ -845,7 +845,7 @@ void WsMatView::newData(const uint8_t* _data, uint32_t _len) {
 
 /*----------------------------------------------------------------------------*/
 
-void WsMatView::integrate(int64_t serviceTimeUsec) {
+void WsMatView::integrate(int64_t) {
 #if 0
   const uint32_t rate = 1 /* 1 per sec */;
   /* do update? */

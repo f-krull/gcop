@@ -5,7 +5,7 @@
 
 class LengthsSumChr {
 public:
-  LengthsSumChr(const std::vector<GCord> &g, ChrInfo::CType c) {
+  LengthsSumChr(const std::vector<GCord> &g, ChrInfo::CType) {
     m_sum = 0;
     for (uint32_t i = 0; i < g.size(); i++) {
       m_sum += g[i].len();

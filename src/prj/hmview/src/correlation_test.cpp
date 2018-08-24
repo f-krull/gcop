@@ -8,6 +8,7 @@ static bool cmpSmaller(const std::pair<double, uint32_t>& a, const std::pair<
    return a.first < b.first;
 }
 
+#if 0
 /* small values get small ranks. (0.5, 0.2, 0.4) -> (3, 1, 2) */
 static std::vector<uint32_t> rank1(const std::vector<double> &c) {
   std::vector<uint32_t> order(c.size());
@@ -16,6 +17,7 @@ static std::vector<uint32_t> rank1(const std::vector<double> &c) {
         [&c](uint32_t i1, uint32_t i2) {return c[i1] < c[i2];});
    return order;
 }
+#endif
 
 static std::vector<uint32_t> rank2(const std::vector<double> &c) {
    std::vector<uint32_t> rank;

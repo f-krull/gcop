@@ -8,7 +8,7 @@
 
 volatile sig_atomic_t g_stop = 0;
 
-static void signalHandler(int signum) {
+static void signalHandler(int) {
   g_stop = 1;
 }
 
@@ -22,7 +22,7 @@ int64_t getTimeUsec() {
 
 /*----------------------------------------------------------------------------*/
 
-int main(int argc, char **argv) {
+int main(int, char **) {
   signal(SIGINT, signalHandler);
   Log log("main");
 
