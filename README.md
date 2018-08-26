@@ -2,7 +2,7 @@
 
 Genomic coordinate processing
 
-Various tools for working with plain-text or gzipped text files.
+Various tools for working with biological data. See [src/prj](src/prj).
 
 ## Build
 
