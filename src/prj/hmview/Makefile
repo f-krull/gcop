@@ -25,6 +25,7 @@ include ../../../makefile.mk
 
 #-------------------------------------------------------------------------------
 
+CXXFLAGS += -I$(shell pwd)/3rdparty/libjpeg/include/
 LIBJPEG=$(shell pwd)/3rdparty/libjpeg/lib/libjpeg.a
 LDLIBS  += -pthread -lrt $(LIBJPEG)
 
