@@ -3,7 +3,7 @@
 trap 'exit' ERR
 
 declare -r SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-declare -r OUTDIR="$SCRIPTDIR"/../../testdata/tfbs_jaspar/
+declare -r OUTDIR="$SCRIPTDIR"/../../../testdata/tfbs_jaspar/
 
 mkdir -p "$OUTDIR"
 mkdir -p "$OUTDIR"/tmp

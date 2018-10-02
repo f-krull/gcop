@@ -5,9 +5,9 @@
 trap 'exit' ERR
 
 declare -r SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-declare -r GCOPDIR="$SCRIPTDIR/../../"
+declare -r GCOPDIR="$SCRIPTDIR/../../../"
 
-make -C "$GCOPDIR" disreg 
+make
 
 #-------------------------------------------------------------------------------
 
