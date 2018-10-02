@@ -1,13 +1,13 @@
 BASEDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BINDIR  := $(BASEDIR)/bin/
 LIBDIR  := $(BASEDIR)/lib/
-BINDEPS ?= 
-TARGETS ?= 
+BINDEPS ?=
+TARGETS ?=
 PHONIES ?=
 CLEANDIRS     ?=
 DISTCLEANDIRS ?=
 DLCLEANDIRS   ?=
-DOWNLOADDIRS  ?=  
+DOWNLOADDIRS  ?=
 export LIBZA   = $(BASEDIR)/src/3rdparty/zlib/zlib-1.2.11/build/libz.a
 export LIBGCOP = $(BASEDIR)/lib/libgcop.a
 SRCS ?= $(wildcard *.cpp)
@@ -16,8 +16,8 @@ OBJS  = $(patsubst %.cpp, %.o, $(SRCS))
 #-------------------------------------------------------------------------------
 
 CXXFLAGS += -g -Ofast -flto -static -march=native -std=c++11
-CXXFLAGS += -Wall -Wextra -Wwrite-strings -Wno-parentheses -Wpedantic 
-CXXFLAGS += -Warray-bounds -Weffc++
+CXXFLAGS += -Wall -Wextra -Wwrite-strings -Wno-parentheses -Wpedantic
+CXXFLAGS += -Warray-bounds # -Weffc++
 LDFLAGS += -Wall -g -Ofast -flto -static
 
 -include $(BASEDIR)/makefile_cfg.mk
