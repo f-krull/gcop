@@ -9,10 +9,10 @@ mkdir -p "$OUTDIR"
 mkdir -p "$OUTDIR"/tmp
 
 
-declare -r GTRDFILE="$OUTDIR"/tmp/human_meta_clusters.interval.gz
+declare -r GTRDFILE="$OUTDIR"/tmp/homo_sapiens_meta_clusters.interval.gz
 
 if [ ! -e $GTRDFILE ]; then
-  wget http://gtrd.biouml.org/downloads/18.01/human_meta_clusters.interval.gz \
+  wget http://gtrd.biouml.org/downloads/18.06/Homo%20sapiens_meta_clusters.interval.gz \
     -O "$GTRDFILE"
 fi
 
