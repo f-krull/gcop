@@ -214,6 +214,7 @@ static std::vector<std::vector<double>> disreg(const StrTable &l1,
       GCordsInfoCache s_ginf(&s_g);
       //e_mat[j][i] = p_ginf.len()->get() * s_ginf.leqn()->get() / p_ginf.gcords()->chrinfo().len();
       o_mat[j][i] = numOverlap(p_ginf, s_ginf);
+      printf("computed overlap for %u,%u\n", i, j);
     }
   }
   /* compute N_1 .. N_m */
