@@ -18,7 +18,7 @@ public:
 class IUrlHandle {
 public:
   virtual ~IUrlHandle() {}
-  virtual void handleUrl(uint32_t clientId, const char *url, ISocketService* s) = 0;
+  virtual void handleUrl(uint32_t clientId, const char *url, const char *query, ISocketService* s) = 0;
 };
 
 /*----------------------------------------------------------------------------*/

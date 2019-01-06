@@ -43,7 +43,7 @@ public:
       m_path(path), m_mimetype(mt), m_log(log) {
   }
   virtual ~FileUrlHandle() {}
-  virtual void handleUrl(uint32_t clientId, const char *url, ISocketService* s);
+  virtual void handleUrl(uint32_t clientId, const char *url, const char *query, ISocketService* s);
 private:
   std::string m_path;
   HttpService::MimeType m_mimetype;
@@ -52,7 +52,7 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-void FileUrlHandle::handleUrl(uint32_t clientId, const char *url, ISocketService* s) {
+void FileUrlHandle::handleUrl(uint32_t clientId, const char *url, const char *, ISocketService* s) {
   FILE *fin = fopen(m_path.c_str(), "rb");
   if (fin == NULL) {
     m_log->err("client %u - error opening file %s", m_path.c_str());
@@ -134,6 +134,7 @@ void HttpService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len
     const bool knownHf = hd.setHeaderField(hfname, hfvalue);
     m_log.dbg("client %u -> %sheader field: %s %s", clientId, knownHf ? "" : "ignoring ", hfname, hfvalue);
   }
+  char *inquery = gettoken(inurl, '?');
   std::map<std::string, IUrlHandle*>::const_iterator it = m_rurls.find(inurl);
   if (it == m_rurls.end()) {
     m_log.dbg("client %u requested invalid url (%s)", clientId, inurl);
@@ -141,7 +142,7 @@ void HttpService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len
     write(clientId, "\r\n");
     return;
   }
-  it->second->handleUrl(clientId, inurl, this);
+  it->second->handleUrl(clientId, inurl, inquery, this);
   if (!hd.connectionKeepAlive) {
     m_srv->disconnect(clientId);
   }
