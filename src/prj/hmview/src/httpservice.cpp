@@ -3,40 +3,85 @@
 #include <string.h>
 #include "httpservice.h"
 
-
 // https://tools.ietf.org/html/rfc2616
 
+/*----------------------------------------------------------------------------*/
+
+HttpHeader::HttpHeader() {
+  connectionKeepAlive = false;
+}
 
 /*----------------------------------------------------------------------------*/
 
-#define HTTP_STATUS_OK                  200
-#define HTTP_STATUS_BADREQUEST          400
-#define HTTP_STATUS_NOTFOUND            404
-#define HTTP_STATUS_INTERNALSERVERERROR 500
+bool HttpHeader::setHeaderField(const char *name, const char* value) {
+  if (strcmp(name, "Connection:") == 0) {
+    connectionKeepAlive = strcmp(value, "keep-alive") == 0;
+    return true;
+  }
+  return false;
+}
 
 /*----------------------------------------------------------------------------*/
 
-class HttpHeader {
+HttpService::HttpService() : m_log("HttpServer") {
+}
+
+/*----------------------------------------------------------------------------*/
+
+HttpService::~HttpService() {
+  for (uint32_t i = 0; i < m_handles.size(); i++) {
+    delete m_handles[i];
+  }
+  m_handles.clear();
+}
+
+/*----------------------------------------------------------------------------*/
+
+class FileUrlHandle : public IUrlHandle {
 public:
-  bool connectionKeepAlive;
-
-  HttpHeader() {
-    connectionKeepAlive = false;
+  FileUrlHandle(const char *path, HttpService::MimeType mt, Log *log) :
+      m_path(path), m_mimetype(mt), m_log(log) {
   }
-
-  bool setHeaderField(const char *name, const char* value) {
-    if (strcmp(name, "Connection:") == 0) {
-      connectionKeepAlive = strcmp(value, "keep-alive") == 0;
-      return true;
-    }
-    return false;
-  }
+  virtual ~FileUrlHandle() {}
+  virtual void handleUrl(uint32_t clientId, const char *url, ISocketService* s);
 private:
+  std::string m_path;
+  HttpService::MimeType m_mimetype;
+  Log *m_log;
 };
 
 /*----------------------------------------------------------------------------*/
 
-HttpService::HttpService() : m_log("HttpFileServer") {
+void FileUrlHandle::handleUrl(uint32_t clientId, const char *url, ISocketService* s) {
+  FILE *fin = fopen(m_path.c_str(), "rb");
+  if (fin == NULL) {
+    m_log->err("client %u - error opening file %s", m_path.c_str());
+    s->write(clientId, "HTTP/1.1 %u\r\n", HttpService::HTTP_STATUS_INTERNALSERVERERROR);
+    s->write(clientId, "\r\n");
+    return;
+  }
+  /* get file size */
+  fseek(fin, 0L, SEEK_END);
+  const size_t flen = ftell(fin);
+  rewind(fin);
+  m_log->dbg("client %u <- sending file '%s' size=%zu", clientId, url, flen);
+  s->write(clientId, "HTTP/1.1 200 OK\r\n");
+  s->write(clientId, "Content-Type: %s\r\n", HttpService::MimeTypeStr[m_mimetype]);
+  s->write(clientId, "Cache-Control: no-cache\r\n");
+  s->write(clientId, "Content-Length: %zu\r\n", flen);
+  s->write(clientId, "\r\n");
+  {
+    /* read file and send to client */
+    uint8_t buf[16*1024];
+    while (true) {
+      const size_t len = fread(buf, 1, sizeof(buf), fin);
+      if (len == 0) {
+        break;
+      }
+      s->write(clientId, buf, len);
+    }
+  }
+  fclose(fin);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -89,58 +134,33 @@ void HttpService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len
     const bool knownHf = hd.setHeaderField(hfname, hfvalue);
     m_log.dbg("client %u -> %sheader field: %s %s", clientId, knownHf ? "" : "ignoring ", hfname, hfvalue);
   }
-  http_get(clientId, inurl, &hd);
+  std::map<std::string, IUrlHandle*>::const_iterator it = m_rurls.find(inurl);
+  if (it == m_rurls.end()) {
+    m_log.dbg("client %u requested invalid url (%s)", clientId, inurl);
+    write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_NOTFOUND);
+    write(clientId, "\r\n");
+    return;
+  }
+  it->second->handleUrl(clientId, inurl, this);
+  if (!hd.connectionKeepAlive) {
+    m_srv->disconnect(clientId);
+  }
 }
 
 /*----------------------------------------------------------------------------*/
 
 void HttpService::registerFile(const char *path, const char *url, MimeType mt) {
-  RegUrl r;
-  r.mimetype = mt;
-  r.path     = path;
-  m_rurls[url] = r;
+  IUrlHandle *h = new FileUrlHandle(path, mt, &m_log);
+  registerUrl(h, url);
+  /* delete later */
+  m_handles.push_back(h);
 }
 
 /*----------------------------------------------------------------------------*/
 
-void HttpService::http_get(uint32_t clientId, const char* url, const HttpHeader *header) {
-  std::map<std::string, RegUrl>::const_iterator it = m_rurls.find(url);
-  if (it == m_rurls.end()) {
-    m_log.dbg("client %u requested invalid file (%s)", clientId, url);
-    write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_NOTFOUND);
-    write(clientId, "\r\n");
-    return;
-  }
-  FILE *fin = fopen(it->second.path.c_str(), "rb");
-  if (fin == NULL) {
-    m_log.err("client %u - error opening file %s", it->second.path.c_str());
-    write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_INTERNALSERVERERROR);
-    write(clientId, "\r\n");
-    return;
-  }
-  /* get file size */
-  fseek(fin, 0L, SEEK_END);
-  const size_t flen = ftell(fin);
-  rewind(fin);
-  m_log.dbg("client %u <- sending file '%s' size=%zu", clientId, url, flen);
-  write(clientId, "HTTP/1.1 200 OK\r\n");
-  write(clientId, "Content-Type: %s\r\n", MimeTypeStr[it->second.mimetype]);
-  write(clientId, "Cache-Control: no-cache\r\n");
-  write(clientId, "Content-Length: %zu\r\n", flen);
-  write(clientId, "\r\n");
-  {
-    /* read file and send to client */
-    uint8_t buf[16*1024];
-    while (true) {
-      const size_t len = fread(buf, 1, sizeof(buf), fin);
-      if (len == 0) {
-        break;
-      }
-      write(clientId, buf, len);
-    }
-  }
-  fclose(fin);
-  if (!header->connectionKeepAlive) {
-    m_srv->disconnect(clientId);
-  }
+void HttpService::registerUrl(IUrlHandle *h, const char *url) {
+  m_rurls[url] = h;
 }
+
+/*----------------------------------------------------------------------------*/
+

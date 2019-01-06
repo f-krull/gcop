@@ -5,6 +5,24 @@
 
 /*----------------------------------------------------------------------------*/
 
+class HttpHeader {
+public:
+  bool connectionKeepAlive;
+
+  HttpHeader();
+  bool setHeaderField(const char *name, const char* value);
+};
+
+/*----------------------------------------------------------------------------*/
+
+class IUrlHandle {
+public:
+  virtual ~IUrlHandle() {}
+  virtual void handleUrl(uint32_t clientId, const char *url, ISocketService* s) = 0;
+};
+
+/*----------------------------------------------------------------------------*/
+
 #define ENUM_HTTPSTATUS(select_fun) \
   select_fun(HTTP_STATUS_OK                 , 200) \
   select_fun(HTTP_STATUS_BADREQUEST         , 400) \
@@ -18,9 +36,6 @@
     select_fun(MIMETYPE_TEXT_JAVASCRIPT , "text/javascript"  ) \
     select_fun(MIMETYPE_TEXT_EVENTSTREAM, "text/event-stream") \
     select_fun(MIMETYPE_IMAGE_PNG       , "image/png"        )
-
-class HttpHeader;
-class IUrlHandle;
 
 /*----------------------------------------------------------------------------*/
 
@@ -42,19 +57,14 @@ public:
   };
 
   HttpService();
-  virtual ~HttpService() {};
+  virtual ~HttpService();
   virtual void newData(uint32_t clientId, const uint8_t* data, uint32_t len);
   void registerFile(const char *path, const char *url, MimeType mt);
-  void registerUrl(IUrlHandle *      , const char *url, MimeType mt);
+  void registerUrl(IUrlHandle *, const char *url);
 
 protected:
-  void http_get(uint32_t clientId, const char* url, const HttpHeader *);
-  struct RegUrl {
-    MimeType mimetype;
-    std::string path;
-    IUrlHandle *urlHandle;
-  };
-  std::map<std::string, RegUrl> m_rurls;
+  std::map<std::string, IUrlHandle*> m_rurls;
+  std::vector<IUrlHandle*> m_handles;
 
 private:
   Log m_log;
