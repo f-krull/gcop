@@ -1,7 +1,7 @@
-#include "httpfileservice.h"
 #include "l_buffer.h"
 #include <assert.h>
 #include <string.h>
+#include "httpservice.h"
 
 
 // https://tools.ietf.org/html/rfc2616
@@ -36,7 +36,7 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-HttpFileService::HttpFileService() : m_log("HttpFileServer") {
+HttpService::HttpService() : m_log("HttpFileServer") {
 }
 
 /*----------------------------------------------------------------------------*/
@@ -45,7 +45,7 @@ HttpFileService::HttpFileService() : m_log("HttpFileServer") {
 
 /*----------------------------------------------------------------------------*/
 
-const char* HttpFileService::MimeTypeStr[] = {
+const char* HttpService::MimeTypeStr[] = {
 #define  ENUM_GET_STR(name, str) str,
         ENUM_MIMETYPE(ENUM_GET_STR)
         "undefined"
@@ -55,7 +55,7 @@ const char* HttpFileService::MimeTypeStr[] = {
 /*----------------------------------------------------------------------------*/
 
 #include "helper.h"
-void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len) {
+void HttpService::newData(uint32_t clientId, const uint8_t* _data, uint32_t _len) {
   if (_len == 0 || _len > 1e6) {
     m_log.err("client %u - received invalid size (%u bytes)", clientId, _len);
     return;
@@ -94,18 +94,18 @@ void HttpFileService::newData(uint32_t clientId, const uint8_t* _data, uint32_t 
 
 /*----------------------------------------------------------------------------*/
 
-void HttpFileService::registerFile(const char *path, const char *url, MimeType mt) {
-  RegFile r;
+void HttpService::registerFile(const char *path, const char *url, MimeType mt) {
+  RegUrl r;
   r.mimetype = mt;
   r.path     = path;
-  m_rfiles[url] = r;
+  m_rurls[url] = r;
 }
 
 /*----------------------------------------------------------------------------*/
 
-void HttpFileService::http_get(uint32_t clientId, const char* url, const HttpHeader *header) {
-  std::map<std::string, RegFile>::const_iterator it = m_rfiles.find(url);
-  if (it == m_rfiles.end()) {
+void HttpService::http_get(uint32_t clientId, const char* url, const HttpHeader *header) {
+  std::map<std::string, RegUrl>::const_iterator it = m_rurls.find(url);
+  if (it == m_rurls.end()) {
     m_log.dbg("client %u requested invalid file (%s)", clientId, url);
     write(clientId, "HTTP/1.1 %u\r\n", HTTP_STATUS_NOTFOUND);
     write(clientId, "\r\n");

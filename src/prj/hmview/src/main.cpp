@@ -1,8 +1,8 @@
 #include "server.h"
-#include "httpfileservice.h"
 #include "wsmatview.h"
 #include <time.h>
 #include <signal.h>
+#include "httpservice.h"
 
 /*----------------------------------------------------------------------------*/
 
@@ -27,10 +27,10 @@ int main(int, char **) {
   Log log("main");
 
   /* create HTTP server for static files */
-  HttpFileService * hfs = new HttpFileService;
-  hfs->registerFile("data/index.html", "/index.html", HttpFileService::MIMETYPE_TEXT_HTML);
-  hfs->registerFile("data/hmview.css", "/hmview.css", HttpFileService::MIMETYPE_TEXT_CSS);
-  hfs->registerFile("data/hmview.js",  "/hmview.js",  HttpFileService::MIMETYPE_TEXT_JAVASCRIPT);
+  HttpService * hfs = new HttpService;
+  hfs->registerFile("data/index.html", "/index.html", HttpService::MIMETYPE_TEXT_HTML);
+  hfs->registerFile("data/hmview.css", "/hmview.css", HttpService::MIMETYPE_TEXT_CSS);
+  hfs->registerFile("data/hmview.js",  "/hmview.js",  HttpService::MIMETYPE_TEXT_JAVASCRIPT);
   ServerTcp srv_http(hfs, ServerTcpConfig{11380});
   srv_http.listen();
   /* create WebSocket server with matrix viewer service */

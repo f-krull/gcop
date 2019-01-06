@@ -1,7 +1,7 @@
 BINNAME=hmview
 SRCS=main.cpp \
 	server.cpp \
-	httpfileservice.cpp \
+	httpservice.cpp \
 	wsservice.cpp \
 	l_buffer.cpp \
 	debuglog.cpp \
