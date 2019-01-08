@@ -10,7 +10,8 @@ SRCS=main.cpp \
 	distmatrix.cpp \
 	dendrogram.cpp \
 	clusterersl.cpp \
-	clusterercl.cpp
+	clusterercl.cpp \
+	urlgeneinfo.cpp
 SRCS:=$(addprefix src/, $(SRCS))
 
 PHONIES += 3rdparty

@@ -1,8 +1,9 @@
 #include "server.h"
 #include "wsmatview.h"
+#include "httpservice.h"
+#include "urlgeneinfo.h"
 #include <time.h>
 #include <signal.h>
-#include "httpservice.h"
 
 /*----------------------------------------------------------------------------*/
 
@@ -31,6 +32,9 @@ int main(int, char **) {
   hfs->registerFile("data/index.html", "/index.html", HttpService::MIMETYPE_TEXT_HTML);
   hfs->registerFile("data/hmview.css", "/hmview.css", HttpService::MIMETYPE_TEXT_CSS);
   hfs->registerFile("data/hmview.js",  "/hmview.js",  HttpService::MIMETYPE_TEXT_JAVASCRIPT);
+  UrlGeneInfo urlgi;
+  hfs->registerUrl(&urlgi, "/geneinfo");
+
   ServerTcp srv_http(hfs, ServerTcpConfig{11380});
   srv_http.listen();
   /* create WebSocket server with matrix viewer service */

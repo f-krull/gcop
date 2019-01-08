@@ -169,13 +169,13 @@ document.getElementById("crop").addEventListener("click", function(evt){
   g_mvWs.send("CROPMAT");
 });
 document.getElementById("load1").addEventListener("click", function(evt){
-  g_mvWs.send("LOADMAT data/disreg_matrix_1073x681.txt");
+  g_mvWs.send("LOADMAT data/disreg_matrix_1212x845.txt");
 });
 document.getElementById("load2").addEventListener("click", function(evt){
   g_mvWs.send("LOADMAT data/disreg_matrix_10x8.txt");
 });
 document.getElementById("load3").addEventListener("click", function(evt){
-  g_mvWs.send("LOADMAT data/matrix_gwas-gwas_1073x1073.txt");
+  g_mvWs.send("LOADMAT data/disreg_matrix_1212x845.txt");
 });
 document.getElementById("dist_euclidean").addEventListener("click", function(evt){
   g_mvWs.send("ODISTFUN euclidean");
