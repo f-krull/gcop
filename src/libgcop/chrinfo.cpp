@@ -215,3 +215,33 @@ ChrInfoHg19::ChrInfoHg19() : ChrInfo() {
   addEntry("chrX",  155270560);
   addEntry("chrY",  59373566);
 }
+
+/*----------------------------------------------------------------------------*/
+
+ChrInfoUnknown::ChrInfoUnknown() : ChrInfo() {
+  addEntry("chr1",  0);
+  addEntry("chr2",  0);
+  addEntry("chr3",  0);
+  addEntry("chr4",  0);
+  addEntry("chr5",  0);
+  addEntry("chr6",  0);
+  addEntry("chr7",  0);
+  addEntry("chr8",  0);
+  addEntry("chr9",  0);
+  addEntry("chr10", 0);
+  addEntry("chr11", 0);
+  addEntry("chr12", 0);
+  addEntry("chr13", 0);
+  addEntry("chr14", 0);
+  addEntry("chr15", 0);
+  addEntry("chr16", 0);
+  addEntry("chr17", 0);
+  addEntry("chr18", 0);
+  addEntry("chr19", 0);
+  addEntry("chr20", 0);
+  addEntry("chr21", 0);
+  addEntry("chr22", 0);
+  addEntry("chrX",  0);
+  addEntry("chrY",  0);
+}
+

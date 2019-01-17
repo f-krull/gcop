@@ -43,5 +43,12 @@ public:
   ChrInfoHg19();
 };
 
+/*----------------------------------------------------------------------------*/
+
+class ChrInfoUnknown : public ChrInfo {
+public:
+  ChrInfoUnknown();
+};
+
 
 #endif /* DATA_CHRINFO_H_ */
