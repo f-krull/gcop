@@ -15,9 +15,9 @@ OBJS  = $(patsubst %.cpp, %.o, $(SRCS))
 
 #-------------------------------------------------------------------------------
 
-CXXFLAGS += -g -Ofast -flto -static -march=native -std=c++11
+CXXFLAGS += -g -Ofast -flto -static -std=c++11
 CXXFLAGS += -Wall -Wextra -Wwrite-strings -Wno-parentheses -Wpedantic
-CXXFLAGS += -Warray-bounds # -Weffc++
+CXXFLAGS += -Warray-bounds # -Weffc++  -march=native
 LDFLAGS += -Wall -g -Ofast -flto -static
 
 -include $(BASEDIR)/makefile_cfg.mk
